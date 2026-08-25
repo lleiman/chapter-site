@@ -79,6 +79,45 @@
     float:left;font-family:var(--sans);font-weight:800;
     font-size:66px;line-height:.82;margin:4px 14px 0 0;color:var(--ember-hi)}
 
+  /* Реплики. Абзацный отбив меньше обычного: диалог должен читаться
+     одним блоком, а не рассыпаться на отдельные абзацы */
+  .chapter p.say{margin-bottom:10px}
+  .chapter p.say + p:not(.say){margin-top:26px}
+
+  /* ── содержание ── */
+  .toc{padding:96px 24px 40px}
+  .toc .kick{font-family:var(--mono);font-size:10px;letter-spacing:.42em;
+    text-transform:uppercase;color:var(--ember);margin-bottom:30px}
+  .toc ol{list-style:none;counter-reset:none}
+  .toc li{margin:0;padding:0}
+  .toc li a, .toc li.off{
+    display:grid;grid-template-columns:88px 1fr auto;gap:18px;align-items:baseline;
+    padding:15px 0;border-bottom:1px solid var(--line);
+    text-decoration:none;color:var(--ink);transition:color .3s,border-color .3s}
+  .toc li a:hover{color:var(--ember-hi);border-bottom-color:#43301f}
+  .toc .n{font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--ember)}
+  .toc .t{font-size:17px}
+  .toc .p{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--faint)}
+  /* ненаписанное: тот же строй, но без хода и без акцента */
+  .toc li.off{color:var(--faint)}
+  .toc li.off .n{color:var(--faint)}
+  .toc .note{margin-top:22px;font-size:14px;color:var(--faint);font-style:italic}
+
+  /* ── титул главы внутри тома ── */
+  /* Тот же строй, что у титула тома, но вполовину тише: это разделитель
+     внутри чтения, а не вход на страницу */
+  .chapterhead{padding:120px 24px 0;text-align:center}
+  .chapterhead .kick{font-family:var(--mono);font-size:10px;letter-spacing:.42em;
+    text-transform:uppercase;color:var(--ember-hi)}
+  .chapterhead h2{font-family:var(--sans);font-weight:800;
+    font-size:clamp(30px,6vw,56px);text-transform:uppercase;letter-spacing:.09em;
+    color:var(--ink-hi);line-height:1;margin-top:20px}
+  .chapterhead .rule{width:56px;height:1px;background:var(--ember);margin:28px auto}
+  .chapterhead .sub{font-family:var(--mono);font-size:9.5px;letter-spacing:.26em;
+    text-transform:uppercase;color:var(--dim)}
+  .chapterhead + .chapter{padding-top:64px}
+
   /* Якорные фразы романа: «Время застыло», «Город дышал».
      Отбиваются воздухом и моноширинным — так они читаются как удар,
      а не как ещё одно предложение */
@@ -114,6 +153,14 @@
     .chapter p.first::first-letter{font-size:56px;margin-right:11px}
     .chapter p.beat{font-size:11px;letter-spacing:.3em;margin:44px 0 40px}
     .sep{margin:46px auto}
+    .toc{padding:70px 20px 30px}
+    /* колонцифра на телефоне не помещается третьей колонкой — уводим её
+       под название, в ту же ячейку */
+    .toc li a, .toc li.off{grid-template-columns:76px 1fr;gap:14px}
+    .toc .p{grid-column:2;font-size:9px}
+    .toc .t{font-size:16px}
+    .chapterhead{padding:84px 20px 0}
+    .chapterhead + .chapter{padding-top:48px}
     #hero .brand{width:132px;top:22px;left:20px}
     #hero .meta{font-size:9px;letter-spacing:.2em;top:24px;right:20px}
     #hero .kick{font-size:10px;letter-spacing:.3em}
