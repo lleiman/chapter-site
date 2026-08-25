@@ -1,0 +1,22 @@
+{
+	admin off
+	auto_https off
+	persist_config off
+}
+
+:{$PORT:8080} {
+	root * /srv
+	encode zstd gzip
+
+	# пароля здесь нет намеренно: сайт открытый.
+	# Если понадобится закрыть — basic_auth с хешем из переменной окружения,
+	# как сделано в model-site
+
+	file_server
+
+	# mp3 и обложка большие и не меняются — пусть лежат в кеше браузера
+	@static path /assets/audio/* /assets/img/*
+	header @static Cache-Control "public, max-age=31536000, immutable"
+
+	header -Server
+}
