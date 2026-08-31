@@ -129,6 +129,54 @@
   .sep{width:5px;height:5px;border-radius:50%;background:var(--ember);
     margin:54px auto;opacity:.75}
 
+  /* ── места под изображения ──────────────────────────────────────────
+     Слот стоит только на границе сцен и никогда перед beat-фразой:
+     ей нужно падать в тишину.
+
+     Три формата. Полоса — во всю ширину окна, открывает главу и держит
+     поворот. Врезка — в колонку, рабочий ритм. Ролик — то же место,
+     но для петли 2–4 с; ставится там, где текст описывает повторяющееся
+     движение. Лента — узкая засечка в треть экрана, не считается
+     полноценной остановкой.
+
+     Когда картинка вставлена, ставим классу done: заглушка с промтом
+     исчезает, остаётся изображение. Чтобы опубликовать том с ещё
+     не заполненными слотами, достаточно раскомментировать строку ниже */
+  /* .slot:not(.done){display:none} */
+
+  .slot{margin:64px 0}
+  .slot.band{width:100vw;margin-left:calc(50% - 50vw);margin-top:80px;margin-bottom:80px}
+  .slot.done .ph, .slot.done .brief{display:none}
+  .slot img, .slot video{display:block;width:100%;height:auto}
+  .slot.band img, .slot.band video{max-height:76svh;object-fit:cover}
+
+  /* Рамка держит пропорции будущего кадра и потому несёт только номер
+     и формат. Описание и промт вынесены под неё: на узком экране они
+     в несколько раз выше самой рамки и распирали бы её, а тогда рамка
+     перестаёт показывать то единственное, ради чего она стоит, — форму */
+  .ph{display:grid;align-content:center;justify-items:center;gap:9px;
+    padding:18px;text-align:center;
+    border:1px dashed #2a2723;background:rgba(255,106,31,.015)}
+  .slot.inset .ph, .slot.loop .ph{aspect-ratio:3/2}
+  .slot.strip .ph{aspect-ratio:21/9}
+  .slot.band  .ph{aspect-ratio:21/9;max-height:76svh;border-left:0;border-right:0}
+  .ph .id{font-family:var(--mono);font-size:10px;letter-spacing:.3em;
+    text-transform:uppercase;color:var(--ember)}
+  .ph .fmt{font-family:var(--mono);font-size:9px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--faint)}
+
+  .brief{max-width:640px;margin:16px auto 0;padding:0 2px}
+  .brief .what{display:block;font-size:15px;line-height:1.6;color:var(--dim)}
+  /* промт лежит открытым: слот всё равно временный и уедет вместе с ним.
+     user-select:all — одним кликом выделяется целиком */
+  .brief .prompt{display:block;font-family:var(--mono);font-size:10.5px;
+    line-height:1.75;color:#6f6a62;white-space:pre-wrap;
+    user-select:all;-webkit-user-select:all;
+    border-top:1px solid var(--line);padding-top:11px;margin-top:11px}
+  .slot.band .brief{padding:0 24px}
+  .slot figcaption{font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--faint);text-align:center;margin-top:14px}
+
   /* появление */
   .rv{opacity:0;transform:translateY(26px);transition:opacity 1.1s ease,transform 1.1s ease}
   .rv.in{opacity:1;transform:none}
@@ -150,6 +198,14 @@
     body::after{animation:none}
     .chapter{padding:84px 20px 30px}
     .chapter p{font-size:17px;line-height:1.8;margin-bottom:24px}
+    .slot{margin:48px 0}
+    .slot.band{margin-top:56px;margin-bottom:56px}
+    /* 3:2 на телефоне съедает пол-экрана заглушкой, в которой нечего
+       смотреть; квадрат под врезку читается спокойнее */
+    .slot.inset .ph, .slot.loop .ph{aspect-ratio:1/1}
+    .ph{padding:14px;gap:7px}
+    .brief .what{font-size:14px}
+    .brief .prompt{font-size:10px;line-height:1.7}
     .chapter p.first::first-letter{font-size:56px;margin-right:11px}
     .chapter p.beat{font-size:11px;letter-spacing:.3em;margin:44px 0 40px}
     .sep{margin:46px auto}
