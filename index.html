@@ -60,7 +60,75 @@
   .actions{display:flex;gap:12px}.actions button{appearance:none;border:1px solid var(--ink);background:transparent;padding:13px 22px;text-transform:uppercase;letter-spacing:.12em;font-size:11px;cursor:pointer}.actions button:hover{background:var(--ink);color:var(--paper)}
   .final{display:none;margin-top:44px;font-size:clamp(24px,4vw,56px);max-width:760px;line-height:1.05}
   .final.show{display:block}
-  @media(max-width:750px){section{padding:8vh 6vw}.hero-copy{left:6vw;right:6vw;display:block}.timer-card{margin-top:30px;display:inline-block}.hero .sun{width:86vw;height:86vw}.hero .rings{width:72vw;height:72vw}.tx-row{grid-template-columns:1.2fr .6fr}.tx-row .category{display:none}.lookgrid{grid-template-columns:1fr}.ledger-head,.ledger-line{grid-template-columns:1fr .7fr}.top{left:12px;right:12px}}
+  @media(max-width:750px){
+    html,body{min-height:100%;overflow-x:hidden}
+    section{min-height:auto;padding:72px 20px}
+    .top{left:14px;right:14px;top:12px;font-size:9px;letter-spacing:.12em}
+    .top>div:last-child{max-width:52%;text-align:right}
+    .progress{height:2px}
+
+    .hero{height:100svh;min-height:720px;padding:0;display:block}
+    .hero .sun{width:82vw;height:82vw;top:11svh}
+    .hero .rings{width:67vw;height:67vw;top:14.8svh}
+    .hero .figure{bottom:29svh;transform:translateX(-50%) scale(.82)}
+    .hero-copy{left:20px;right:20px;bottom:24px;display:block}
+    h1{font-size:clamp(48px,16vw,76px);line-height:.86;letter-spacing:-.065em;max-width:94vw}
+    .timer-card{margin-top:20px;display:inline-block;min-width:190px;padding:10px 12px}
+    .timer{font-size:28px}
+
+    .statement{font-size:clamp(31px,10vw,48px);line-height:1.02}
+    .sub{font-size:16px;line-height:1.45;margin:22px auto 0;max-width:92vw}
+
+    .tx-world{min-height:auto;padding:88px 20px 60px}
+    .tx-title{font-size:clamp(38px,12vw,58px);line-height:.94;margin:0 0 54px;max-width:100%}
+    .tx-row{height:auto;min-height:72px;grid-template-columns:minmax(0,1fr) auto;gap:14px;font-size:17px;padding:14px 0}
+    .tx-row .cost{font-size:14px;white-space:nowrap}
+    .tx-row .category{display:none}
+
+    .ledger{min-height:auto;padding:72px 20px}
+    .ledger-wrap{max-width:100%}
+    .ledger-head,.ledger-line{grid-template-columns:minmax(0,1fr) 104px}
+    .ledger-head>div,.ledger-line>div{padding:12px 11px}
+    .ledger-head{font-size:9px}
+    .ledger-line{font-size:15px}
+    .ledger-total{padding:18px 12px;font-size:clamp(28px,8vw,42px);line-height:.95}
+
+    .void{min-height:100svh;padding:0;overflow:hidden}
+    .drain{width:76vmin;height:76vmin}
+    .void .figure{top:50%;transform:translate(-50%,-50%) scale(.82)}
+    .orb{font-size:9px;padding:7px 9px;letter-spacing:.08em}
+    .o1{left:4%;top:18%}.o2{right:4%;top:20%}.o3{left:5%;top:47%}.o4{right:5%;top:49%}
+    .o5{left:33%;top:12%}.o6{right:27%;bottom:12%}.o7{left:4%;bottom:16%}.o8{right:4%;bottom:24%}
+
+    .look{min-height:auto;padding:82px 20px 64px}
+    .lookgrid{grid-template-columns:1fr;margin-top:46px}
+    .lookitem{min-height:118px;padding:18px;font-size:clamp(30px,11vw,50px)}
+    .lookitem small{font-size:10px}
+
+    .formula{min-height:72svh;padding:80px 22px}
+    .formula .eq{font-size:clamp(44px,13vw,72px);line-height:.96;word-break:normal}
+    .formula .caption{font-size:10px;line-height:1.45;margin-top:18px;max-width:88vw}
+
+    .ending{min-height:100svh;padding:80px 20px 54px}
+    .spent{font-size:clamp(72px,22vw,112px)}
+    .question{font-size:clamp(36px,11vw,54px);margin:24px 0 28px}
+    .actions{width:100%;justify-content:center}
+    .actions button{padding:12px 18px}
+    .final{font-size:clamp(26px,8vw,40px);margin-top:34px}
+
+    .reveal{transform:translateY(28px)}
+  }
+
+  @media(max-width:390px){
+    h1{font-size:clamp(44px,15.2vw,64px)}
+    .hero{min-height:680px}
+    .hero .sun{top:12svh}
+    .hero .rings{top:15.5svh}
+    .ledger-head,.ledger-line{grid-template-columns:minmax(0,1fr) 92px}
+    .ledger-line{font-size:14px}
+    .tx-row{font-size:16px}
+    .tx-row .cost{font-size:13px}
+  }
 
   .reveal{opacity:0;transform:translateY(48px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
   .reveal.in{opacity:1;transform:none}
