@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Transactions of Attention — Formulas</title>
 <style>
-  :root{--ink:#111;--paper:#f4efe6;--red:#e5322d;--yellow:#e0b94d;--muted:#8d877c;--line:#cbc3b7}
+  :root{--ink:#111;--paper:#f4efe6;--red:#e5322d;--yellow:#1a1a1a;--muted:#8d877c;--line:#cbc3b7}
   *{box-sizing:border-box}
   html{scroll-behavior:smooth;background:var(--paper)}
   body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--paper);color:var(--ink);overflow-x:hidden}
@@ -16,9 +16,9 @@
   .hero{height:130vh;overflow:hidden}
   .hero .sun{position:absolute;width:min(64vw,760px);height:min(64vw,760px);border-radius:50%;background:var(--red);top:10vh;left:50%;transform:translateX(-50%);box-shadow:0 0 0 1px rgba(0,0,0,.15)}
   .hero .rings{position:absolute;width:min(53vw,630px);height:min(53vw,630px);top:15.5vh;left:50%;transform:translateX(-50%);border-radius:50%;background:repeating-radial-gradient(circle at center,transparent 0 7px,rgba(0,0,0,.36) 8px 9px,transparent 10px 14px);mix-blend-mode:multiply;opacity:.5}
-  .figure{position:absolute;bottom:12vh;left:50%;transform:translateX(-50%);width:58px;height:155px;filter:drop-shadow(6px 7px 0 rgba(0,0,0,.06))}
-  .figure:before{content:"";position:absolute;left:21px;top:0;width:17px;height:17px;border:2px solid var(--ink);border-radius:50%;background:var(--yellow)}
-  .figure:after{content:"";position:absolute;left:11px;top:20px;width:36px;height:118px;background:var(--yellow);border:2px solid var(--ink);border-radius:18px 18px 3px 3px;transform:skewX(-3deg)}
+  .figure{position:absolute;bottom:12vh;left:50%;transform:translateX(-50%);width:56px;height:152px;filter:drop-shadow(6px 7px 0 rgba(0,0,0,.05))}
+  .figure:before{content:"";position:absolute;left:20px;top:0;width:16px;height:16px;border:1.5px solid var(--ink);border-radius:50%;background:#171717}
+  .figure:after{content:"";position:absolute;left:11px;top:19px;width:34px;height:116px;background:linear-gradient(180deg,#1b1b1b 0%,#2a2a2a 100%);border:1.5px solid var(--ink);border-radius:17px 17px 4px 4px;transform:skewX(-3deg);box-shadow:inset 0 0 0 1px rgba(255,255,255,.03)}
   .hero-copy{position:absolute;left:8vw;right:8vw;bottom:7vh;display:flex;justify-content:space-between;gap:40px;align-items:flex-end}
   h1{font-size:clamp(58px,10vw,170px);line-height:.82;margin:0;font-weight:800;letter-spacing:-.07em;text-transform:uppercase;max-width:1100px}
   .timer-card{min-width:230px;border:1px solid var(--ink);padding:14px 16px;background:rgba(244,239,230,.86);backdrop-filter:blur(4px);font-family:monospace}
@@ -40,7 +40,7 @@
   .ledger-line{font-family:monospace;font-size:clamp(18px,2.4vw,34px)}
   .ledger-total{padding:28px 18px;font-size:clamp(32px,5vw,70px);letter-spacing:-.05em;background:var(--ink);color:var(--paper)}
   .void{min-height:160vh;overflow:hidden}
-  .void .figure{bottom:auto;top:48%;left:50%;transform:translate(-50%,-50%)}
+  .void .figure{bottom:auto;top:58%;left:50%;transform:translate(-50%,-50%) scale(.92)}
   .orbit{position:absolute;inset:0}
   .orb{position:absolute;border:1px solid var(--ink);padding:10px 13px;background:rgba(244,239,230,.85);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
   .orb:after{content:"";position:absolute;height:1px;background:var(--ink);opacity:.38;transform-origin:left center}
@@ -49,7 +49,7 @@
   .look{min-height:160vh;display:block;padding-top:14vh}
   .lookgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--ink);border:1px solid var(--ink);margin-top:9vh}
   .lookitem{background:var(--paper);min-height:24vh;padding:28px;display:flex;align-items:flex-end;justify-content:space-between;font-size:clamp(28px,4vw,66px);letter-spacing:-.04em;text-transform:uppercase}
-  .lookitem:nth-child(3n){background:var(--yellow)}.lookitem:nth-child(4n){background:var(--red);color:#fff}
+  .lookitem:nth-child(3n){background:#d9d4ca}.lookitem:nth-child(4n){background:var(--red);color:#fff}
   .lookitem small{font-family:monospace;font-size:12px;letter-spacing:0}
   .formula{min-height:130vh;flex-direction:column;text-align:center}
   .formula .eq{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:clamp(50px,10vw,150px);letter-spacing:-.05em}
@@ -95,7 +95,7 @@
 
     .void{min-height:100svh;padding:0;overflow:hidden}
     .drain{width:76vmin;height:76vmin}
-    .void .figure{top:50%;transform:translate(-50%,-50%) scale(.82)}
+    .void .figure{top:58%;transform:translate(-50%,-50%) scale(.76)}
     .orb{font-size:9px;padding:7px 9px;letter-spacing:.08em}
     .o1{left:4%;top:18%}.o2{right:4%;top:20%}.o3{left:5%;top:47%}.o4{right:5%;top:49%}
     .o5{left:33%;top:12%}.o6{right:27%;bottom:12%}.o7{left:4%;bottom:16%}.o8{right:4%;bottom:24%}
@@ -288,8 +288,8 @@ function frame(){
     const pulse=Math.sin(local*Math.PI);
     drain.style.transform=`translate(-50%,-50%) rotate(${local*220}deg) scale(${.85+pulse*.5})`;
     drain.style.opacity=.05+pulse*.22;
-    person.style.opacity=Math.max(.12,1-pulse*.82);
-    person.style.transform=`translate(-50%,-50%) scale(${1-pulse*.18}) rotate(${(local-.5)*5}deg)`;
+    person.style.opacity=Math.max(.28,1-pulse*.68);
+    person.style.transform=`translate(-50%,-50%) scale(${.92-pulse*.12}) rotate(${(local-.5)*3}deg)`;
     const radius=Math.min(innerWidth,innerHeight)*(.18+pulse*.15);
     orbs.forEach((orb,i)=>{
       const a=(i/orbs.length)*Math.PI*2 + local*2.4;
