@@ -1,0 +1,16 @@
+{
+  "name": "leiman-lab-journal",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "pngjs": "^7.0.0"
+  }
+}
