@@ -1,0 +1,46 @@
+name: Leiman Lab Journal — verify
+
+on:
+  push:
+    branches: [leiman-lab-journal]
+  workflow_dispatch:
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: leiman-lab-journal
+    steps:
+      - name: Check out journal branch
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Validate server syntax
+        run: npm run check
+
+      - name: Smoke test pages and Telegram thumbnails
+        run: |
+          set -e
+          PORT=3019 npm start > /tmp/leiman-journal.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3019/health >/dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:3019/ > /tmp/leiman-home.html
+          curl -fsS http://127.0.0.1:3019/articles/black-october > /tmp/leiman-black.html
+          curl -fsS http://127.0.0.1:3019/articles/warhound > /tmp/leiman-warhound.html
+          curl -fsS http://127.0.0.1:3019/og/warhound.png > /tmp/leiman-cover.png
+          grep -q 'Warhound' /tmp/leiman-warhound.html
+          grep -q "og:image" /tmp/leiman-warhound.html
+          test "$(wc -c < /tmp/leiman-cover.png)" -gt 1000
+          file /tmp/leiman-cover.png
