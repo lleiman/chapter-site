@@ -245,10 +245,12 @@ function snapshot(name, data) {
   for (const old of files.slice(0, Math.max(0, files.length - HISTORY_LIMIT))) unlinkSync(path.join(dir, old));
 }
 
+// Without ADMIN_PASSWORD the editor is open to anyone (author's choice, 23.10.2026); setting it turns the password back on.
 function passwordOk(req) {
+  if (!ADMIN_PASSWORD) return true;
   const given = Buffer.from(String(req.headers['x-admin-password'] || ''));
   const expected = Buffer.from(ADMIN_PASSWORD);
-  return ADMIN_PASSWORD !== '' && given.length === expected.length && timingSafeEqual(given, expected);
+  return given.length === expected.length && timingSafeEqual(given, expected);
 }
 function readBody(req, limit = 512 * 1024) {
   return new Promise((resolve, reject) => {
@@ -261,7 +263,6 @@ function readBody(req, limit = 512 * 1024) {
 const sendJson = (res, code, data) => write(res, code, JSON.stringify(data), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
 
 async function adminApi(req, res, pathname) {
-  if (!ADMIN_PASSWORD) return sendJson(res, 503, { error: 'Редактор не настроен: нет ADMIN_PASSWORD' });
   if (!passwordOk(req)) { await new Promise(r => setTimeout(r, 800)); return sendJson(res, 401, { error: 'Неверный пароль' }); }
   if (pathname === '/api/admin/login' && req.method === 'POST') return sendJson(res, 200, { ok: true });
 

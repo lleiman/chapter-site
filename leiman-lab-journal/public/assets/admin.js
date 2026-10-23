@@ -1,7 +1,8 @@
 /**
  * LEIMAN LAB — on-site text editor.
  * Loaded on ⌘⇧E / Ctrl+Shift+E or ?edit. Edits [data-edit] text in place and saves it
- * to the server (Railway volume). Password is kept in sessionStorage for this tab only.
+ * to the server (Railway volume). A password is asked only when the server has ADMIN_PASSWORD;
+ * it is then kept in sessionStorage for this tab only.
  */
 const store = {
   get(k) { try { return sessionStorage.getItem(k); } catch { return null; } },
@@ -173,13 +174,15 @@ function setEditable(on) {
 
 async function enable() {
   if (!['article', 'home'].includes(pageType)) { alert('Редактор работает на главной и на страницах статей.'); return; }
-  if (!store.get('ll-admin-pw') && !(await askPassword())) { store.set('ll-admin-on', null); return; }
+  // The password dialog appears only if the server asks for one (ADMIN_PASSWORD set).
   try {
     if (pageType === 'article') meta = await api('GET', `/api/admin/article/${slug}`);
     else await api('POST', '/api/admin/login');
   } catch (error) {
-    if (error.status === 401) { store.set('ll-admin-pw', null); return enable(); }
-    alert(error.message); return;
+    if (error.status !== 401) { alert(error.message); return; }
+    store.set('ll-admin-pw', null);
+    if (await askPassword()) return enable();
+    store.set('ll-admin-on', null); return;
   }
   active = true;
   store.set('ll-admin-on', '1');

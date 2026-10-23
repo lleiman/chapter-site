@@ -92,5 +92,21 @@ async function editorTests() {
   assert.equal((await api('POST', '/api/admin/site', { edits: { 'home.nope': 'x' } })).status, 400);
   assert.equal((await api('DELETE', '/api/admin/site')).status, 200);
   console.log('✓ editor: home texts');
+  await openEditorTest();
+}
+
+// Without ADMIN_PASSWORD (production setup) the editor works with no password at all.
+async function openEditorTest() {
+  const openPort = port + 1, openDir = mkdtempSync(path.join(tmpdir(), 'leiman-lab-open-'));
+  const open = spawn(process.execPath, ['server.mjs'], { env: { ...process.env, PORT: String(openPort), DATA_DIR: openDir, ADMIN_PASSWORD: '' }, stdio: 'ignore' });
+  try {
+    const url = `http://127.0.0.1:${openPort}`;
+    for (let i = 0; i < 50; i++) { try { if ((await fetch(url + '/health')).ok) break; } catch {} await new Promise(r => setTimeout(r, 100)); }
+    assert.equal((await fetch(url + '/api/admin/login', { method: 'POST' })).status, 200);
+    const save = await fetch(url + '/api/admin/site', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ edits: { 'home.lead': 'Без пароля' } }) });
+    assert.equal(save.status, 200);
+    assert.ok((await (await fetch(url + '/')).text()).includes('Без пароля'));
+    console.log('✓ editor: open without ADMIN_PASSWORD');
+  } finally { open.kill('SIGTERM'); rmSync(openDir, { recursive: true, force: true }); }
 }
 try { await main(); } catch (err) { console.error(err); process.exitCode = 1; } finally { child.kill('SIGTERM'); rmSync(dataDir, { recursive: true, force: true }); }
