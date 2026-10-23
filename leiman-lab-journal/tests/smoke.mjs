@@ -1,10 +1,15 @@
 /** Run: npm test. Zero dependencies. */
 import { spawn } from 'node:child_process';
 import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync, readdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 
 const port = 37839;
 const origin = `http://127.0.0.1:${port}`;
-const child = spawn(process.execPath, ['server.mjs'], { env: { ...process.env, PORT: String(port) }, stdio: ['ignore', 'pipe', 'pipe'] });
+const dataDir = mkdtempSync(path.join(tmpdir(), 'leiman-lab-test-'));
+const PASSWORD = 'test-password';
+const child = spawn(process.execPath, ['server.mjs'], { env: { ...process.env, PORT: String(port), DATA_DIR: dataDir, ADMIN_PASSWORD: PASSWORD }, stdio: ['ignore', 'pipe', 'pipe'] });
 let errors = '';
 child.stderr.on('data', b => errors += b.toString());
 async function get(path) { return fetch(origin + path); }
@@ -45,6 +50,47 @@ async function main() {
   assert.ok(page.includes('Чёрный октябрь'));
   assert.ok(!page.includes('главный вопрос не в том'));
   console.log('✓ homepage includes both articles');
+  await editorTests();
   console.log('\nALL TESTS PASSED');
 }
-try { await main(); } catch (err) { console.error(err); process.exitCode = 1; } finally { child.kill('SIGTERM'); }
+
+async function api(method, route, data, password = PASSWORD) {
+  const response = await fetch(origin + route, { method, headers: { 'Content-Type': 'application/json', 'X-Admin-Password': password }, body: data ? JSON.stringify(data) : undefined });
+  return { status: response.status, json: await response.json() };
+}
+async function editorTests() {
+  assert.equal((await get('/assets/admin.js')).status, 200);
+  assert.ok((await (await get('/')).text()).includes("import('/assets/admin.js')"), 'editor loader missing');
+  assert.equal((await api('POST', '/api/admin/login', null, 'wrong')).status, 401);
+  assert.equal((await api('POST', '/api/admin/article/warhound', { edits: {} }, '')).status, 401);
+  assert.equal((await api('POST', '/api/admin/login')).status, 200);
+  console.log('✓ editor: password required');
+
+  const { json: before } = await api('GET', '/api/admin/article/warhound');
+  assert.equal(before.edited, false);
+  const firstP = before.article.paragraphs.findIndex(b => b.type === 'p');
+  const edit = await api('POST', '/api/admin/article/warhound', { version: before.version, edits: { [`b.${firstP}`]: 'Первый новый абзац.\nВторой новый абзац.', deck: 'Новый подзаголовок' } });
+  assert.equal(edit.status, 200, JSON.stringify(edit.json));
+  const html = await (await get('/articles/warhound')).text();
+  assert.ok(html.includes('Первый новый абзац.</span></p>') && html.includes('Второй новый абзац.'), 'paragraph split missing');
+  assert.ok(html.includes('content="Новый подзаголовок"'), 'deck should feed og:description');
+  assert.ok(readdirSync(path.join(dataDir, 'history')).length >= 1, 'history snapshot missing');
+  console.log('✓ editor: saves text, splits paragraphs, updates OG');
+
+  assert.equal((await api('POST', '/api/admin/article/warhound', { version: before.version, edits: { deck: 'x' } })).status, 409);
+  assert.equal((await api('POST', '/api/admin/article/warhound', { version: edit.json.version, edits: { 'b.999': 'x' } })).status, 400);
+  assert.equal((await api('POST', '/api/admin/article/warhound', { version: edit.json.version, edits: { headline: '' } })).status, 400);
+  console.log('✓ editor: rejects stale version, unknown and empty fields');
+
+  assert.equal((await api('DELETE', '/api/admin/article/warhound')).status, 200);
+  const restored = await (await get('/articles/warhound')).text();
+  assert.ok(!restored.includes('Первый новый абзац.'), 'reset to Git failed');
+  console.log('✓ editor: reset to Git');
+
+  assert.equal((await api('POST', '/api/admin/site', { edits: { 'home.lead': 'Новый текст главной' } })).status, 200);
+  assert.ok((await (await get('/')).text()).includes('Новый текст главной'));
+  assert.equal((await api('POST', '/api/admin/site', { edits: { 'home.nope': 'x' } })).status, 400);
+  assert.equal((await api('DELETE', '/api/admin/site')).status, 200);
+  console.log('✓ editor: home texts');
+}
+try { await main(); } catch (err) { console.error(err); process.exitCode = 1; } finally { child.kill('SIGTERM'); rmSync(dataDir, { recursive: true, force: true }); }
