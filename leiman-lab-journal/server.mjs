@@ -102,10 +102,10 @@ function home(origin) {
 function renderBlock(block) {
   switch(block.type) {
     case 'lead': return `<p class="body-lead">${escaped(block.text)}</p>`;
-    case 'p': return `<p>${escaped(block.text)}</p>`;
+    case 'p': return `<p>${escaped(block.text)}${block.links?.length ? ' '+block.links.map(l=>`<a href="${escaped(l.url)}" target="_blank" rel="noopener noreferrer">${escaped(l.label)} ↗</a>`).join(' · ') : ''}</p>`;
     case 'h2': return `<h2>${escaped(block.text)}</h2>`;
     case 'h3': return `<h3>${escaped(block.text)}</h3>`;
-    case 'aside': return `<aside class="callout"><span class="micro accent">${escaped(block.label||'НАБЛЮДЕНИЕ')}</span><p>${escaped(block.text)}</p></aside>`;
+    case 'aside': { const label = block.label ?? 'НАБЛЮДЕНИЕ'; return `<aside class="callout">${label ? `<span class="micro accent">${escaped(label)}</span>` : ''}<p>${escaped(block.text)}</p></aside>`; }
     case 'quote': return `<blockquote>${escaped(block.text)}</blockquote>`;
     case 'list': return `<ul>${(block.items||[]).map(t=>`<li>${escaped(t)}</li>`).join('')}</ul>`;
     default: return '';
@@ -119,24 +119,25 @@ function articleView(a, origin) {
   <article itemscope itemtype="https://schema.org/Article">
     <header class="container article-head"><a class="back mono" href="/">← JOURNAL / LEIMAN LAB</a>
       <div class="article-overline"><span class="pill micro">FIELD NOTE ${escaped(a.issue)}</span><span class="micro muted">${escaped(a.section)}</span></div>
-      <h1 itemprop="headline">${escaped(a.title)}</h1>
-      <p class="article-deck" itemprop="description">${escaped(a.summary)}</p>
+      <h1 itemprop="headline">${escaped(a.headline || a.title)}</h1>
+      <p class="article-deck" itemprop="description">${escaped(a.deck || a.summary)}</p>
       <div class="article-byline micro"><span>ЛЕВ ЛЕЙМАН</span><span class="thin-sep"></span><time datetime="${escaped(a.date)}">${escaped(a.dateLabel)}</time><span class="thin-sep"></span><span>${escaped(a.readingMinutes)} МИН</span></div>
     </header>
     <div class="container feature-image"><img src="${escaped(a.cover)}" width="1200" height="630" alt="Редакционная иллюстрация к статье ${escaped(a.cardTitle)}" fetchpriority="high">
     <div class="image-caption micro">LEIMAN LAB / ${escaped(a.issue)} &nbsp; · &nbsp; EDITORIAL ILLUSTRATION</div></div>
     <div class="content-layout container"><aside class="article-sidebar"><div class="micro muted">RESEARCH NOTE<br>${escaped(a.issue)} / 2026</div><div class="aside-divider"></div><div class="mono small">LEIMAN<br>LAB<span class="accent">.</span></div></aside>
     <div class="article-prose" itemprop="articleBody">${a.paragraphs.map(renderBlock).join('\n')}
-      <section class="sources"><div class="sources-head"><span class="eyebrow">ИСТОЧНИКИ / SOURCES</span><span class="micro muted">${a.sources.length} LINKS</span></div>
-      <ol>${a.sources.map(s=>`<li><a href="${escaped(s.url)}" rel="noopener noreferrer" target="_blank">${escaped(s.title)} ↗</a><span class="micro muted">${escaped(s.type)}</span></li>`).join('')}</ol>
-      <p class="micro muted source-note">Факты относятся к дате публикации. В продолжающихся расследованиях оценки могут измениться. Заявления компаний помечены в тексте как заявления компаний.</p></section>
+      <section class="sources"><div class="sources-head"><span class="eyebrow">${escaped(a.sourcesLabel || 'ИСТОЧНИКИ / SOURCES')}</span><span class="micro muted">${a.sources.length} LINKS</span></div>
+      <ol>${a.sources.map(s=>`<li><a href="${escaped(s.url)}" rel="noopener noreferrer" target="_blank">${escaped(s.title)} ↗</a>${s.type ? `<span class="micro muted">${escaped(s.type)}</span>` : ''}</li>`).join('')}</ol>
+      <p class="micro muted source-note">${escaped(a.sourceNote || 'Факты относятся к дате публикации. В продолжающихся расследованиях оценки могут измениться. Заявления компаний помечены в тексте как заявления компаний.')}</p></section>
       <div class="share-row"><a class="button button-primary" href="${escaped(share)}" target="_blank" rel="noopener noreferrer">ПОДЕЛИТЬСЯ В TELEGRAM ↗</a><button id="copy-link" class="button button-line" type="button" data-url="${escaped(pageUrl)}">КОПИРОВАТЬ ССЫЛКУ</button></div>
       <script>document.getElementById('copy-link')?.addEventListener('click',async e=>{try{await navigator.clipboard.writeText(e.currentTarget.dataset.url);e.currentTarget.textContent='ССЫЛКА СКОПИРОВАНА ✓'}catch(e){e.currentTarget.textContent='КОПИРОВАНИЕ НЕДОСТУПНО'}})</script>
     </div></div>
   </article>
   ${related.length?`<section class="container more-stories"><div class="section-rule"><h2>ДАЛЬШЕ <span class="accent">/</span></h2><a class="micro muted" href="/">ВЕСЬ ЖУРНАЛ ↗</a></div><div class="journal-grid">${related.map(x=>card(x)).join('')}</div></section>`:''}
   </main>`;
-  return page({content:body,title:`${a.title} — Leiman Lab`,description:a.summary,canonical:pageUrl,cover:`${origin}${a.cover}`,type:'article',date:a.date,schema:{'@context':'https://schema.org','@type':'NewsArticle',headline:a.title,description:a.summary,image:[`${origin}${a.cover}`],datePublished:a.date,inLanguage:'ru',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'}}});
+  const description = a.description || a.summary;
+  return page({content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${a.cover}`,type:'article',date:a.date,schema:{'@context':'https://schema.org','@type':'NewsArticle',headline:a.title,description,image:[`${origin}${a.cover}`],datePublished:a.date,inLanguage:'ru',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'}}});
 }
 
 function write(res, code, data, mime='text/html; charset=utf-8', more={}) {
