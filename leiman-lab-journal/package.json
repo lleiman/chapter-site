@@ -3,14 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "description": "Leiman Lab: independent editorial journal / Railway deployment",
   "scripts": {
     "start": "node server.mjs",
-    "check": "node --check server.mjs"
+    "dev": "node --watch server.mjs",
+    "test": "node tests/smoke.mjs",
+    "check": "node --check server.mjs && node --check tests/smoke.mjs"
   },
-  "engines": {
-    "node": ">=20"
-  },
-  "dependencies": {
-    "pngjs": "^7.0.0"
-  }
+  "engines": { "node": ">=20" }
 }
