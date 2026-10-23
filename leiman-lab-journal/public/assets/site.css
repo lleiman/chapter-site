@@ -30,3 +30,5 @@
 
 .article-prose p a{color:var(--paper);text-decoration:underline;text-decoration-color:var(--red);text-underline-offset:4px}
 .article-prose p a:hover{color:var(--red)}
+.featured-story .story-card+.story-card{margin-top:43px}
+@media(max-width:760px){.featured-story .story-card+.story-card{margin-top:29px}}

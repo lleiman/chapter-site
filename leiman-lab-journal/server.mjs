@@ -130,8 +130,7 @@ function home(origin) {
   </section>
   <section id="journal" class="container journal-section" aria-labelledby="journal-title">
     <div class="section-rule"><h2 id="journal-title">ЖУРНАЛ <span class="accent">/</span> <small>01</small></h2><span class="micro muted">${articles.length} PUBLICATIONS · NEWEST FIRST</span></div>
-    <div class="featured-story">${card(featured,'featured')}</div>
-    <div class="journal-grid">${articles.slice(1).map(a=>card(a)).join('')}</div>
+    <div class="featured-story">${articles.map(a=>card(a,'featured')).join('')}</div>
   </section>
   <section id="about" class="container about-section"><div class="about-heading"><div class="eyebrow">02 / WHO'S BEHIND THE LAB</div><h2>Вопросы.<br>Практика.<br><span class="accent">Результаты.</span></h2></div>
   <div class="about-copy"><p>${siteText('home.about.1')}</p>
@@ -178,7 +177,7 @@ function articleView(a, origin) {
       <script>document.getElementById('copy-link')?.addEventListener('click',async e=>{try{await navigator.clipboard.writeText(e.currentTarget.dataset.url);e.currentTarget.textContent='ССЫЛКА СКОПИРОВАНА ✓'}catch(e){e.currentTarget.textContent='КОПИРОВАНИЕ НЕДОСТУПНО'}})</script>
     </div></div>
   </article>
-  ${related.length?`<section class="container more-stories"><div class="section-rule"><h2>ДАЛЬШЕ <span class="accent">/</span></h2><a class="micro muted" href="/">ВЕСЬ ЖУРНАЛ ↗</a></div><div class="journal-grid">${related.map(x=>card(x)).join('')}</div></section>`:''}
+  ${related.length?`<section class="container more-stories"><div class="section-rule"><h2>ДАЛЬШЕ <span class="accent">/</span></h2><a class="micro muted" href="/">ВЕСЬ ЖУРНАЛ ↗</a></div><div class="featured-story">${related.map(x=>card(x,'featured')).join('')}</div></section>`:''}
   </main>`;
   const description = a.description || a.summary;
   return page({content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${a.cover}`,type:'article',date:a.date,bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@type':'NewsArticle',headline:a.title,description,image:[`${origin}${a.cover}`],datePublished:a.date,inLanguage:'ru',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'}}});
