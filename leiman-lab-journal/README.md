@@ -2,7 +2,14 @@
 
 Рабочий прототип авторского журнала Льва Леймана. Версия handoff 2026-10-23.
 
-**Это исходники для передачи Claude, а не свидетельство нового деплоя.** На публичном Railway-сайте пока существует прежняя версия: открываются главная и статья «Чёрный октябрь», а `/articles/warhound` по последней проверке отвечала 404. ZIP запускается самостоятельно.
+## Где работает (проверено 23.10.2026)
+
+- Сайт: https://journal-production-3e67.up.railway.app/ (прежний адрес перенесён на новый сервис, старые ссылки из Telegram открывают новую версию)
+- Запасной адрес того же сервиса: https://journal-web-production-bf39.up.railway.app/
+- Статьи: `/articles/warhound`, `/articles/black-october`
+- Railway: проект `leiman-lab-journal` → сервис `journal-web` (`10578a57-b8ae-470f-bf64-623605e504df`), источник GitHub `lleiman/chapter-site`, ветка `leiman-lab-journal`, root `/leiman-lab-journal`
+- Автодеплой: любой push в ветку `leiman-lab-journal`, затрагивающий `leiman-lab-journal/**`, сам пересобирает сервис. Публикация новой статьи = commit + push.
+- Старый Railway Function `journal` оставлен без домена для отката; его можно удалить, когда новая версия поживёт без проблем.
 
 ## Быстрый запуск
 

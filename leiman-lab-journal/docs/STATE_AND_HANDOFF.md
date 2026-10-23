@@ -48,6 +48,16 @@
 
 **Последнее действие ChatGPT с Railway:** попытка создать деплой из `lleiman/chapter-site` (ветка `leiman-lab-journal`) упёрлась в проблемное соединение, подтверждённого результата создания нового сервиса нет. Claude обязан проверить текущий список сервисов перед созданием, чтобы исключить дубликаты.
 
+## 5a. 23.10.2026 — Claude: деплой завершён
+
+1. ZIP локально: Node 22, `npm test` — все проверки прошли.
+2. Railway-проект `leiman-lab-journal` (аккаунт AI UNI's Projects): до начала работ в нём был только Function `journal`, дубликатов не было.
+3. Код ZIP перенесён в `lleiman/chapter-site`, ветка `leiman-lab-journal`, папка `leiman-lab-journal` (коммит `0a76d8b`). `main` и GitHub Pages сайта главы не тронуты. Добавлены совместимые маршруты старой версии: `/og/<slug>.png`, `/style.css` → 301, `/favicon.ico` → 301. Старый workflow Actions остался как был (у токена `gh` нет scope `workflow`), для него добавлен скрипт `npm run check`.
+4. Создан сервис `journal-web` (`10578a57-b8ae-470f-bf64-623605e504df`): GitHub source, ветка `leiman-lab-journal`, root `/leiman-lab-journal`, watch `/leiman-lab-journal/**`, `npm start`, healthcheck `/health`. Настройки заданы в сервисе: Railway отклоняет путь к `railway.json` (config-as-code объявлен устаревшим), файл оставлен как справка.
+5. Автодеплой проверен тестовым коммитом `a43f471`: Railway сам запустил деплой из GitHub, статус `SUCCESS`.
+6. Домен `journal-production-3e67.up.railway.app` перенесён с Function `journal` на `journal-web` (до этого порядок удаления и повторного занятия имени проверен на временных доменах). Все маршруты на нём отвечают новой версией.
+7. Function `journal` не удалён, остался без домена — для отката: переименовать домен обратно на него.
+
 ## 6. Модель материала
 
 Telegram — короткий самостоятельный авторский текст (длина до экрана) + URL, создающий встроенное превью. Сайт — текст со спокойной подачей, первоисточниками, статусом фактов, размышлением автора. Отдельный OG thumbnail для статьи. Не обещать Telegram Instant View: для него нужна отдельная конфигурация; Telegram in-app Browser и Instant View не одно и то же.

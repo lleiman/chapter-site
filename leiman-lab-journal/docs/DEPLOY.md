@@ -8,7 +8,11 @@
 - Старый URL: https://journal-production-3e67.up.railway.app/
 - GitHub: `lleiman/chapter-site`, ветка `leiman-lab-journal`, вложенная папка `leiman-lab-journal`
 
-## Стратегия без простоя
+## Текущее состояние (23.10.2026)
+
+Сделано: сервис `journal-web` (`10578a57-b8ae-470f-bf64-623605e504df`) деплоится из GitHub автоматически, на нём оба домена — `journal-production-3e67.up.railway.app` (основной, перенесён со старого Function) и `journal-web-production-bf39.up.railway.app`. Function `journal` остался без домена. Настройки сборки заданы в самом сервисе (Railway больше не принимает путь к `railway.json`).
+
+## Стратегия без простоя (как это делалось)
 
 1. Открыть Railway-проект, проверить список сервисов. Если новый GitHub-service **уже есть**, не дублировать.
 2. Добавить GitHub source к существующему новому service (или создать один отдельный, например `journal-web`). **Не отключать** Function `journal`.
