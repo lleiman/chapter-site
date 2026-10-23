@@ -44,6 +44,15 @@ function loadArticles() {
 }
 loadArticles();
 let siteTexts = readJson(SITE_FILE) || {};
+// Content-hash query (?v=…) on assets: a replaced cover or stylesheet gets a new URL, so browsers and Telegram drop stale copies.
+const assetVersions = new Map();
+const asset = file => {
+  if (!assetVersions.has(file)) {
+    try { assetVersions.set(file, createHash('sha1').update(readFileSync(path.join(PUBLIC, file))).digest('hex').slice(0, 10)); }
+    catch { assetVersions.set(file, ''); }
+  }
+  return assetVersions.get(file) ? `${file}?v=${assetVersions.get(file)}` : file;
+};
 const versionOf = a => createHash('sha1').update(JSON.stringify(a)).digest('hex').slice(0, 12);
 
 const escaped = value => String(value ?? '').replace(/[&<>"']/g, ch => ({
@@ -86,7 +95,7 @@ function page({ content, title, description, canonical, cover, type = 'website',
 <meta property="og:image" content="${escaped(cover)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta property="og:image:type" content="image/png"><meta name="twitter:card" content="summary_large_image">
 ${date ? `<meta property="article:published_time" content="${escaped(date)}">` : ''}
-<link rel="stylesheet" href="/assets/site.css">${structured}
+<link rel="stylesheet" href="${asset('/assets/site.css')}">${structured}
 </head><body${bodyData}>
 <header class="site-header"><div class="container header-inner">
 <a class="identity" href="/" aria-label="Leiman Lab — главная">${logo}<span class="wordmark">LEIMAN <b>LAB</b></span></a>
@@ -103,7 +112,7 @@ ${editorLoader}
 
 function card(a, size = '') {
   return `<a class="story-card ${size}" href="/articles/${escaped(a.slug)}">
-  <div class="story-image"><img src="${escaped(a.cover)}" alt="Обложка ${escaped(a.cardTitle)}" loading="lazy" width="1200" height="630"><span class="image-index mono">${escaped(a.issue)} ↗</span></div>
+  <div class="story-image"><img src="${escaped(asset(a.cover))}" alt="Обложка ${escaped(a.cardTitle)}" loading="lazy" width="1200" height="630"><span class="image-index mono">${escaped(a.issue)} ↗</span></div>
   <div class="story-info"><div class="micro story-meta">${escaped(a.section)} <span class="line"></span> ${escaped(a.dateLabel)}</div>
   <h3>${escaped(a.title)}</h3><p>${escaped(a.summary)}</p><div class="story-foot"><span class="micro muted">${escaped(a.readingMinutes)} МИН ЧТЕНИЯ</span><span class="read-link micro">ЧИТАТЬ ↗</span></div></div>
   </a>`;
@@ -138,7 +147,7 @@ function home(origin) {
   <div class="about-services"><span>AI-ПРОДАКШЕН</span><span>AI-ПРОДУКТЫ</span><span>R&D</span><span>СПЕЦПРОЕКТЫ</span></div>
   <a class="button button-line" href="https://t.me/leimanleo">СВЯЗАТЬСЯ ПО ПРОЕКТУ ↗</a></div></section>
   </main>`;
-  return page({content:html,title:'Leiman Lab — журнал исследований, технологий и экспериментов',description:'ИИ, технологии, бизнес, психология, исследования сознания и искусство. Авторский журнал Льва Леймана.',canonical:`${origin}/`,cover:`${origin}${featured.cover}`,bodyData:' data-page="home"',schema:{'@context':'https://schema.org','@type':'WebSite',name:'Leiman Lab',url:origin+'/','inLanguage':'ru'}});
+  return page({content:html,title:'Leiman Lab — журнал исследований, технологий и экспериментов',description:'ИИ, технологии, бизнес, психология, исследования сознания и искусство. Авторский журнал Льва Леймана.',canonical:`${origin}/`,cover:`${origin}${asset(featured.cover)}`,bodyData:' data-page="home"',schema:{'@context':'https://schema.org','@type':'WebSite',name:'Leiman Lab',url:origin+'/','inLanguage':'ru'}});
 }
 // data-edit keys: b.N — block text, b.N.M — list item, b.N.label / b.N.link.M — callout label / inline link label.
 function renderBlock(block, i) {
@@ -166,7 +175,7 @@ function articleView(a, origin) {
       <p class="article-deck" itemprop="description" data-edit="deck">${escaped(a.deck || a.summary)}</p>
       <div class="article-byline micro"><span>ЛЕВ ЛЕЙМАН</span><span class="thin-sep"></span><time datetime="${escaped(a.date)}">${escaped(a.dateLabel)}</time><span class="thin-sep"></span><span>${escaped(a.readingMinutes)} МИН</span></div>
     </header>
-    <div class="container feature-image"><img src="${escaped(a.cover)}" width="1200" height="630" alt="Редакционная иллюстрация к статье ${escaped(a.cardTitle)}" fetchpriority="high">
+    <div class="container feature-image"><img src="${escaped(asset(a.cover))}" width="1200" height="630" alt="Редакционная иллюстрация к статье ${escaped(a.cardTitle)}" fetchpriority="high">
     <div class="image-caption micro">LEIMAN LAB / ${escaped(a.issue)} &nbsp; · &nbsp; EDITORIAL ILLUSTRATION</div></div>
     <div class="content-layout container"><aside class="article-sidebar"><div class="micro muted">RESEARCH NOTE<br>${escaped(a.issue)} / 2026</div><div class="aside-divider"></div><div class="mono small">LEIMAN<br>LAB<span class="accent">.</span></div></aside>
     <div class="article-prose" itemprop="articleBody">${a.paragraphs.map(renderBlock).join('\n')}
@@ -180,7 +189,7 @@ function articleView(a, origin) {
   ${related.length?`<section class="container more-stories"><div class="section-rule"><h2>ДАЛЬШЕ <span class="accent">/</span></h2><a class="micro muted" href="/">ВЕСЬ ЖУРНАЛ ↗</a></div><div class="featured-story">${related.map(x=>card(x,'featured')).join('')}</div></section>`:''}
   </main>`;
   const description = a.description || a.summary;
-  return page({content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${a.cover}`,type:'article',date:a.date,bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@type':'NewsArticle',headline:a.title,description,image:[`${origin}${a.cover}`],datePublished:a.date,inLanguage:'ru',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'}}});
+  return page({content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${asset(a.cover)}`,type:'article',date:a.date,bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@type':'NewsArticle',headline:a.title,description,image:[`${origin}${asset(a.cover)}`],datePublished:a.date,inLanguage:'ru',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'}}});
 }
 
 function write(res, code, data, mime='text/html; charset=utf-8', more={}) {
@@ -335,6 +344,6 @@ const server = http.createServer((req,res)=>{
     catch{return write(res,404,'Not found','text/plain');}
   }
   const missing=`<main class="container not-found"><div class="eyebrow">404 / NOT FOUND</div><h1>СТРАНИЦА НЕ НАЙДЕНА.</h1><p>Такого материала в журнале нет.</p><a class="button button-primary" href="/">ВЕРНУТЬСЯ В ЖУРНАЛ ↗</a></main>`;
-  return write(res,404,page({content:missing,title:'404 — Leiman Lab',description:'Страница не найдена',canonical:origin+pathname,cover:origin+'/assets/black-october-1200x630.png'}));
+  return write(res,404,page({content:missing,title:'404 — Leiman Lab',description:'Страница не найдена',canonical:origin+pathname,cover:origin+asset('/assets/black-october-1200x630.png')}));
 });
 server.listen(PORT,'0.0.0.0',()=>console.log(`LEIMAN LAB listening on :${PORT} (${articles.length} articles)`));
