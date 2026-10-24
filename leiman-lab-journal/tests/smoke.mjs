@@ -93,6 +93,61 @@ async function editorTests() {
   assert.equal((await api('DELETE', '/api/admin/site')).status, 200);
   console.log('✓ editor: home texts');
   await openEditorTest();
+  await engagementTests();
+}
+
+async function call(method, route, data, headers = {}) {
+  const response = await fetch(origin + route, { method, headers: { 'Content-Type': 'application/json', ...headers }, body: data ? JSON.stringify(data) : undefined });
+  return { status: response.status, json: await response.json() };
+}
+async function engagementTests() {
+  const slug = 'black-october';
+  assert.equal((await call('POST', `/api/views/${slug}`, {})).json.views, 1);
+  assert.equal((await call('POST', `/api/views/${slug}`, {})).json.views, 1, 'same person counted twice');
+  assert.equal((await call('POST', `/api/views/${slug}`, {}, { 'User-Agent': 'TelegramBot (like TwitterBot)' })).json.views, 1, 'bot counted');
+  console.log('✓ views: one per person per day, bots ignored');
+
+  assert.deepEqual((await call('POST', `/api/likes/${slug}`, { visitor: 'A' })).json, { likes: 1, liked: true });
+  assert.deepEqual((await call('POST', `/api/likes/${slug}`, { visitor: 'A' })).json, { likes: 0, liked: false });
+  await call('POST', `/api/likes/${slug}`, { visitor: 'A' }); await call('POST', `/api/likes/${slug}`, { visitor: 'B' });
+  console.log('✓ likes: toggle per visitor');
+
+  const general = await call('POST', `/api/comments/${slug}`, { visitor: 'A', name: 'Тест', text: 'Общий комментарий' });
+  assert.equal(general.status, 201);
+  const { json: { article } } = await api('GET', `/api/admin/article/${slug}`);
+  const quote = article.paragraphs[0].text.slice(0, 20);
+  const fragment = await call('POST', `/api/comments/${slug}`, { visitor: 'B', text: 'К фрагменту', anchor: { block: 0, start: 0, end: 20, quote } });
+  assert.equal(fragment.status, 201); assert.equal(fragment.json.comment.anchor.quote, quote);
+  const reply = await call('POST', `/api/comments/${slug}`, { visitor: 'A', text: 'Ответ', parent: fragment.json.comment.id });
+  assert.equal(reply.status, 201);
+  assert.equal((await call('POST', `/api/comments/${slug}`, { visitor: 'A', text: 'x', parent: reply.json.comment.id })).status, 400, 'reply to reply');
+  assert.equal((await call('POST', `/api/comments/${slug}`, { visitor: 'A', text: 'x', anchor: { block: 999, start: 0, end: 2, quote: 'x' } })).status, 400);
+  assert.equal((await call('POST', `/api/comments/${slug}`, { visitor: 'A', text: 'spam', website: 'http://spam' })).status, 400, 'honeypot');
+  assert.equal((await fetch(`${origin}/api/comments/${slug}`, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: '{"text":"x"}' })).status, 415);
+  console.log('✓ comments: article, fragment, reply, validation');
+
+  const { json: forA } = await call('GET', `/api/engagement/${slug}?visitor=A`);
+  assert.equal(forA.list.length, 3); assert.equal(forA.comments, 3); assert.equal(forA.likes, 2); assert.equal(forA.liked, true);
+  assert.deepEqual(forA.list.map(c => c.mine), [true, false, true]);
+  assert.equal((await call('DELETE', `/api/comments/${slug}/${general.json.comment.id}`, { visitor: 'B' })).status, 403);
+  assert.equal((await call('DELETE', `/api/comments/${slug}/${general.json.comment.id}`, { visitor: 'A' })).status, 200);
+  const byEditor = await call('DELETE', `/api/comments/${slug}/${fragment.json.comment.id}`, { visitor: 'C' }, { 'X-Editor': '1', 'X-Admin-Password': PASSWORD });
+  assert.deepEqual(byEditor.json, { comments: 0 }, 'thread with reply removed by editor');
+  console.log('✓ comments: owner and editor can delete');
+
+  await call('POST', `/api/comments/${slug}`, { visitor: 'A', text: 'Ещё один' });
+  const html = await (await get(`/articles/${slug}`)).text();
+  assert.ok(html.includes('data-stat="likes">2<') && html.includes('data-stat="views">1<') && html.includes('data-stat="comments">1<'), 'counters in article');
+  assert.ok((await (await get('/')).text()).includes('1 ПРОСМ. · ♥ 2 · 1 КОММ.'), 'counters on home card');
+  assert.ok(html.includes('/assets/engage.js?v='), 'engage.js missing');
+  console.log('✓ counters rendered on article and home');
+
+  let limited = 0;
+  for (let i = 0; i < 6; i++) if ((await call('POST', `/api/comments/${slug}`, { visitor: 'A', text: `flood ${i}` })).status === 429) limited++;
+  assert.ok(limited >= 1, 'rate limit');
+  await new Promise(r => setTimeout(r, 1700));
+  assert.ok(readdirSync(dataDir).includes('engagement.json'), 'engagement not saved to disk');
+  console.log('✓ comments: rate limit, data saved to disk');
 }
 
 // Without ADMIN_PASSWORD (production setup) the editor works with no password at all.
@@ -107,6 +162,16 @@ async function openEditorTest() {
     assert.equal(save.status, 200);
     assert.ok((await (await fetch(url + '/')).text()).includes('Без пароля'));
     console.log('✓ editor: open without ADMIN_PASSWORD');
-  } finally { open.kill('SIGTERM'); rmSync(openDir, { recursive: true, force: true }); }
+  } finally {
+    const exited = new Promise(resolve => open.once('exit', resolve));
+    open.kill('SIGTERM'); await exited;
+    rmSync(openDir, { recursive: true, force: true });
+  }
 }
-try { await main(); } catch (err) { console.error(err); process.exitCode = 1; } finally { child.kill('SIGTERM'); rmSync(dataDir, { recursive: true, force: true }); }
+try { await main(); } catch (err) { console.error(err); process.exitCode = 1; }
+finally {
+  // The server flushes engagement data on SIGTERM; wait for it before removing the temp dir.
+  const exited = new Promise(resolve => child.once('exit', resolve));
+  child.kill('SIGTERM'); await exited;
+  rmSync(dataDir, { recursive: true, force: true });
+}

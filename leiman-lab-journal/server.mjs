@@ -9,6 +9,7 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { readFileSync, readdirSync, statSync, writeFileSync, renameSync, mkdirSync, unlinkSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { createEngagement, EngagementError } from './engagement.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(ROOT, 'public');
@@ -17,6 +18,11 @@ const PORT = Number(process.env.PORT || 3000);
 const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(ROOT, 'data'));
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 const HISTORY_LIMIT = 100;
+const engagement = createEngagement(DATA_DIR);
+const plural = (n, [one, few, many]) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many; };
+const fmt = n => n.toLocaleString('ru-RU');
+// Person key for de-duplication and rate limits: first X-Forwarded-For hop (Railway edge) + User-Agent. Only hashes are stored.
+const clientKey = req => `${String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim()}|${req.headers['user-agent'] || ''}`;
 
 const readJson = file => { try { return JSON.parse(readFileSync(file, 'utf8')); } catch { return null; } };
 const writeJson = (file, data) => {
@@ -110,11 +116,15 @@ ${editorLoader}
 </body></html>`;
 }
 
+function cardStats(slug) {
+  const c = engagement.counts(slug);
+  return ` · ${fmt(c.views)} ПРОСМ. · ♥ ${fmt(c.likes)} · ${fmt(c.comments)} КОММ.`;
+}
 function card(a, size = '') {
   return `<a class="story-card ${size}" href="/articles/${escaped(a.slug)}">
   <div class="story-image"><img src="${escaped(asset(a.cover))}" alt="Обложка ${escaped(a.cardTitle)}" loading="lazy" width="1200" height="630"><span class="image-index mono">${escaped(a.issue)} ↗</span></div>
   <div class="story-info"><div class="micro story-meta">${escaped(a.section)} <span class="line"></span> ${escaped(a.dateLabel)}</div>
-  <h3>${escaped(a.title)}</h3><p>${escaped(a.summary)}</p><div class="story-foot"><span class="micro muted">${escaped(a.readingMinutes)} МИН ЧТЕНИЯ</span><span class="read-link micro">ЧИТАТЬ ↗</span></div></div>
+  <h3>${escaped(a.title)}</h3><p>${escaped(a.summary)}</p><div class="story-foot"><span class="micro muted">${escaped(a.readingMinutes)} МИН ЧТЕНИЯ${cardStats(a.slug)}</span><span class="read-link micro">ЧИТАТЬ ↗</span></div></div>
   </a>`;
 }
 
@@ -167,13 +177,14 @@ function articleView(a, origin) {
   const pageUrl = `${origin}/articles/${a.slug}`;
   const share = `https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(a.title)}`;
   const related = articles.filter(x=>x.slug!==a.slug).slice(0,2);
+  const stats = engagement.counts(a.slug);
   const body = `<main>
   <article itemscope itemtype="https://schema.org/Article">
     <header class="container article-head"><a class="back mono" href="/">← JOURNAL / LEIMAN LAB</a>
       <div class="article-overline"><span class="pill micro">FIELD NOTE ${escaped(a.issue)}</span><span class="micro muted">${escaped(a.section)}</span></div>
       <h1 itemprop="headline" data-edit="headline">${escaped(a.headline || a.title)}</h1>
       <p class="article-deck" itemprop="description" data-edit="deck">${escaped(a.deck || a.summary)}</p>
-      <div class="article-byline micro"><span>ЛЕВ ЛЕЙМАН</span><span class="thin-sep"></span><time datetime="${escaped(a.date)}">${escaped(a.dateLabel)}</time><span class="thin-sep"></span><span>${escaped(a.readingMinutes)} МИН</span></div>
+      <div class="article-byline micro"><span>ЛЕВ ЛЕЙМАН</span><span class="thin-sep"></span><time datetime="${escaped(a.date)}">${escaped(a.dateLabel)}</time><span class="thin-sep"></span><span>${escaped(a.readingMinutes)} МИН</span><span class="thin-sep"></span><span><b data-stat="views">${fmt(stats.views)}</b> <span data-plural="views">${plural(stats.views, ['ПРОСМОТР', 'ПРОСМОТРА', 'ПРОСМОТРОВ'])}</span></span><span class="thin-sep"></span><a href="#comments">♥ <b data-stat="likes">${fmt(stats.likes)}</b> · <b data-stat="comments">${fmt(stats.comments)}</b> КОММ.</a></div>
     </header>
     <div class="container feature-image"><img src="${escaped(asset(a.cover))}" width="1200" height="630" alt="Редакционная иллюстрация к статье ${escaped(a.cardTitle)}" fetchpriority="high">
     <div class="image-caption micro">LEIMAN LAB / ${escaped(a.issue)} &nbsp; · &nbsp; EDITORIAL ILLUSTRATION</div></div>
@@ -182,9 +193,12 @@ function articleView(a, origin) {
       <section class="sources"><div class="sources-head"><span class="eyebrow" data-edit="sourcesLabel">${escaped(a.sourcesLabel || 'ИСТОЧНИКИ / SOURCES')}</span><span class="micro muted">${a.sources.length} LINKS</span></div>
       <ol>${a.sources.map((s,i)=>`<li><a href="${escaped(s.url)}" rel="noopener noreferrer" target="_blank"><span data-edit="s.${i}">${escaped(s.title)}</span> ↗</a>${s.type ? `<span class="micro muted">${escaped(s.type)}</span>` : ''}</li>`).join('')}</ol>
       <p class="micro muted source-note" data-edit="sourceNote">${escaped(a.sourceNote || 'Факты относятся к дате публикации. В продолжающихся расследованиях оценки могут измениться. Заявления компаний помечены в тексте как заявления компаний.')}</p></section>
-      <div class="share-row"><a class="button button-primary" href="${escaped(share)}" target="_blank" rel="noopener noreferrer">ПОДЕЛИТЬСЯ В TELEGRAM ↗</a><button id="copy-link" class="button button-line" type="button" data-url="${escaped(pageUrl)}">КОПИРОВАТЬ ССЫЛКУ</button></div>
+      <div class="share-row"><button class="button button-line ll-like" type="button" aria-pressed="false"><span class="ll-heart">♡</span> НРАВИТСЯ <b data-stat="likes">${fmt(stats.likes)}</b></button><a class="button button-primary" href="${escaped(share)}" target="_blank" rel="noopener noreferrer">ПОДЕЛИТЬСЯ В TELEGRAM ↗</a><button id="copy-link" class="button button-line" type="button" data-url="${escaped(pageUrl)}">КОПИРОВАТЬ ССЫЛКУ</button></div>
       <script>document.getElementById('copy-link')?.addEventListener('click',async e=>{try{await navigator.clipboard.writeText(e.currentTarget.dataset.url);e.currentTarget.textContent='ССЫЛКА СКОПИРОВАНА ✓'}catch(e){e.currentTarget.textContent='КОПИРОВАНИЕ НЕДОСТУПНО'}})</script>
+      <section class="ll-comments" id="comments" aria-labelledby="comments-title"><div class="sources-head"><h2 id="comments-title" class="eyebrow">КОММЕНТАРИИ / <span data-stat="comments">${fmt(stats.comments)}</span></h2><span class="micro muted">ВЫДЕЛИТЕ ТЕКСТ, ЧТОБЫ ОБСУДИТЬ ФРАГМЕНТ</span></div>
+      <div class="ll-comment-list"></div><noscript><p class="micro muted">Комментарии работают с включённым JavaScript.</p></noscript></section>
     </div></div>
+  <script type="module" src="${asset('/assets/engage.js')}"></script>
   </article>
   ${related.length?`<section class="container more-stories"><div class="section-rule"><h2>ДАЛЬШЕ <span class="accent">/</span></h2><a class="micro muted" href="/">ВЕСЬ ЖУРНАЛ ↗</a></div><div class="featured-story">${related.map(x=>card(x,'featured')).join('')}</div></section>`:''}
   </main>`;
@@ -308,8 +322,39 @@ async function adminApi(req, res, pathname) {
   return sendJson(res, 404, { error: 'Not found' });
 }
 
+// ---------- Views, likes, comments (public API) ----------
+async function publicApi(req, res, pathname) {
+  const [, kind, slug, id] = pathname.split('/').slice(1);
+  if (!articleBySlug.has(slug)) return sendJson(res, 404, { error: 'Нет такой статьи' });
+  const client = clientKey(req), ua = req.headers['user-agent'] || '';
+  const visitor = String(new URL(req.url, 'http://x').searchParams.get('visitor') || '').slice(0, 64);
+  if (req.method === 'GET' && kind === 'engagement') return sendJson(res, 200, engagement.read(slug, visitor, client));
+  // JSON-only writes: a cross-site form cannot send application/json without a CORS preflight, which this server never allows.
+  if (req.method !== 'GET' && !String(req.headers['content-type'] || '').startsWith('application/json')) return sendJson(res, 415, { error: 'Нужен JSON' });
+  const body = req.method === 'GET' ? {} : await readBody(req, 16 * 1024);
+  const who = String(body.visitor || visitor || '').slice(0, 64);
+  if (req.method === 'POST' && kind === 'views') return sendJson(res, 200, engagement.view(slug, client, ua));
+  if (req.method === 'POST' && kind === 'likes') return sendJson(res, 200, engagement.toggleLike(slug, who, client));
+  if (req.method === 'POST' && kind === 'comments' && !id) {
+    const comment = engagement.addComment(slug, body, client, articleBySlug.get(slug).paragraphs.length);
+    console.log(`comments: new on ${slug}${comment.anchor ? ' (fragment)' : ''}`);
+    return sendJson(res, 201, { comment, ...engagement.counts(slug) });
+  }
+  if (req.method === 'DELETE' && kind === 'comments' && id) {
+    const isEditor = req.headers['x-editor'] === '1' && passwordOk(req);
+    return sendJson(res, 200, engagement.deleteComment(slug, id, who, client, isEditor));
+  }
+  return sendJson(res, 405, { error: 'Method Not Allowed' });
+}
+
 const server = http.createServer((req,res)=>{
   const apiPath = (req.url || '').split('?')[0];
+  if (/^\/api\/(views|likes|engagement|comments)\//.test(apiPath)) {
+    return publicApi(req, res, apiPath).catch(err => {
+      if (!(err instanceof EngagementError || err instanceof EditError)) console.error('engagement:', err);
+      sendJson(res, err.code && err.code < 500 ? err.code : 500, { error: err.code && err.code < 500 ? err.message : 'Ошибка сервера' });
+    });
+  }
   if (apiPath.startsWith('/api/admin/')) {
     return adminApi(req, res, apiPath).catch(err => {
       if (!(err instanceof EditError)) console.error('editor:', err);
@@ -347,4 +392,5 @@ const server = http.createServer((req,res)=>{
   const missing=`<main class="container not-found"><div class="eyebrow">404 / NOT FOUND</div><h1>СТРАНИЦА НЕ НАЙДЕНА.</h1><p>Такого материала в журнале нет.</p><a class="button button-primary" href="/">ВЕРНУТЬСЯ В ЖУРНАЛ ↗</a></main>`;
   return write(res,404,page({content:missing,title:'404 — Leiman Lab',description:'Страница не найдена',canonical:origin+pathname,cover:origin+asset('/assets/black-october-1200x630.png')}));
 });
+for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { engagement.flush(); process.exit(0); });
 server.listen(PORT,'0.0.0.0',()=>console.log(`LEIMAN LAB listening on :${PORT} (${articles.length} articles)`));
