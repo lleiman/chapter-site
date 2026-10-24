@@ -33,6 +33,12 @@ const css = `
 .ll-panel .button[disabled]{opacity:.4;cursor:default}
 .ll-panel .ll-fields{width:min(var(--container),calc(100% - 32px));margin-inline:auto;display:none;gap:14px;padding:4px 0 16px;border-bottom:1px solid var(--line)}
 .ll-panel.ll-open .ll-fields{display:grid}
+.ll-panel .ll-stats{width:min(var(--container),calc(100% - 32px));margin-inline:auto;display:none;padding:14px 0 16px;border-bottom:1px solid var(--line);max-height:46vh;overflow:auto}
+.ll-panel.ll-stats-open .ll-stats{display:block}
+.ll-stats-sum{display:flex;flex-wrap:wrap;gap:8px 28px;margin-bottom:14px}.ll-stats-sum b{display:block;font:700 26px/1.1 var(--sans);letter-spacing:-.03em;color:var(--paper)}
+.ll-stats table{width:100%;border-collapse:collapse;font:13px/1.45 var(--mono)}.ll-stats th{text-align:left;color:var(--quiet);font-weight:600;font-size:10px;letter-spacing:.09em;text-transform:uppercase;padding:6px 10px 6px 0;border-bottom:1px solid var(--line)}
+.ll-stats td{padding:7px 10px 7px 0;border-bottom:1px solid #222226;color:var(--soft);word-break:break-word}.ll-stats td.num,.ll-stats th.num{text-align:right;white-space:nowrap}
+.ll-stats .ll-utm-link{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}.ll-stats .ll-utm-link code{flex:1 1 280px;background:var(--ink);border:1px solid var(--line);padding:8px 10px;font:12px/1.4 var(--mono);color:var(--soft);word-break:break-all}
 .ll-panel label{display:grid;gap:6px}
 .ll-panel input,.ll-panel textarea{width:100%;background:var(--ink);color:var(--paper);border:1px solid var(--line);padding:9px 11px;font:15px/1.5 var(--sans);resize:vertical}
 .ll-panel input:focus,.ll-panel textarea:focus{outline:1px solid var(--red);border-color:var(--red)}
@@ -89,10 +95,11 @@ function buildPanel() {
     if (a.deck !== undefined) fields.push(['summary', 'Текст карточки на главной', a.summary, true]);
     fields.push(['description', 'Описание в превью Telegram (пусто — как текст карточки)', a.description ?? '', true]);
   }
-  panel.innerHTML = `${fields.length ? `<div class="ll-fields">${fields.map(f => field(f[0], f[1], f[3])).join('')}</div>` : ''}
+  panel.innerHTML = `${pageType === 'article' ? '<div class="ll-stats" aria-live="polite"></div>' : ''}${fields.length ? `<div class="ll-fields">${fields.map(f => field(f[0], f[1], f[3])).join('')}</div>` : ''}
   <div class="ll-row">
     <div class="ll-status micro"></div>
     <div class="ll-actions">
+      ${pageType === 'article' ? '<button class="button button-line" data-act="stats" type="button">СТАТИСТИКА</button>' : ''}
       ${fields.length ? '<button class="button button-line" data-act="fields" type="button">ПРЕВЬЮ И КАРТОЧКА</button>' : ''}
       <button class="button button-line" data-act="revert" type="button">ОТМЕНИТЬ</button>
       ${meta?.edited || (pageType === 'home') ? '<button class="button button-line" data-act="reset" type="button">СБРОСИТЬ К GIT</button>' : ''}
@@ -112,9 +119,46 @@ function buildPanel() {
     if (act === 'revert') revert();
     if (act === 'exit') toggle();
     if (act === 'fields') panel.classList.toggle('ll-open');
+    if (act === 'stats') { panel.classList.toggle('ll-stats-open'); if (panel.classList.contains('ll-stats-open')) loadStats(); }
     if (act === 'reset') reset();
   });
   document.body.append(panel);
+}
+
+// ---------- Article statistics (views, «дочитали», UTM tags) ----------
+const pct = (part, whole) => whole ? `${Math.round(part / whole * 100)}%` : '—';
+const n = v => Number(v).toLocaleString('ru-RU');
+function cell(tag, text, cls) { const c = document.createElement(tag); c.textContent = text; if (cls) c.className = cls; return c; }
+
+async function loadStats() {
+  const box = panel.querySelector('.ll-stats');
+  box.textContent = 'ЗАГРУЖАЮ…';
+  try {
+    const s = await api('GET', `/api/admin/stats/${slug}`);
+    box.replaceChildren();
+    const sum = document.createElement('div'); sum.className = 'll-stats-sum';
+    for (const [label, value] of [['ПРОСМОТРЫ', n(s.views)], ['ДОЧИТАЛИ', `${n(s.reads)} · ${pct(s.reads, s.views)}`], ['ЛАЙКИ', n(s.likes)], ['КОММЕНТАРИИ', n(s.comments)]]) {
+      const item = cell('div', '', 'micro muted'); item.append(cell('b', value), label); sum.append(item);
+    }
+    box.append(sum);
+    const table = document.createElement('table');
+    const head = document.createElement('tr');
+    head.append(cell('th', 'Метка: источник / канал / кампания / пост'), cell('th', 'Просмотры', 'num'), cell('th', 'Дочитали', 'num'), cell('th', 'Доля', 'num'));
+    table.append(head);
+    for (const row of s.utm) {
+      const tr = document.createElement('tr');
+      tr.append(cell('td', row.tag), cell('td', n(row.views), 'num'), cell('td', n(row.reads), 'num'), cell('td', pct(row.reads, row.views), 'num'));
+      table.append(tr);
+    }
+    if (!s.utm.length) { const tr = document.createElement('tr'); const td = cell('td', 'Пока нет данных по меткам. Учёт меток начался 24.10.2026, более ранние просмотры в таблицу не попали.'); td.colSpan = 4; tr.append(td); table.append(tr); }
+    box.append(table);
+    const link = `${location.origin}/articles/${slug}?utm_source=telegram&utm_medium=messenger&utm_campaign=${slug}&utm_content=post`;
+    const linkRow = document.createElement('div'); linkRow.className = 'll-utm-link';
+    const copy = cell('button', 'КОПИРОВАТЬ', 'button button-line'); copy.type = 'button';
+    copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(link); copy.textContent = 'СКОПИРОВАНО ✓'; } catch { copy.textContent = 'НЕ ВЫШЛО'; } });
+    linkRow.append(cell('span', 'ССЫЛКА ДЛЯ АНОНСА В TELEGRAM:', 'micro muted'), cell('code', link), copy);
+    box.append(linkRow, cell('p', 'Просмотр — один на человека на статью в сутки, без ботов. «Дочитали» — 30 секунд текста на экране или прокрутка до 75% текста. Номер поста можно вписать вместо «post».', 'micro muted'));
+  } catch (error) { box.textContent = `НЕ ЗАГРУЗИЛОСЬ: ${error.message}`; }
 }
 
 function update(message) {

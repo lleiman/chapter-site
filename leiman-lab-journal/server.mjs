@@ -300,6 +300,9 @@ async function adminApi(req, res, pathname) {
     }
   }
 
+  const stats = pathname.match(/^\/api\/admin\/stats\/([a-z0-9-]+)$/);
+  if (stats && req.method === 'GET' && articleBySlug.has(stats[1])) return sendJson(res, 200, engagement.stats(stats[1]));
+
   const m = pathname.match(/^\/api\/admin\/article\/([a-z0-9-]+)$/);
   if (m && articleBySlug.has(m[1])) {
     const slug = m[1], current = articleBySlug.get(slug);
@@ -333,7 +336,8 @@ async function publicApi(req, res, pathname) {
   if (req.method !== 'GET' && !String(req.headers['content-type'] || '').startsWith('application/json')) return sendJson(res, 415, { error: 'Нужен JSON' });
   const body = req.method === 'GET' ? {} : await readBody(req, 16 * 1024);
   const who = String(body.visitor || visitor || '').slice(0, 64);
-  if (req.method === 'POST' && kind === 'views') return sendJson(res, 200, engagement.view(slug, client, ua));
+  if (req.method === 'POST' && kind === 'views') return sendJson(res, 200, engagement.view(slug, client, ua, body.utm));
+  if (req.method === 'POST' && kind === 'reads') return sendJson(res, 200, engagement.markRead(slug, client, ua, body.utm));
   if (req.method === 'POST' && kind === 'likes') return sendJson(res, 200, engagement.toggleLike(slug, who, client));
   if (req.method === 'POST' && kind === 'comments' && !id) {
     const comment = engagement.addComment(slug, body, client, articleBySlug.get(slug).paragraphs.length);
@@ -349,7 +353,7 @@ async function publicApi(req, res, pathname) {
 
 const server = http.createServer((req,res)=>{
   const apiPath = (req.url || '').split('?')[0];
-  if (/^\/api\/(views|likes|engagement|comments)\//.test(apiPath)) {
+  if (/^\/api\/(views|reads|likes|engagement|comments)\//.test(apiPath)) {
     return publicApi(req, res, apiPath).catch(err => {
       if (!(err instanceof EngagementError || err instanceof EditError)) console.error('engagement:', err);
       sendJson(res, err.code && err.code < 500 ? err.code : 500, { error: err.code && err.code < 500 ? err.message : 'Ошибка сервера' });

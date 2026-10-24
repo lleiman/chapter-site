@@ -107,6 +107,23 @@ async function engagementTests() {
   assert.equal((await call('POST', `/api/views/${slug}`, {}, { 'User-Agent': 'TelegramBot (like TwitterBot)' })).json.views, 1, 'bot counted');
   console.log('✓ views: one per person per day, bots ignored');
 
+  const tg = { source: 'telegram', medium: 'messenger', campaign: 'warhound', content: 'post<1>' };
+  await call('POST', '/api/views/warhound', { utm: tg });
+  await call('POST', '/api/views/warhound', { utm: tg });
+  await call('POST', '/api/views/warhound', { utm: tg }, { 'User-Agent': 'Mozilla/5.0 other browser' });
+  await call('POST', '/api/views/warhound', {}, { 'User-Agent': 'Mozilla/5.0 third browser' });
+  assert.equal((await call('POST', '/api/reads/warhound', { utm: tg })).json.reads, 1);
+  assert.equal((await call('POST', '/api/reads/warhound', { utm: tg })).json.reads, 1, 'read counted twice');
+  assert.equal((await call('POST', '/api/reads/warhound', { utm: tg }, { 'User-Agent': 'TelegramBot (like TwitterBot)' })).json.reads, 1, 'bot read counted');
+  assert.equal((await call('GET', '/api/admin/stats/warhound', null, { 'X-Admin-Password': 'wrong' })).status, 401);
+  const { json: st } = await call('GET', '/api/admin/stats/warhound', null, { 'X-Admin-Password': PASSWORD });
+  assert.equal(st.views, 3); assert.equal(st.reads, 1);
+  assert.deepEqual(st.utm, [
+    { tag: 'telegram / messenger / warhound / post1', views: 2, reads: 1 },
+    { tag: '(без метки)', views: 1, reads: 0 },
+  ]);
+  console.log('✓ UTM tags with views, «дочитал» once per person, stats for the editor');
+
   assert.deepEqual((await call('POST', `/api/likes/${slug}`, { visitor: 'A' })).json, { likes: 1, liked: true });
   assert.deepEqual((await call('POST', `/api/likes/${slug}`, { visitor: 'A' })).json, { likes: 0, liked: false });
   await call('POST', `/api/likes/${slug}`, { visitor: 'A' }); await call('POST', `/api/likes/${slug}`, { visitor: 'B' });

@@ -305,8 +305,54 @@ function refresh() { renderMarks(); renderList(); }
 new MutationObserver(() => { selectButton.hidden = true; closePopover(); refresh(); })
   .observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
+// ---------- UTM tags ----------
+// Read utm_* from the address, keep them for this tab (the read event comes later), then remove them
+// from the address bar so a reader who shares the link does not credit their visitors to the post.
+const utm = (() => {
+  const params = new URLSearchParams(location.search);
+  const found = Object.fromEntries(['source', 'medium', 'campaign', 'content'].map(f => [f, params.get(`utm_${f}`) || '']).filter(([, v]) => v));
+  const key = `ll-utm-${slug}`;
+  if (Object.keys(found).length) {
+    try { sessionStorage.setItem(key, JSON.stringify(found)); } catch {}
+    for (const name of [...params.keys()]) if (name.startsWith('utm_')) params.delete(name);
+    const clean = location.pathname + (params.toString() ? `?${params}` : '') + location.hash;
+    history.replaceState(history.state, '', clean);
+    return found;
+  }
+  try { return JSON.parse(sessionStorage.getItem(key) || 'null') || {}; } catch { return {}; }
+})();
+
+// ---------- «Дочитал»: 30 s of visible article text or a scroll past 75 % of it ----------
+// The text is measured from the start of .article-prose to the sources block, so comments do not count.
+(() => {
+  const prose = document.querySelector('.article-prose');
+  const end = prose?.querySelector('.sources');
+  if (!prose || !end) return;
+  const READ_MS = 30000, READ_SHARE = 0.75;
+  let visibleMs = 0, last = performance.now(), active = false, scrolled = false, done = false;
+  const geometry = () => { const top = prose.getBoundingClientRect().top, bottom = end.getBoundingClientRect().top; return { top, bottom, height: bottom - top }; };
+  function check() {
+    if (done) return;
+    const now = performance.now(), g = geometry();
+    // Time since the previous check counts only if the text was on screen in a visible tab back then.
+    if (active) visibleMs += now - last;
+    last = now;
+    active = document.visibilityState === 'visible' && g.top < innerHeight && g.bottom > 0;
+    const share = g.height > 0 ? (innerHeight - g.top) / g.height : 0;
+    if (visibleMs >= READ_MS || (scrolled && share >= READ_SHARE)) {
+      done = true;
+      clearInterval(timer);
+      api('POST', `/api/reads/${slug}`, { utm }).catch(() => {});
+    }
+  }
+  const timer = setInterval(check, 1000);
+  addEventListener('scroll', () => { scrolled = true; check(); }, { passive: true });
+  document.addEventListener('visibilitychange', check);
+  check();
+})();
+
 // ---------- Start ----------
-api('POST', `/api/views/${slug}`, {}).then(r => setStat('views', r.views)).catch(() => {});
+api('POST', `/api/views/${slug}`, { utm }).then(r => setStat('views', r.views)).catch(() => {});
 fetch(`/api/engagement/${slug}?visitor=${encodeURIComponent(visitor)}`)
   .then(r => r.json())
   .then(data => { state.comments = data.list || []; state.liked = !!data.liked; setCounts(data); renderLike(); refresh(); })

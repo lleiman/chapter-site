@@ -10,6 +10,14 @@ import path from 'node:path';
 export const BOT_UA = /bot|crawl|spider|slurp|preview|facebookexternalhit|embedly|whatsapp|skypeuri|curl|wget|python|node-fetch|go-http|java\/|headless/i;
 const COMMENT_MAX = 2000, NAME_MAX = 60, QUOTE_MAX = 500, DELETED_KEEP = 500;
 const RATE = { windowMs: 10 * 60 * 1000, perWindow: 5, perDay: 30 };
+const UTM_FIELDS = ['source', 'medium', 'campaign', 'content'], UTM_KEYS_MAX = 200;
+export const NO_UTM = '(без метки)', OTHER_UTM = '(прочие метки)';
+
+/** «telegram / messenger / warhound / post-12» from {source, medium, campaign, content}; untagged visits get NO_UTM. */
+export function utmKey(utm) {
+  const parts = UTM_FIELDS.map(f => String(utm?.[f] ?? '').normalize('NFC').replace(/[^\p{L}\p{N}_.\-]+/gu, '').slice(0, 60)).filter(Boolean);
+  return parts.length ? parts.join(' / ') : NO_UTM;
+}
 
 export class EngagementError extends Error { constructor(message, code = 400) { super(message); this.code = code; } }
 
@@ -31,10 +39,27 @@ export function createEngagement(dataDir) {
   const save = () => { timer ??= setTimeout(flush, 1500); };
 
   const hash = (...parts) => createHash('sha256').update(state.salt + '|' + parts.join('|')).digest('hex').slice(0, 24);
-  const entry = slug => (state.articles[slug] ||= { views: 0, likes: [], comments: [] });
+  const entry = slug => {
+    const e = (state.articles[slug] ||= { views: 0, likes: [], comments: [] });
+    e.reads ||= 0; e.utm ||= {};
+    return e;
+  };
+  /** Per-tag counter row; the number of distinct tags is capped so a crawler cannot bloat the file. */
+  const utmRow = (e, utm) => {
+    let key = utmKey(utm);
+    if (!e.utm[key] && Object.keys(e.utm).length >= UTM_KEYS_MAX) key = OTHER_UTM;
+    return (e.utm[key] ||= { views: 0, reads: 0 });
+  };
 
-  // View de-duplication: one per person per article per UTC day, kept in memory only.
+  // View and read de-duplication: one per person per article per UTC day, kept in memory only.
   let viewDay = '', seenViews = new Set();
+  const firstToday = (kind, slug, client, ua) => {
+    const day = new Date().toISOString().slice(0, 10);
+    if (day !== viewDay) { viewDay = day; seenViews = new Set(); }
+    const key = hash(kind, day, slug, client, ua);
+    if (seenViews.has(key)) return false;
+    seenViews.add(key); return true;
+  };
   // Comment rate limits per person, in memory only.
   const recent = new Map();
 
@@ -47,13 +72,23 @@ export function createEngagement(dataDir) {
       const e = state.articles[slug];
       return { views: e?.views || 0, likes: e?.likes.length || 0, comments: e?.comments.length || 0 };
     },
-    view(slug, client, ua) {
-      if (BOT_UA.test(ua || '')) return this.counts(slug);
-      const day = new Date().toISOString().slice(0, 10);
-      if (day !== viewDay) { viewDay = day; seenViews = new Set(); }
-      const key = hash('view', day, slug, client, ua);
-      if (!seenViews.has(key)) { seenViews.add(key); entry(slug).views++; save(); }
+    view(slug, client, ua, utm) {
+      if (!BOT_UA.test(ua || '') && firstToday('view', slug, client, ua)) {
+        const e = entry(slug); e.views++; utmRow(e, utm).views++; save();
+      }
       return this.counts(slug);
+    },
+    /** «Дочитал»: the page script reports 30 s of visible text or a scroll past 75 % of it. */
+    markRead(slug, client, ua, utm) {
+      if (!BOT_UA.test(ua || '') && firstToday('read', slug, client, ua)) {
+        const e = entry(slug); e.reads++; utmRow(e, utm).reads++; save();
+      }
+      return { reads: state.articles[slug]?.reads || 0 };
+    },
+    stats(slug) {
+      const e = state.articles[slug];
+      const utm = Object.entries(e?.utm || {}).map(([tag, row]) => ({ tag, ...row })).sort((a, b) => b.views - a.views || b.reads - a.reads);
+      return { ...this.counts(slug), reads: e?.reads || 0, utm };
     },
     toggleLike(slug, visitor, client) {
       const e = entry(slug), who = ownerOf(visitor, client);
