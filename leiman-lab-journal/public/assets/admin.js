@@ -40,7 +40,7 @@ const css = `
 .ll-stats td{padding:7px 10px 7px 0;border-bottom:1px solid #222226;color:var(--soft);word-break:break-word}.ll-stats td.num,.ll-stats th.num{text-align:right;white-space:nowrap}
 .ll-stats .ll-utm-link{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}.ll-stats .ll-utm-link code{flex:1 1 280px;background:var(--ink);border:1px solid var(--line);padding:8px 10px;font:12px/1.4 var(--mono);color:var(--soft);word-break:break-all}
 .ll-panel label{display:grid;gap:6px}
-.ll-panel input,.ll-panel textarea{width:100%;background:var(--ink);color:var(--paper);border:1px solid var(--line);padding:9px 11px;font:15px/1.5 var(--sans);resize:vertical}
+.ll-panel input,.ll-panel textarea,.ll-panel select{width:100%;background:var(--ink);color:var(--paper);border:1px solid var(--line);padding:9px 11px;font:15px/1.5 var(--sans);resize:vertical}
 .ll-panel input:focus,.ll-panel textarea:focus{outline:1px solid var(--red);border-color:var(--red)}
 .ll-login{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(11,11,13,.86);padding:16px}
 .ll-login form{width:min(420px,100%);background:var(--panel);border:1px solid var(--line);padding:26px;display:grid;gap:16px}
@@ -82,8 +82,9 @@ function askPassword() {
   });
 }
 
-const field = (key, label, multiline) => `<label><span class="micro muted">${label}</span>${
-  multiline ? `<textarea rows="3" data-field="${key}"></textarea>` : `<input data-field="${key}">`}</label>`;
+const field = (key, label, multiline, options) => `<label><span class="micro muted">${label}</span>${
+  options ? `<select data-field="${key}">${options.map(o => `<option value="${o.slug}">${o.title.replace(/[<>&"]/g, '')}</option>`).join('')}</select>`
+  : multiline ? `<textarea rows="3" data-field="${key}"></textarea>` : `<input data-field="${key}">`}</label>`;
 
 function buildPanel() {
   panel = document.createElement('div');
@@ -91,11 +92,12 @@ function buildPanel() {
   const a = meta?.article;
   const fields = [];
   if (a) {
+    if (meta.rubrics?.length) fields.push(['rubric', 'Рубрика', a.rubric ?? '', false, meta.rubrics]);
     if (a.headline !== undefined) fields.push(['title', 'Заголовок для карточки на главной и превью Telegram', a.title]);
     if (a.deck !== undefined) fields.push(['summary', 'Текст карточки на главной', a.summary, true]);
     fields.push(['description', 'Описание в превью Telegram (пусто — как текст карточки)', a.description ?? '', true]);
   }
-  panel.innerHTML = `${pageType === 'article' ? '<div class="ll-stats" aria-live="polite"></div>' : ''}${fields.length ? `<div class="ll-fields">${fields.map(f => field(f[0], f[1], f[3])).join('')}</div>` : ''}
+  panel.innerHTML = `${pageType === 'article' ? '<div class="ll-stats" aria-live="polite"></div>' : ''}${fields.length ? `<div class="ll-fields">${fields.map(f => field(f[0], f[1], f[3], f[4])).join('')}</div>` : ''}
   <div class="ll-row">
     <div class="ll-status micro"></div>
     <div class="ll-actions">
@@ -110,7 +112,8 @@ function buildPanel() {
   for (const [key, , value] of fields) {
     const el = panel.querySelector(`[data-field="${key}"]`);
     el.value = value; el.dataset.original = value;
-    el.addEventListener('input', () => { el.value !== el.dataset.original ? dirty.add('field:' + key) : dirty.delete('field:' + key); update(); });
+    const track = () => { el.value !== el.dataset.original ? dirty.add('field:' + key) : dirty.delete('field:' + key); update(); };
+    el.addEventListener('input', track); el.addEventListener('change', track);
   }
   statusEl = panel.querySelector('.ll-status');
   panel.addEventListener('click', e => {

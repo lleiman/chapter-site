@@ -60,3 +60,12 @@ mark.ll-note.ll-flash{animation:ll-flash 1.6s}@keyframes ll-flash{0%,60%{backgro
 .article-prose p.ll-empty{font-size:11px;line-height:1.6;margin:18px 0 0}
 @media(max-width:700px){.ll-pop{position:fixed;left:0!important;right:0;bottom:0;top:auto!important;width:auto;max-height:78vh;border-width:1px 0 0;padding:24px 18px calc(18px + env(safe-area-inset-bottom))}.ll-select-btn{padding:11px 15px}.ll-comments{margin-top:52px}}
 .ll-pop .ll-reply-btn{display:none}
+/* Rubrics */
+.rubric-nav{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 38px}
+.rubric-nav a{border:1px solid var(--line);padding:9px 12px;font:600 11px/1.2 var(--mono);letter-spacing:.07em;color:#c4c2be;transition:border-color .15s,color .15s}
+.rubric-nav a:hover{border-color:var(--red);color:var(--paper)}.rubric-nav a.active{background:var(--red);border-color:var(--red);color:var(--paper)}
+.rubric-nav small{font:inherit;opacity:.65;margin-left:5px}
+.article-overline .rubric-link{color:var(--paper);border-bottom:1px solid var(--red);padding-bottom:2px}.article-overline .rubric-link:hover{color:var(--red)}
+.rubric-head{padding-bottom:10px}.rubric-section{padding-top:10px}
+.rubric-empty{border-top:1px solid var(--line);padding:34px 0 10px;display:grid;gap:22px;justify-items:start}.rubric-empty p{margin:0;color:var(--soft);font-size:18px;max-width:640px}
+@media(max-width:760px){.rubric-nav{gap:6px;margin-bottom:28px}.rubric-nav a{padding:8px 10px;font-size:10px}}

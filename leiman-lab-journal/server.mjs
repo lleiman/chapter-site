@@ -37,6 +37,8 @@ const gitArticles = new Map(readdirSync(DIR)
   .filter(n => /^\d{3}-[a-z0-9-]+\.json$/.test(n))
   .map(n => JSON.parse(readFileSync(path.join(DIR, n), 'utf8')))
   .map(a => [a.slug, a]));
+const rubrics = JSON.parse(readFileSync(path.join(DIR, 'rubrics.json'), 'utf8'));
+const rubricBySlug = new Map(rubrics.map(r => [r.slug, r]));
 const articles = [];
 const articleBySlug = new Map();
 function loadArticles() {
@@ -123,7 +125,7 @@ function cardStats(slug) {
 function card(a, size = '') {
   return `<a class="story-card ${size}" href="/articles/${escaped(a.slug)}">
   <div class="story-image"><img src="${escaped(asset(a.cover))}" alt="Обложка ${escaped(a.cardTitle)}" loading="lazy" width="1200" height="630"><span class="image-index mono">${escaped(a.issue)} ↗</span></div>
-  <div class="story-info"><div class="micro story-meta">${escaped(a.section)} <span class="line"></span> ${escaped(a.dateLabel)}</div>
+  <div class="story-info"><div class="micro story-meta">${rubricBySlug.has(a.rubric) ? `${escaped(rubricBySlug.get(a.rubric).title.toUpperCase())} <span class="line"></span> ` : ''}${escaped(a.section)} <span class="line"></span> ${escaped(a.dateLabel)}</div>
   <h3>${escaped(a.title)}</h3><p>${escaped(a.summary)}</p><div class="story-foot"><span class="micro muted">${escaped(a.readingMinutes)} МИН ЧТЕНИЯ${cardStats(a.slug)}</span><span class="read-link micro">ЧИТАТЬ ↗</span></div></div>
   </a>`;
 }
@@ -135,6 +137,30 @@ const SITE_DEFAULTS = {
   'home.about.2': 'Здесь я собираю то, над чем работаю: AI-продукты, продакшен, исследования поведения людей, экспериментальные инструменты и искусство. Кроме выводов пишу, как шла работа, где упёрся и на какие источники опирался.',
 };
 const siteText = key => `<span data-edit="${key}">${escaped(siteTexts[key] ?? SITE_DEFAULTS[key])}</span>`;
+
+function rubricNav(active) {
+  const count = slug => articles.filter(a => a.rubric === slug).length;
+  return `<nav class="rubric-nav" aria-label="Рубрики"><a href="/#journal"${active ? '' : ' class="active" aria-current="page"'}>ВСЕ <small>${articles.length}</small></a>${rubrics.map(r =>
+    `<a href="/rubrics/${escaped(r.slug)}"${active === r.slug ? ' class="active" aria-current="page"' : ''}>${escaped(r.title.toUpperCase())} <small>${count(r.slug)}</small></a>`).join('')}</nav>`;
+}
+
+function rubricView(r, origin) {
+  const list = articles.filter(a => a.rubric === r.slug);
+  const body = `<main>
+  <header class="container article-head rubric-head"><a class="back mono" href="/#journal">← JOURNAL / LEIMAN LAB</a>
+    <div class="article-overline"><span class="pill micro">РУБРИКА</span><span class="micro muted">${list.length} ${plural(list.length, ['МАТЕРИАЛ', 'МАТЕРИАЛА', 'МАТЕРИАЛОВ'])}</span></div>
+    <h1>${escaped(r.title)}</h1>
+    <p class="article-deck">${escaped(r.description)}</p>
+  </header>
+  <section class="container journal-section rubric-section">
+    ${rubricNav(r.slug)}
+    ${list.length ? `<div class="featured-story">${list.map(a => card(a, 'featured')).join('')}</div>`
+      : `<div class="rubric-empty"><p>В этой рубрике пока нет материалов. Первые появятся в Telegram-канале раньше, чем здесь.</p><a class="button button-line" href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer">TELEGRAM ↗</a></div>`}
+  </section>
+  </main>`;
+  const cover = list[0]?.cover || '/assets/black-october-1200x630.png';
+  return page({ content: body, title: `${r.title} — Leiman Lab`, description: r.description, canonical: `${origin}/rubrics/${r.slug}`, cover: `${origin}${asset(cover)}`, bodyData: ' data-page="rubric"' });
+}
 
 function home(origin) {
   const featured = articles[0];
@@ -149,6 +175,7 @@ function home(origin) {
   </section>
   <section id="journal" class="container journal-section" aria-labelledby="journal-title">
     <div class="section-rule"><h2 id="journal-title">ЖУРНАЛ <span class="accent">/</span> <small>01</small></h2><span class="micro muted">${articles.length} PUBLICATIONS · NEWEST FIRST</span></div>
+    ${rubricNav(null)}
     <div class="featured-story">${articles.map(a=>card(a,'featured')).join('')}</div>
   </section>
   <section id="about" class="container about-section"><div class="about-heading"><div class="eyebrow">02 / WHO'S BEHIND THE LAB</div><h2>Вопросы.<br>Практика.<br><span class="accent">Результаты.</span></h2></div>
@@ -181,7 +208,7 @@ function articleView(a, origin) {
   const body = `<main>
   <article itemscope itemtype="https://schema.org/Article">
     <header class="container article-head"><a class="back mono" href="/">← JOURNAL / LEIMAN LAB</a>
-      <div class="article-overline"><span class="pill micro">FIELD NOTE ${escaped(a.issue)}</span><span class="micro muted">${escaped(a.section)}</span></div>
+      <div class="article-overline"><span class="pill micro">FIELD NOTE ${escaped(a.issue)}</span>${rubricBySlug.has(a.rubric) ? `<a class="micro rubric-link" href="/rubrics/${escaped(a.rubric)}">${escaped(rubricBySlug.get(a.rubric).title.toUpperCase())}</a>` : ''}<span class="micro muted">${escaped(a.section)}</span></div>
       <h1 itemprop="headline" data-edit="headline">${escaped(a.headline || a.title)}</h1>
       <p class="article-deck" itemprop="description" data-edit="deck">${escaped(a.deck || a.summary)}</p>
       <div class="article-byline micro"><span>ЛЕВ ЛЕЙМАН</span><span class="thin-sep"></span><time datetime="${escaped(a.date)}">${escaped(a.dateLabel)}</time><span class="thin-sep"></span><span>${escaped(a.readingMinutes)} МИН</span><span class="thin-sep"></span><span><b data-stat="views">${fmt(stats.views)}</b> <span data-plural="views">${plural(stats.views, ['ПРОСМОТР', 'ПРОСМОТРА', 'ПРОСМОТРОВ'])}</span></span><span class="thin-sep"></span><a href="#comments">♥ <b data-stat="likes">${fmt(stats.likes)}</b> · <b data-stat="comments">${fmt(stats.comments)}</b> КОММ.</a></div>
@@ -231,6 +258,7 @@ function applyArticleEdits(a, edits) {
     if (key === 'headline') next[next.headline !== undefined ? 'headline' : 'title'] = required(value, key);
     else if (key === 'deck') next[next.deck !== undefined ? 'deck' : 'summary'] = required(value, key);
     else if (key === 'title' || key === 'summary') next[key] = required(value, key);
+    else if (key === 'rubric') { if (!rubricBySlug.has(value)) throw new EditError(`Нет такой рубрики: ${value}`); next.rubric = value; }
     else if (OPTIONAL_FIELDS.includes(key)) { if (value) next[key] = oneLine(value); else delete next[key]; }
     else if (block && b[2] === undefined && typeof block.text === 'string') blockText.set(Number(b[1]), value);
     else if (block && b[2] === 'label' && block.type === 'aside') block.label = oneLine(value);
@@ -306,7 +334,7 @@ async function adminApi(req, res, pathname) {
   const m = pathname.match(/^\/api\/admin\/article\/([a-z0-9-]+)$/);
   if (m && articleBySlug.has(m[1])) {
     const slug = m[1], current = articleBySlug.get(slug);
-    if (req.method === 'GET') return sendJson(res, 200, { article: current, version: versionOf(current), edited: existsSync(overrideFile(slug)) });
+    if (req.method === 'GET') return sendJson(res, 200, { article: current, version: versionOf(current), edited: existsSync(overrideFile(slug)), rubrics });
     if (req.method === 'POST') {
       const { edits, version } = await readBody(req);
       if (version !== versionOf(current)) throw new EditError('Статья уже изменилась. Перезагрузите страницу и повторите правку.', 409);
@@ -372,7 +400,7 @@ const server = http.createServer((req,res)=>{
   if(pathname==='/health')return write(res,200,'OK','text/plain; charset=utf-8',{'Cache-Control':'no-store'});
   if(pathname==='/robots.txt')return write(res,200,`User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n`,'text/plain; charset=utf-8');
   if(pathname==='/sitemap.xml'){
-    const paths=['/',...articles.map(a=>'/articles/'+a.slug)];
+    const paths=['/',...rubrics.map(r=>'/rubrics/'+r.slug),...articles.map(a=>'/articles/'+a.slug)];
     return write(res,200,`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${paths.map(p=>`<url><loc>${xmlSafe(origin+p)}</loc></url>`).join('')}</urlset>`,'application/xml; charset=utf-8');
   }
   if(pathname==='/rss.xml'){
@@ -385,6 +413,8 @@ const server = http.createServer((req,res)=>{
   if(legacyOg && articleBySlug.has(legacyOg[1])){const data=readFileSync(path.join(PUBLIC,articleBySlug.get(legacyOg[1]).cover));return write(res,200,data,'image/png',{'Cache-Control':'public,max-age=600','Content-Length':data.length});}
   if(pathname==='/style.css')return write(res,301,'','text/plain',{Location:'/assets/site.css'});
   if(pathname==='/favicon.ico')return write(res,301,'','text/plain',{Location:'/favicon.svg'});
+  const rubricMatch=pathname.match(/^\/rubrics\/([a-z0-9-]+)\/?$/);
+  if(rubricMatch && rubricBySlug.has(rubricMatch[1]))return write(res,200,rubricView(rubricBySlug.get(rubricMatch[1]),origin));
   const match=pathname.match(/^\/articles\/([a-z0-9-]+)\/?$/);
   if(match && articleBySlug.has(match[1]))return write(res,200,articleView(articleBySlug.get(match[1]),origin));
   if(pathname.startsWith('/assets/') || pathname==='/favicon.svg') {

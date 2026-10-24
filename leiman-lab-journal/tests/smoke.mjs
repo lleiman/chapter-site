@@ -50,8 +50,30 @@ async function main() {
   assert.ok(page.includes('Чёрный октябрь'));
   assert.ok(!page.includes('главный вопрос не в том'));
   console.log('✓ homepage includes both articles');
+  await rubricTests();
   await editorTests();
   console.log('\nALL TESTS PASSED');
+}
+
+async function rubricTests() {
+  const ai = await get('/rubrics/ai');
+  assert.equal(ai.status, 200);
+  const aiHtml = await ai.text();
+  assert.ok(aiHtml.includes('href="/articles/warhound"') && aiHtml.includes('href="/articles/black-october"'), 'rubric lists its articles');
+  const mind = await (await get('/rubrics/mind')).text();
+  assert.ok(mind.includes('rubric-empty') && !mind.includes('href="/articles/'), 'empty rubric page');
+  assert.equal((await get('/rubrics/nope')).status, 404);
+  const home = await (await get('/')).text();
+  assert.ok(home.includes('class="rubric-nav"') && home.includes('href="/rubrics/ai"'), 'rubric nav on home');
+  assert.ok((await (await get('/articles/warhound')).text()).includes('class="micro rubric-link" href="/rubrics/ai"'), 'rubric link in article');
+  assert.ok((await (await get('/sitemap.xml')).text()).includes('/rubrics/mind'), 'rubrics in sitemap');
+  const { json: before } = await api('GET', '/api/admin/article/warhound');
+  assert.equal(before.rubrics.length, 4);
+  assert.equal((await api('POST', '/api/admin/article/warhound', { version: before.version, edits: { rubric: 'nope' } })).status, 400);
+  assert.equal((await api('POST', '/api/admin/article/warhound', { version: before.version, edits: { rubric: 'mind' } })).status, 200);
+  assert.ok((await (await get('/rubrics/mind')).text()).includes('href="/articles/warhound"'), 'rubric changed in editor');
+  assert.equal((await api('DELETE', '/api/admin/article/warhound')).status, 200);
+  console.log('✓ rubrics: pages, nav, article link, sitemap, editor');
 }
 
 async function api(method, route, data, password = PASSWORD) {
