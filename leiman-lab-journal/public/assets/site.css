@@ -84,3 +84,10 @@ mark.ll-note.ll-flash{animation:ll-flash 1.6s}@keyframes ll-flash{0%,60%{backgro
 @media(max-width:760px){.changes li{grid-template-columns:1fr;gap:2px}.about-page{display:block;padding-bottom:50px}.about-page-text p{font-size:17px}.tg-follow{padding:18px}.tg-follow .button{width:100%;justify-content:center}.site-header nav{gap:13px}.search-form{flex-direction:column}}
 .nav-short{display:none}.site-header nav a{white-space:nowrap}
 @media(max-width:420px){.nav-long{display:none}.nav-short{display:inline}.site-header nav{gap:12px}}
+/* «Материал» block: downloadable kits, later paid mini-products */
+.kit{margin:46px 0;border:1px solid var(--line);border-top:3px solid var(--red);background:var(--panel);padding:24px 26px 26px}
+.kit-head{display:flex;justify-content:space-between;gap:12px;color:var(--quiet)}.kit-badge{color:var(--red)}
+.kit-title{font-size:clamp(24px,2.6vw,32px);font-weight:790;letter-spacing:-.045em;line-height:1.12;margin:12px 0 10px;color:var(--paper)}
+.article-prose .kit p{font-size:17px;line-height:1.65;margin:0 0 12px;color:#d7d3cd}
+.kit-meta{margin-bottom:18px}.kit-actions{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center}.kit-actions .micro{max-width:360px;line-height:1.5}
+@media(max-width:760px){.kit{padding:20px 18px}.kit-actions .button{width:100%;justify-content:center}}

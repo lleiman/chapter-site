@@ -116,6 +116,22 @@ async function featureTests() {
   console.log('✓ drafts and publishing, overall stats');
 
   for (const slug of ['warhound', 'black-october']) assert.equal((await api('DELETE', `/api/admin/article/${slug}`)).status, 200);
+
+  // «Материал» block and counted downloads
+  const kitPage = await html('/articles/human-voice');
+  assert.ok(kitPage.includes('class="kit"') && kitPage.includes('href="/files/leiman-lab-kit-001-human-voice.zip" download'), 'kit block');
+  assert.ok(kitPage.includes('href="/articles/black-october"'), 'links to earlier articles');
+  const zip = await get('/files/leiman-lab-kit-001-human-voice.zip');
+  assert.equal(zip.status, 200);
+  assert.equal(zip.headers.get('content-type'), 'application/zip');
+  assert.ok(zip.headers.get('content-disposition').includes('attachment'));
+  await get('/files/leiman-lab-kit-001-human-voice.zip');
+  await fetch(`${origin}/files/leiman-lab-kit-001-human-voice.zip`, { headers: { 'User-Agent': 'TelegramBot (like TwitterBot)' } });
+  const { json: kitStats } = await api('GET', '/api/admin/stats/human-voice');
+  assert.deepEqual(kitStats.files.map(f => f.downloads), [1], 'one download per person, bots excluded');
+  assert.equal((await get('/files/..%2Fserver.mjs')).status, 404);
+  assert.equal((await get('/files/nope.zip')).status, 404);
+  console.log('✓ material block and counted downloads');
 }
 
 async function rubricTests() {

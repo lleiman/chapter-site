@@ -85,6 +85,12 @@ export function createEngagement(dataDir) {
       }
       return { reads: state.articles[slug]?.reads || 0 };
     },
+    /** Downloads of article materials (/files/<name>): one per person per file per day, bots excluded. */
+    download(file, client, ua) {
+      state.downloads ||= {};
+      if (!BOT_UA.test(ua || '') && firstToday('download', file, client, ua)) { state.downloads[file] = (state.downloads[file] || 0) + 1; save(); }
+    },
+    downloads(file) { return state.downloads?.[file] || 0; },
     stats(slug) {
       const e = state.articles[slug];
       const utm = Object.entries(e?.utm || {}).map(([tag, row]) => ({ tag, ...row })).sort((a, b) => b.views - a.views || b.reads - a.reads);

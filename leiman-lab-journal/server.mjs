@@ -244,12 +244,32 @@ function home(origin) {
   </main>`;
   return page({content:html,title:'Leiman Lab — журнал исследований, технологий и экспериментов',description:'ИИ, технологии, бизнес, психология, исследования сознания и искусство. Авторский журнал Льва Леймана.',canonical:`${origin}/`,cover:`${origin}${asset(featured.cover)}`,bodyData:' data-page="home"',schema:{'@context':'https://schema.org','@type':'WebSite',name:'Leiman Lab',url:origin+'/','inLanguage':'ru'}});
 }
+const inlineLinks = (block, i) => block.links?.length ? ' '+block.links.map((l,j)=>`<a href="${escaped(l.url)}"${/^\//.test(l.url) ? '' : ' target="_blank" rel="noopener noreferrer"'}><span data-edit="b.${i}.link.${j}">${escaped(l.label)}</span> ↗</a>`).join(' · ') : '';
+const FILES = path.join(PUBLIC, 'files');
+const fileSize = name => { try { const b = statSync(path.join(FILES, name)).size; return b < 1024 * 1024 ? `${Math.max(1, Math.round(b / 1024))} КБ` : `${(b / 1024 / 1024).toFixed(1).replace('.', ',')} МБ`; } catch { return ''; } };
+/** «Материал» block: a downloadable kit now, a paid mini-product later (set price + buyUrl in the block). */
+function resourceBlock(block, i) {
+  const file = String(block.file || '').replace(/^\/files\//, '');
+  const paid = block.price && block.buyUrl;
+  const meta = [block.format, file && fileSize(file)].filter(Boolean).join(' · ');
+  const button = paid
+    ? `<a class="button button-primary" href="${escaped(block.buyUrl)}" target="_blank" rel="noopener noreferrer">КУПИТЬ — ${escaped(block.price)} ↗</a>`
+    : `<a class="button button-primary" href="/files/${escaped(file)}" download>СКАЧАТЬ БЕСПЛАТНО ↓</a>`;
+  return `<aside class="kit" id="kit-${escaped(file.replace(/\.[a-z0-9]+$/, ''))}">
+    <div class="kit-head micro"><span class="kit-badge">${escaped(block.kit || 'МАТЕРИАЛ')}</span><span>${paid ? escaped(block.price) : 'БЕСПЛАТНО'}</span></div>
+    <div class="kit-title" data-edit="b.${i}.label">${escaped(block.label || '')}</div>
+    <p><span data-edit="b.${i}" data-multiline="0">${escaped(block.text)}</span></p>
+    ${meta ? `<div class="kit-meta micro muted">${escaped(meta)}</div>` : ''}
+    <div class="kit-actions">${button}${block.note ? `<span class="micro muted">${escaped(block.note)}</span>` : ''}</div>
+  </aside>`;
+}
 // data-edit keys: b.N — block text, b.N.M — list item, b.N.label / b.N.link.M — callout label / inline link label.
 function renderBlock(block, i) {
   const t = `<span data-edit="b.${i}" data-multiline="${block.type==='p'?1:0}">${escaped(block.text)}</span>`;
   switch(block.type) {
-    case 'lead': return `<p class="body-lead">${t}</p>`;
-    case 'p': return `<p>${t}${block.links?.length ? ' '+block.links.map((l,j)=>`<a href="${escaped(l.url)}" target="_blank" rel="noopener noreferrer"><span data-edit="b.${i}.link.${j}">${escaped(l.label)}</span> ↗</a>`).join(' · ') : ''}</p>`;
+    case 'lead': return `<p class="body-lead">${t}${inlineLinks(block, i)}</p>`;
+    case 'p': return `<p>${t}${inlineLinks(block, i)}</p>`;
+    case 'resource': return resourceBlock(block, i);
     case 'h2': return `<h2>${t}</h2>`;
     case 'h3': return `<h3>${t}</h3>`;
     case 'aside': { const label = block.label ?? 'НАБЛЮДЕНИЕ'; return `<aside class="callout">${label ? `<span class="micro accent" data-edit="b.${i}.label">${escaped(label)}</span>` : ''}<p>${t}</p></aside>`; }
@@ -303,7 +323,7 @@ function articleView(a, origin) {
 function write(res, code, data, mime='text/html; charset=utf-8', more={}) {
   res.writeHead(code, {'Content-Type':mime,'X-Content-Type-Options':'nosniff',...more});res.end(data);
 }
-function mimeFor(file){return ({'.css':'text/css; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.svg':'image/svg+xml','.webp':'image/webp','.js':'text/javascript; charset=utf-8'})[path.extname(file)]||'application/octet-stream';}
+function mimeFor(file){return ({'.css':'text/css; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.svg':'image/svg+xml','.webp':'image/webp','.js':'text/javascript; charset=utf-8','.zip':'application/zip','.pdf':'application/pdf','.md':'text/markdown; charset=utf-8'})[path.extname(file)]||'application/octet-stream';}
 function xmlSafe(x){return escaped(x);}
 
 // ---------- On-site editor API ----------
@@ -332,7 +352,7 @@ function applyArticleEdits(a, edits) {
     else if (key === 'story') { if (value) next.story = oneLine(value).slice(0, 80); else delete next.story; }
     else if (OPTIONAL_FIELDS.includes(key)) { if (value) next[key] = oneLine(value); else delete next[key]; }
     else if (block && b[2] === undefined && typeof block.text === 'string') blockText.set(Number(b[1]), value);
-    else if (block && b[2] === 'label' && block.type === 'aside') block.label = oneLine(value);
+    else if (block && b[2] === 'label' && (block.type === 'aside' || block.type === 'resource')) block.label = oneLine(value);
     else if (block && b[3] !== undefined && block.links?.[Number(b[3])]) block.links[Number(b[3])].label = required(value, key);
     else if (block && /^\d+$/.test(b[2] ?? '') && typeof block.items?.[Number(b[2])] === 'string') block.items[Number(b[2])] = oneLine(value);
     else if (/^s\.\d+$/.test(key) && next.sources[Number(key.slice(2))]) next.sources[Number(key.slice(2))].title = required(value, key);
@@ -342,7 +362,7 @@ function applyArticleEdits(a, edits) {
     if (block.type === 'list') { block.items = block.items.filter(Boolean); return block.items.length ? [block] : []; }
     if (!blockText.has(i)) return [block];
     const text = blockText.get(i);
-    if (!text) return [];
+    if (!text) return block.type === 'resource' ? [block] : [];
     if (block.type !== 'p') return [{ ...block, text: oneLine(text) }];
     const parts = text.split(/\n+/);
     return parts.map((part, j) => j === parts.length - 1 ? { ...block, text: part } : { type: 'p', text: part });
@@ -375,6 +395,8 @@ function readBody(req, limit = 512 * 1024) {
 }
 const sendJson = (res, code, data) => write(res, code, JSON.stringify(data), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
 
+const articleFiles = a => a.paragraphs.filter(b => b.type === 'resource' && b.file).map(b => { const file = String(b.file).replace(/^\/files\//, ''); return { file, title: b.label || file, downloads: engagement.downloads(file) }; });
+
 async function adminApi(req, res, pathname) {
   if (!passwordOk(req)) { await new Promise(r => setTimeout(r, 800)); return sendJson(res, 401, { error: 'Неверный пароль' }); }
   if (pathname === '/api/admin/login' && req.method === 'POST') return sendJson(res, 200, { ok: true });
@@ -402,10 +424,10 @@ async function adminApi(req, res, pathname) {
   if (pathname === '/api/admin/stats' && req.method === 'GET') return sendJson(res, 200, { articles: articles.map(a => {
     const s = engagement.stats(a.slug);
     const telegram = s.utm.filter(r => r.tag.startsWith('telegram')).reduce((sum, r) => ({ views: sum.views + r.views, reads: sum.reads + r.reads }), { views: 0, reads: 0 });
-    return { slug: a.slug, title: a.title, date: a.date, draft: !!a.draft, views: s.views, reads: s.reads, likes: s.likes, comments: s.comments, telegramViews: telegram.views, telegramReads: telegram.reads };
+    return { slug: a.slug, title: a.title, date: a.date, draft: !!a.draft, views: s.views, reads: s.reads, likes: s.likes, comments: s.comments, telegramViews: telegram.views, telegramReads: telegram.reads, downloads: articleFiles(a).reduce((t, f) => t + f.downloads, 0) };
   }) });
   const stats = pathname.match(/^\/api\/admin\/stats\/([a-z0-9-]+)$/);
-  if (stats && req.method === 'GET' && articleBySlug.has(stats[1])) return sendJson(res, 200, engagement.stats(stats[1]));
+  if (stats && req.method === 'GET' && articleBySlug.has(stats[1])) return sendJson(res, 200, { ...engagement.stats(stats[1]), files: articleFiles(articleBySlug.get(stats[1])) });
 
   const m = pathname.match(/^\/api\/admin\/article\/([a-z0-9-]+)$/);
   if (m && articleBySlug.has(m[1])) {
@@ -505,6 +527,14 @@ const server = http.createServer((req,res)=>{
   if(rubricMatch && rubricBySlug.has(rubricMatch[1]))return write(res,200,rubricView(rubricBySlug.get(rubricMatch[1]),origin));
   const match=pathname.match(/^\/articles\/([a-z0-9-]+)\/?$/);
   if(match && articleBySlug.has(match[1]))return write(res,200,articleView(articleBySlug.get(match[1]),origin));
+  const fileMatch=pathname.match(/^\/files\/([a-z0-9][a-z0-9._-]*)$/);
+  if(fileMatch){
+    try{
+      const data=readFileSync(path.join(FILES,fileMatch[1]));
+      if(req.method==='GET')engagement.download(fileMatch[1],clientKey(req),req.headers['user-agent']||'');
+      return write(res,200,data,mimeFor(fileMatch[1]),{'Content-Disposition':`attachment; filename="${fileMatch[1]}"`,'Content-Length':data.length,'Cache-Control':'no-store'});
+    }catch{return write(res,404,'Not found','text/plain');}
+  }
   if(pathname.startsWith('/assets/') || pathname==='/favicon.svg') {
     const staticFile=path.resolve(PUBLIC,'.'+pathname);
     if(!staticFile.startsWith(PUBLIC+path.sep))return write(res,403,'Forbidden','text/plain');

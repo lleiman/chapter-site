@@ -156,17 +156,17 @@ async function loadAllStats() {
     const { articles } = await api('GET', '/api/admin/stats');
     const table = document.createElement('table');
     const head = document.createElement('tr');
-    for (const [t, c] of [['Статья'], ['Просмотры', 'num'], ['Дочитали', 'num'], ['Доля', 'num'], ['Из Telegram', 'num'], ['♥', 'num'], ['Комм.', 'num']]) head.append(cell('th', t, c));
+    for (const [t, c] of [['Статья'], ['Просмотры', 'num'], ['Дочитали', 'num'], ['Доля', 'num'], ['Из Telegram', 'num'], ['♥', 'num'], ['Комм.', 'num'], ['Скачивания', 'num']]) head.append(cell('th', t, c));
     table.append(head);
     for (const a of articles) {
       const tr = document.createElement('tr');
       const name = cell('td', ''); const link = cell('a', a.title + (a.draft ? ' · черновик' : '')); link.href = `/articles/${a.slug}`; name.append(link);
-      tr.append(name, cell('td', n(a.views), 'num'), cell('td', n(a.reads), 'num'), cell('td', pct(a.reads, a.views), 'num'), cell('td', `${n(a.telegramViews)} / ${n(a.telegramReads)}`, 'num'), cell('td', n(a.likes), 'num'), cell('td', n(a.comments), 'num'));
+      tr.append(name, cell('td', n(a.views), 'num'), cell('td', n(a.reads), 'num'), cell('td', pct(a.reads, a.views), 'num'), cell('td', `${n(a.telegramViews)} / ${n(a.telegramReads)}`, 'num'), cell('td', n(a.likes), 'num'), cell('td', n(a.comments), 'num'), cell('td', n(a.downloads), 'num'));
       table.append(tr);
     }
     const sum = k => articles.reduce((t, a) => t + a[k], 0);
     const total = document.createElement('tr');
-    total.append(cell('td', 'ВСЕГО'), cell('td', n(sum('views')), 'num'), cell('td', n(sum('reads')), 'num'), cell('td', pct(sum('reads'), sum('views')), 'num'), cell('td', `${n(sum('telegramViews'))} / ${n(sum('telegramReads'))}`, 'num'), cell('td', n(sum('likes')), 'num'), cell('td', n(sum('comments')), 'num'));
+    total.append(cell('td', 'ВСЕГО'), cell('td', n(sum('views')), 'num'), cell('td', n(sum('reads')), 'num'), cell('td', pct(sum('reads'), sum('views')), 'num'), cell('td', `${n(sum('telegramViews'))} / ${n(sum('telegramReads'))}`, 'num'), cell('td', n(sum('likes')), 'num'), cell('td', n(sum('comments')), 'num'), cell('td', n(sum('downloads')), 'num'));
     table.append(total);
     box.replaceChildren(table, cell('p', '«Из Telegram» — просмотры / дочитывания по ссылкам с меткой utm_source=telegram (учёт меток с 24.10.2026). Подробности по меткам — в статистике каждой статьи.', 'micro muted'));
   } catch (error) { box.textContent = `НЕ ЗАГРУЗИЛОСЬ: ${error.message}`; }
@@ -232,7 +232,8 @@ async function loadStats() {
     const s = await api('GET', `/api/admin/stats/${slug}`);
     box.replaceChildren();
     const sum = document.createElement('div'); sum.className = 'll-stats-sum';
-    for (const [label, value] of [['ПРОСМОТРЫ', n(s.views)], ['ДОЧИТАЛИ', `${n(s.reads)} · ${pct(s.reads, s.views)}`], ['ЛАЙКИ', n(s.likes)], ['КОММЕНТАРИИ', n(s.comments)]]) {
+    const fileStats = (s.files || []).map(f => [`СКАЧАЛИ: ${f.title.toUpperCase()}`, n(f.downloads)]);
+    for (const [label, value] of [['ПРОСМОТРЫ', n(s.views)], ['ДОЧИТАЛИ', `${n(s.reads)} · ${pct(s.reads, s.views)}`], ['ЛАЙКИ', n(s.likes)], ['КОММЕНТАРИИ', n(s.comments)], ...fileStats]) {
       const item = cell('div', '', 'micro muted'); item.append(cell('b', value), label); sum.append(item);
     }
     box.append(sum);
