@@ -35,6 +35,15 @@ const css = `
 .ll-panel.ll-open .ll-fields{display:grid}
 .ll-panel .ll-stats{width:min(var(--container),calc(100% - 32px));margin-inline:auto;display:none;padding:14px 0 16px;border-bottom:1px solid var(--line);max-height:46vh;overflow:auto}
 .ll-panel.ll-stats-open .ll-stats{display:block}
+.ll-panel .ll-announce{width:min(var(--container),calc(100% - 32px));margin-inline:auto;display:none;padding:14px 0 16px;border-bottom:1px solid var(--line);max-height:58vh;overflow:auto}
+.ll-panel.ll-announce-open .ll-announce{display:block}
+.ll-ann-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,360px);gap:22px}.ll-ann-grid label{display:grid;gap:6px;margin-bottom:10px}
+.ll-ann-bubble{background:#1c1c20;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:15px/1.45 var(--sans);color:var(--paper);white-space:pre-wrap;word-break:break-word}
+.ll-ann-bubble a{color:#6ab3f3;text-decoration:none}.ll-ann-card{margin-top:10px;border-left:3px solid #6ab3f3;padding-left:10px;white-space:normal}
+.ll-ann-card b{display:block;color:#6ab3f3;font-size:13px}.ll-ann-card strong{display:block;margin-top:2px}.ll-ann-card span{display:block;color:var(--soft);font-size:14px}
+.ll-ann-card img{display:block;width:100%;border-radius:8px;margin-top:8px;aspect-ratio:1200/630;object-fit:cover}
+.ll-ann-count.ll-over{color:var(--red)}.ll-ann-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+@media (max-width:700px){.ll-ann-grid{grid-template-columns:1fr}}
 .ll-stats-sum{display:flex;flex-wrap:wrap;gap:8px 28px;margin-bottom:14px}.ll-stats-sum b{display:block;font:700 26px/1.1 var(--sans);letter-spacing:-.03em;color:var(--paper)}
 .ll-stats table{width:100%;border-collapse:collapse;font:13px/1.45 var(--mono)}.ll-stats th{text-align:left;color:var(--quiet);font-weight:600;font-size:10px;letter-spacing:.09em;text-transform:uppercase;padding:6px 10px 6px 0;border-bottom:1px solid var(--line)}
 .ll-stats td{padding:7px 10px 7px 0;border-bottom:1px solid #222226;color:var(--soft);word-break:break-word}.ll-stats td.num,.ll-stats th.num{text-align:right;white-space:nowrap}
@@ -96,15 +105,20 @@ function buildPanel() {
     if (a.headline !== undefined) fields.push(['title', 'Заголовок для карточки на главной и превью Telegram', a.title]);
     if (a.deck !== undefined) fields.push(['summary', 'Текст карточки на главной', a.summary, true]);
     fields.push(['description', 'Описание в превью Telegram (пусто — как текст карточки)', a.description ?? '', true]);
+    fields.push(['tags', 'Теги через запятую', (a.tags || []).join(', ')]);
+    fields.push(['story', 'Сюжет: одинаковое название у нескольких статей собирает их в общий блок', a.story ?? '']);
+    fields.push(['changeNote', 'Что исправлено — попадёт в «Историю правок» под статьёй (необязательно; опечатки можно не записывать)', '', true]);
   }
-  panel.innerHTML = `${pageType === 'article' ? '<div class="ll-stats" aria-live="polite"></div>' : ''}${fields.length ? `<div class="ll-fields">${fields.map(f => field(f[0], f[1], f[3], f[4])).join('')}</div>` : ''}
+  panel.innerHTML = `${pageType !== 'about' ? '<div class="ll-stats" aria-live="polite"></div>' : ''}${pageType === 'article' ? '<div class="ll-announce"></div>' : ''}${fields.length ? `<div class="ll-fields">${fields.map(f => field(f[0], f[1], f[3], f[4])).join('')}</div>` : ''}
   <div class="ll-row">
     <div class="ll-status micro"></div>
     <div class="ll-actions">
-      ${pageType === 'article' ? '<button class="button button-line" data-act="stats" type="button">СТАТИСТИКА</button>' : ''}
+      ${a?.draft ? '<button class="button button-primary" data-act="publish" type="button">ОПУБЛИКОВАТЬ</button>' : ''}
+      ${pageType !== 'about' ? '<button class="button button-line" data-act="stats" type="button">СТАТИСТИКА</button>' : ''}
+      ${pageType === 'article' ? '<button class="button button-line" data-act="announce" type="button">АНОНС</button>' : ''}
       ${fields.length ? '<button class="button button-line" data-act="fields" type="button">ПРЕВЬЮ И КАРТОЧКА</button>' : ''}
       <button class="button button-line" data-act="revert" type="button">ОТМЕНИТЬ</button>
-      ${meta?.edited || (pageType === 'home') ? '<button class="button button-line" data-act="reset" type="button">СБРОСИТЬ К GIT</button>' : ''}
+      ${meta?.edited || pageType !== 'article' ? '<button class="button button-line" data-act="reset" type="button">СБРОСИТЬ К GIT</button>' : ''}
       <button class="button button-line" data-act="exit" type="button">ВЫЙТИ</button>
       <button class="button button-primary" data-act="save" type="button">СОХРАНИТЬ</button>
     </div>
@@ -122,7 +136,9 @@ function buildPanel() {
     if (act === 'revert') revert();
     if (act === 'exit') toggle();
     if (act === 'fields') panel.classList.toggle('ll-open');
-    if (act === 'stats') { panel.classList.toggle('ll-stats-open'); if (panel.classList.contains('ll-stats-open')) loadStats(); }
+    if (act === 'stats') { panel.classList.toggle('ll-stats-open'); if (panel.classList.contains('ll-stats-open')) (pageType === 'home' ? loadAllStats() : loadStats()); }
+    if (act === 'announce') { panel.classList.toggle('ll-announce-open'); if (panel.classList.contains('ll-announce-open')) buildAnnounce(); }
+    if (act === 'publish') publish();
     if (act === 'reset') reset();
   });
   document.body.append(panel);
@@ -132,6 +148,82 @@ function buildPanel() {
 const pct = (part, whole) => whole ? `${Math.round(part / whole * 100)}%` : '—';
 const n = v => Number(v).toLocaleString('ru-RU');
 function cell(tag, text, cls) { const c = document.createElement(tag); c.textContent = text; if (cls) c.className = cls; return c; }
+
+async function loadAllStats() {
+  const box = panel.querySelector('.ll-stats');
+  box.textContent = 'ЗАГРУЖАЮ…';
+  try {
+    const { articles } = await api('GET', '/api/admin/stats');
+    const table = document.createElement('table');
+    const head = document.createElement('tr');
+    for (const [t, c] of [['Статья'], ['Просмотры', 'num'], ['Дочитали', 'num'], ['Доля', 'num'], ['Из Telegram', 'num'], ['♥', 'num'], ['Комм.', 'num']]) head.append(cell('th', t, c));
+    table.append(head);
+    for (const a of articles) {
+      const tr = document.createElement('tr');
+      const name = cell('td', ''); const link = cell('a', a.title + (a.draft ? ' · черновик' : '')); link.href = `/articles/${a.slug}`; name.append(link);
+      tr.append(name, cell('td', n(a.views), 'num'), cell('td', n(a.reads), 'num'), cell('td', pct(a.reads, a.views), 'num'), cell('td', `${n(a.telegramViews)} / ${n(a.telegramReads)}`, 'num'), cell('td', n(a.likes), 'num'), cell('td', n(a.comments), 'num'));
+      table.append(tr);
+    }
+    const sum = k => articles.reduce((t, a) => t + a[k], 0);
+    const total = document.createElement('tr');
+    total.append(cell('td', 'ВСЕГО'), cell('td', n(sum('views')), 'num'), cell('td', n(sum('reads')), 'num'), cell('td', pct(sum('reads'), sum('views')), 'num'), cell('td', `${n(sum('telegramViews'))} / ${n(sum('telegramReads'))}`, 'num'), cell('td', n(sum('likes')), 'num'), cell('td', n(sum('comments')), 'num'));
+    table.append(total);
+    box.replaceChildren(table, cell('p', '«Из Telegram» — просмотры / дочитывания по ссылкам с меткой utm_source=telegram (учёт меток с 24.10.2026). Подробности по меткам — в статистике каждой статьи.', 'micro muted'));
+  } catch (error) { box.textContent = `НЕ ЗАГРУЗИЛОСЬ: ${error.message}`; }
+}
+
+// ---------- Telegram announcement: text, character count, preview, link with UTM ----------
+function buildAnnounce() {
+  const box = panel.querySelector('.ll-announce');
+  if (box.dataset.ready) return;
+  box.dataset.ready = '1';
+  const a = meta.article;
+  const key = `ll-ann-${slug}`;
+  let saved = {}; try { saved = JSON.parse(localStorage.getItem(key) || '{}'); } catch {}
+  const og = name => document.querySelector(`meta[property="og:${name}"]`)?.content || '';
+  box.innerHTML = `<div class="ll-ann-grid"><div>
+      <label><span class="micro muted">ТЕКСТ ПОСТА · ПЕРВАЯ СТРОКА — ФАКТ ИЗ ЛИДА · ЖИРНЫЙ В TELEGRAM: **ТАК**</span><textarea rows="7" data-ann="text"></textarea><span class="micro muted ll-ann-count"></span></label>
+      <label><span class="micro muted">НОМЕР ИЛИ МЕТКА ПОСТА (utm_content)</span><input data-ann="post" placeholder="post"></label>
+      <div class="ll-ann-actions"><button type="button" class="button button-primary" data-ann="copy-post">КОПИРОВАТЬ ПОСТ</button><button type="button" class="button button-line" data-ann="copy-link">КОПИРОВАТЬ ССЫЛКУ</button></div>
+    </div><div><div class="micro muted" style="margin-bottom:6px">ТАК ПРИМЕРНО ВЫГЛЯДИТ В КАНАЛЕ</div><div class="ll-ann-bubble"></div></div></div>`;
+  const text = box.querySelector('[data-ann=text]'), post = box.querySelector('[data-ann=post]'), count = box.querySelector('.ll-ann-count'), bubble = box.querySelector('.ll-ann-bubble');
+  text.value = saved.text ?? `**${a.title}**\n\n${a.summary}`;
+  post.value = saved.post ?? '';
+  const link = () => `${location.origin}/articles/${slug}?utm_source=telegram&utm_medium=messenger&utm_campaign=${slug}&utm_content=${encodeURIComponent(post.value.trim() || 'post')}`;
+  function render() {
+    try { localStorage.setItem(key, JSON.stringify({ text: text.value, post: post.value })); } catch {}
+    const plain = text.value.replace(/\*\*/g, '');
+    count.textContent = `${plain.length} ЗНАКОВ БЕЗ ССЫЛКИ · РЕКОМЕНДАЦИЯ ИССЛЕДОВАНИЯ — ДО 400`;
+    count.classList.toggle('ll-over', plain.length > 400);
+    bubble.replaceChildren();
+    plain.split('\n').forEach((line, i, all) => {
+      const node = i === 0 ? cell('strong', line) : document.createTextNode(line);
+      bubble.append(node); if (i < all.length - 1) bubble.append('\n');
+    });
+    const url = link();
+    const linkEl = cell('a', url); linkEl.href = url; linkEl.target = '_blank';
+    bubble.append('\n\n', linkEl);
+    const cardEl = cell('div', '', 'll-ann-card');
+    const img = document.createElement('img'); img.src = og('image'); img.alt = '';
+    cardEl.append(cell('b', 'LEIMAN LAB'), cell('strong', og('title')), cell('span', og('description')), img);
+    bubble.append(cardEl);
+  }
+  text.addEventListener('input', render); post.addEventListener('input', render);
+  const copy = async (button, value) => { try { await navigator.clipboard.writeText(value); button.textContent = 'СКОПИРОВАНО ✓'; } catch { button.textContent = 'НЕ ВЫШЛО'; } };
+  box.querySelector('[data-ann=copy-post]').addEventListener('click', e => copy(e.currentTarget, `${text.value.trim()}\n\n${link()}`));
+  box.querySelector('[data-ann=copy-link]').addEventListener('click', e => copy(e.currentTarget, link()));
+  render();
+}
+
+async function publish() {
+  if (dirty.size) { alert('Сначала сохраните или отмените правки.'); return; }
+  if (!confirm('Опубликовать статью? Она появится на главной, в рубрике, поиске, RSS и карте сайта.')) return;
+  try {
+    await api('POST', `/api/admin/article/${slug}`, { version: meta.version, edits: { draft: '0' } });
+    store.set('ll-admin-flash', 'ОПУБЛИКОВАНО ✓ · СТАТЬЯ НА ГЛАВНОЙ');
+    location.reload();
+  } catch (error) { update(`<b>НЕ ОПУБЛИКОВАНО:</b> ${error.message.replace(/[<>&]/g, '')}`); }
+}
 
 async function loadStats() {
   const box = panel.querySelector('.ll-stats');
@@ -220,7 +312,7 @@ function setEditable(on) {
 }
 
 async function enable() {
-  if (!['article', 'home'].includes(pageType)) { alert('Редактор работает на главной и на страницах статей.'); return; }
+  if (!['article', 'home', 'about'].includes(pageType)) { alert('Редактор работает на главной, на странице «Об авторе» и на страницах статей.'); return; }
   // The password dialog appears only if the server asks for one (ADMIN_PASSWORD set).
   try {
     if (pageType === 'article') meta = await api('GET', `/api/admin/article/${slug}`);
@@ -274,8 +366,12 @@ async function save() {
   panel.querySelectorAll('[data-field]').forEach(el => { if (dirty.has('field:' + el.dataset.field)) edits[el.dataset.field] = el.value; });
   update('СОХРАНЯЮ…');
   try {
-    if (pageType === 'article') await api('POST', `/api/admin/article/${slug}`, { version: meta.version, edits });
-    else await api('POST', '/api/admin/site', { edits });
+    // Texts shared by all pages (home.*, about.*, follow.*) go to the site store, the rest to the article.
+    const isSite = key => /^(home|about|follow)\./.test(key);
+    const siteEdits = Object.fromEntries(Object.entries(edits).filter(([k]) => isSite(k)));
+    const articleEdits = Object.fromEntries(Object.entries(edits).filter(([k]) => !isSite(k)));
+    if (Object.keys(siteEdits).length) await api('POST', '/api/admin/site', { edits: siteEdits });
+    if (Object.keys(articleEdits).length) await api('POST', `/api/admin/article/${slug}`, { version: meta.version, edits: articleEdits });
     dirty.clear();
     store.set('ll-admin-flash', 'СОХРАНЕНО ✓ · ПРАВКИ УЖЕ НА САЙТЕ');
     location.reload();
@@ -286,7 +382,7 @@ async function save() {
 }
 
 async function reset() {
-  const what = pageType === 'article' ? 'эту статью к версии из GitHub' : 'тексты главной к исходным';
+  const what = pageType === 'article' ? 'эту статью к версии из GitHub' : 'тексты главной, «Об авторе» и блока «Читать в Telegram» к исходным';
   if (!confirm(`Вернуть ${what}? Правки из редактора пропадут (копия останется в истории на сервере).`)) return;
   try {
     await api('DELETE', pageType === 'article' ? `/api/admin/article/${slug}` : '/api/admin/site');

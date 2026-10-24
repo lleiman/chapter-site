@@ -51,6 +51,13 @@ function loadArticles() {
   articles.sort((a, b) => b.date.localeCompare(a.date));
 }
 loadArticles();
+// Drafts ("draft": true) open only by direct link: no lists, search, sitemap or RSS.
+const published = () => articles.filter(a => !a.draft);
+const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+const dateLabel = iso => { const [y, m, d] = String(iso).split('-').map(Number); return `${d} ${MONTHS[m - 1]} ${y}`; };
+const today = () => new Date().toISOString().slice(0, 10);
+const norm = s => String(s ?? '').toLowerCase().replace(/ё/g, 'е');
+const tagUrl = tag => `/tags/${encodeURIComponent(tag)}`;
 let siteTexts = readJson(SITE_FILE) || {};
 // Content-hash query (?v=…) on assets: a replaced cover or stylesheet gets a new URL, so browsers and Telegram drop stale copies.
 const assetVersions = new Map();
@@ -86,7 +93,7 @@ const editorLoader = `<script>(()=>{const load=()=>import('/assets/admin.js');le
 addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.shiftKey&&e.code==='KeyE'){e.preventDefault();window.llAdmin?window.llAdmin.toggle():load()}});
 if(on||/[?&]edit(=|&|$)/.test(location.search))load()})()</script>`;
 
-function page({ content, title, description, canonical, cover, type = 'website', date, schema, bodyData = '' }) {
+function page({ content, title, description, canonical, cover, type = 'website', date, modified, schema, bodyData = '', noindex = false }) {
   const structured = schema ? `<script type="application/ld+json">${jsonSafe(schema)}</script>` : '';
   return `<!doctype html>
 <html lang="ru"><head>
@@ -102,12 +109,12 @@ function page({ content, title, description, canonical, cover, type = 'website',
 <meta property="og:url" content="${escaped(canonical)}">
 <meta property="og:image" content="${escaped(cover)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta property="og:image:type" content="image/png"><meta name="twitter:card" content="summary_large_image">
-${date ? `<meta property="article:published_time" content="${escaped(date)}">` : ''}
+${date ? `<meta property="article:published_time" content="${escaped(date)}">` : ''}${modified ? `<meta property="article:modified_time" content="${escaped(modified)}">` : ''}${noindex ? '<meta name="robots" content="noindex">' : ''}
 <link rel="stylesheet" href="${asset('/assets/site.css')}">${structured}
 </head><body${bodyData}>
 <header class="site-header"><div class="container header-inner">
 <a class="identity" href="/" aria-label="Leiman Lab — главная">${logo}<span class="wordmark">LEIMAN <b>LAB</b></span></a>
-<nav aria-label="Основная навигация"><a href="/#journal">Журнал</a><a href="/#about">О лаборатории</a><a href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer">Telegram ↗</a></nav>
+<nav aria-label="Основная навигация"><a href="/#journal">Журнал</a><a href="/about">Об авторе</a><a href="/search">Поиск</a><a href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer"><span class="nav-long">Telegram</span><span class="nav-short">TG</span> ↗</a></nav>
 </div></header>
 ${content}
 <footer class="site-footer"><div class="container footer-inner">
@@ -135,17 +142,22 @@ const SITE_DEFAULTS = {
   'home.lead': 'Пишу про ИИ, технологии, продакшен, бизнес, сознание и искусство.',
   'home.about.1': 'Leiman Lab — личная исследовательская и проектная лаборатория Льва Леймана.',
   'home.about.2': 'Здесь я собираю то, над чем работаю: AI-продукты, продакшен, исследования поведения людей, экспериментальные инструменты и искусство. Кроме выводов пишу, как шла работа, где упёрся и на какие источники опирался.',
+  'about.lead': 'Предприниматель, практикующий психолог, исследователь сознания и разработчик AI-продуктов.',
+  'about.1': 'Leiman Lab — моя личная лаборатория. Сюда попадает то, что я сам делаю и проверяю: AI-продукты и продакшен, исследования поведения людей, эксперименты с инструментами и искусство.',
+  'about.2': 'В журнале я пишу разборы. Отдельно отмечаю, что подтверждено, что заявила компания и что думаю я сам. Под каждой статьёй есть первоисточники и история правок.',
+  'about.3': 'Короткие заметки и анонсы новых материалов выходят в Telegram-канале. По проектам и сотрудничеству пишите в личные сообщения.',
+  'follow.text': 'Короткие заметки и анонсы новых материалов — в Telegram-канале Leiman Lab.',
 };
 const siteText = key => `<span data-edit="${key}">${escaped(siteTexts[key] ?? SITE_DEFAULTS[key])}</span>`;
 
 function rubricNav(active) {
-  const count = slug => articles.filter(a => a.rubric === slug).length;
-  return `<nav class="rubric-nav" aria-label="Рубрики"><a href="/#journal"${active ? '' : ' class="active" aria-current="page"'}>ВСЕ <small>${articles.length}</small></a>${rubrics.map(r =>
+  const list = published(), count = slug => list.filter(a => a.rubric === slug).length;
+  return `<nav class="rubric-nav" aria-label="Рубрики"><a href="/#journal"${active ? '' : ' class="active" aria-current="page"'}>ВСЕ <small>${list.length}</small></a>${rubrics.map(r =>
     `<a href="/rubrics/${escaped(r.slug)}"${active === r.slug ? ' class="active" aria-current="page"' : ''}>${escaped(r.title.toUpperCase())} <small>${count(r.slug)}</small></a>`).join('')}</nav>`;
 }
 
 function rubricView(r, origin) {
-  const list = articles.filter(a => a.rubric === r.slug);
+  const list = published().filter(a => a.rubric === r.slug);
   const body = `<main>
   <header class="container article-head rubric-head"><a class="back mono" href="/#journal">← JOURNAL / LEIMAN LAB</a>
     <div class="article-overline"><span class="pill micro">РУБРИКА</span><span class="micro muted">${list.length} ${plural(list.length, ['МАТЕРИАЛ', 'МАТЕРИАЛА', 'МАТЕРИАЛОВ'])}</span></div>
@@ -162,8 +174,54 @@ function rubricView(r, origin) {
   return page({ content: body, title: `${r.title} — Leiman Lab`, description: r.description, canonical: `${origin}/rubrics/${r.slug}`, cover: `${origin}${asset(cover)}`, bodyData: ' data-page="rubric"' });
 }
 
+/** Page with a big title and a list of cards: used for tags and search. */
+function listPage({ origin, path: pagePath, pill, title, deck, list, empty, extra = '', noindex = false }) {
+  const body = `<main>
+  <header class="container article-head rubric-head"><a class="back mono" href="/#journal">← JOURNAL / LEIMAN LAB</a>
+    <div class="article-overline"><span class="pill micro">${escaped(pill)}</span><span class="micro muted">${list.length} ${plural(list.length, ['МАТЕРИАЛ', 'МАТЕРИАЛА', 'МАТЕРИАЛОВ'])}</span></div>
+    <h1>${escaped(title)}</h1>${deck ? `<p class="article-deck">${escaped(deck)}</p>` : ''}${extra}
+  </header>
+  <section class="container journal-section rubric-section">
+    ${list.length ? `<div class="featured-story">${list.map(a => card(a, 'featured')).join('')}</div>` : `<div class="rubric-empty"><p>${escaped(empty)}</p></div>`}
+  </section>
+  </main>`;
+  return page({ content: body, title: `${title} — Leiman Lab`, description: deck || title, canonical: origin + pagePath, cover: `${origin}${asset((list[0] || articles[0]).cover)}`, bodyData: ' data-page="list"', noindex });
+}
+
+function search(q) {
+  const words = norm(q).split(/\s+/).filter(w => w.length > 1).slice(0, 8);
+  if (!words.length) return [];
+  return published().map(a => {
+    const head = norm([a.title, a.headline, a.deck, a.summary, ...(a.tags || [])].join(' '));
+    const body = norm(a.paragraphs.map(b => [b.text, ...(b.items || [])].join(' ')).join(' '));
+    if (!words.every(w => head.includes(w) || body.includes(w))) return null;
+    return { a, score: words.filter(w => head.includes(w)).length * 10 + words.filter(w => body.includes(w)).length };
+  }).filter(Boolean).sort((x, y) => y.score - x.score || y.a.date.localeCompare(x.a.date)).map(x => x.a);
+}
+
+function aboutView(origin) {
+  const body = `<main>
+  <header class="container article-head rubric-head"><a class="back mono" href="/">← JOURNAL / LEIMAN LAB</a>
+    <div class="article-overline"><span class="pill micro">ОБ АВТОРЕ</span><span class="micro muted">LEIMAN LAB</span></div>
+    <h1>Лев Лейман</h1>
+    <p class="article-deck">${siteText('about.lead')}</p>
+  </header>
+  <section class="container about-page">
+    <div class="about-page-text"><p>${siteText('about.1')}</p><p>${siteText('about.2')}</p><p>${siteText('about.3')}</p></div>
+    <div class="about-page-links">
+      <a class="button button-primary" href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer">TELEGRAM-КАНАЛ ↗</a>
+      <a class="button button-line" href="https://t.me/leimanleo" target="_blank" rel="noopener noreferrer">НАПИСАТЬ ЛИЧНО ↗</a>
+      <a class="button button-line" href="/rss.xml">RSS</a>
+    </div>
+  </section>
+  <section class="container journal-section"><div class="section-rule"><h2>ПОСЛЕДНИЕ МАТЕРИАЛЫ <span class="accent">/</span></h2><a class="micro muted" href="/#journal">ВЕСЬ ЖУРНАЛ ↗</a></div>
+    <div class="featured-story">${published().slice(0, 2).map(a => card(a, 'featured')).join('')}</div></section>
+  </main>`;
+  return page({ content: body, title: 'Лев Лейман — Leiman Lab', description: siteTexts['about.lead'] ?? SITE_DEFAULTS['about.lead'], canonical: `${origin}/about`, cover: `${origin}${asset((published()[0] || articles[0]).cover)}`, bodyData: ' data-page="about"' });
+}
+
 function home(origin) {
-  const featured = articles[0];
+  const list = published(), featured = list[0] || articles[0];
   const html = `<main>
   <section class="container intro" aria-labelledby="hero-title">
     <div class="intro-text"><div class="eyebrow"><span class="red-square"></span> INDEPENDENT RESEARCH JOURNAL <span class="muted">/ 2026</span></div>
@@ -174,15 +232,15 @@ function home(origin) {
     <div class="intro-visual" aria-hidden="true"><div class="visual-index mono">FIG. 001 / LL MONOGRAM</div><div class="large-mark">${logo}</div><span class="visual-code mono">[ 01 / OPEN SYSTEM ]</span></div>
   </section>
   <section id="journal" class="container journal-section" aria-labelledby="journal-title">
-    <div class="section-rule"><h2 id="journal-title">ЖУРНАЛ <span class="accent">/</span> <small>01</small></h2><span class="micro muted">${articles.length} PUBLICATIONS · NEWEST FIRST</span></div>
+    <div class="section-rule"><h2 id="journal-title">ЖУРНАЛ <span class="accent">/</span> <small>01</small></h2><span class="micro muted">${list.length} PUBLICATIONS · NEWEST FIRST</span></div>
     ${rubricNav(null)}
-    <div class="featured-story">${articles.map(a=>card(a,'featured')).join('')}</div>
+    <div class="featured-story">${list.map(a=>card(a,'featured')).join('')}</div>
   </section>
   <section id="about" class="container about-section"><div class="about-heading"><div class="eyebrow">02 / WHO'S BEHIND THE LAB</div><h2>Вопросы.<br>Практика.<br><span class="accent">Результаты.</span></h2></div>
   <div class="about-copy"><p>${siteText('home.about.1')}</p>
   <p>${siteText('home.about.2')}</p>
   <div class="about-services"><span>AI-ПРОДАКШЕН</span><span>AI-ПРОДУКТЫ</span><span>R&D</span><span>СПЕЦПРОЕКТЫ</span></div>
-  <a class="button button-line" href="https://t.me/leimanleo">СВЯЗАТЬСЯ ПО ПРОЕКТУ ↗</a></div></section>
+  <div class="about-links"><a class="button button-line" href="/about">ПОДРОБНЕЕ ОБ АВТОРЕ ↗</a><a class="button button-line" href="https://t.me/leimanleo">СВЯЗАТЬСЯ ПО ПРОЕКТУ ↗</a></div></div></section>
   </main>`;
   return page({content:html,title:'Leiman Lab — журнал исследований, технологий и экспериментов',description:'ИИ, технологии, бизнес, психология, исследования сознания и искусство. Авторский журнал Льва Леймана.',canonical:`${origin}/`,cover:`${origin}${asset(featured.cover)}`,bodyData:' data-page="home"',schema:{'@context':'https://schema.org','@type':'WebSite',name:'Leiman Lab',url:origin+'/','inLanguage':'ru'}});
 }
@@ -203,25 +261,34 @@ function renderBlock(block, i) {
 function articleView(a, origin) {
   const pageUrl = `${origin}/articles/${a.slug}`;
   const share = `https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(a.title)}`;
-  const related = articles.filter(x=>x.slug!==a.slug).slice(0,2);
+  const related = published().filter(x=>x.slug!==a.slug).slice(0,2);
   const stats = engagement.counts(a.slug);
+  const storyParts = a.story ? published().filter(x => x.story === a.story).sort((x, y) => x.date.localeCompare(y.date)) : [];
+  const storyBox = storyParts.length >= 2 && !a.draft ? `<aside class="story-box"><div class="micro muted">СЮЖЕТ</div><div class="story-title">${escaped(a.story)}</div><ol>${storyParts.map(x => x.slug === a.slug
+    ? `<li aria-current="page"><span class="micro muted">${escaped(x.dateLabel)}</span> ${escaped(x.title)}</li>`
+    : `<li><span class="micro muted">${escaped(x.dateLabel)}</span> <a href="/articles/${escaped(x.slug)}">${escaped(x.title)}</a></li>`).join('')}</ol></aside>` : '';
+  const changes = (a.changes || []).slice().reverse();
   const body = `<main>
   <article itemscope itemtype="https://schema.org/Article">
+    ${a.draft ? '<div class="draft-banner micro"><div class="container">ЧЕРНОВИК · ВИДЕН ТОЛЬКО ПО ПРЯМОЙ ССЫЛКЕ · ОПУБЛИКОВАТЬ: ⌘⇧E → «ОПУБЛИКОВАТЬ»</div></div>' : ''}
     <header class="container article-head"><a class="back mono" href="/">← JOURNAL / LEIMAN LAB</a>
       <div class="article-overline"><span class="pill micro">FIELD NOTE ${escaped(a.issue)}</span>${rubricBySlug.has(a.rubric) ? `<a class="micro rubric-link" href="/rubrics/${escaped(a.rubric)}">${escaped(rubricBySlug.get(a.rubric).title.toUpperCase())}</a>` : ''}<span class="micro muted">${escaped(a.section)}</span></div>
       <h1 itemprop="headline" data-edit="headline">${escaped(a.headline || a.title)}</h1>
       <p class="article-deck" itemprop="description" data-edit="deck">${escaped(a.deck || a.summary)}</p>
-      <div class="article-byline micro"><span>ЛЕВ ЛЕЙМАН</span><span class="thin-sep"></span><time datetime="${escaped(a.date)}">${escaped(a.dateLabel)}</time><span class="thin-sep"></span><span>${escaped(a.readingMinutes)} МИН</span><span class="thin-sep"></span><span><b data-stat="views">${fmt(stats.views)}</b> <span data-plural="views">${plural(stats.views, ['ПРОСМОТР', 'ПРОСМОТРА', 'ПРОСМОТРОВ'])}</span></span><span class="thin-sep"></span><a href="#comments">♥ <b data-stat="likes">${fmt(stats.likes)}</b> · <b data-stat="comments">${fmt(stats.comments)}</b> КОММ.</a></div>
+      <div class="article-byline micro"><span>ЛЕВ ЛЕЙМАН</span><span class="thin-sep"></span><time datetime="${escaped(a.date)}">${escaped(a.dateLabel)}</time>${a.updated ? `<span class="thin-sep"></span><a href="#changes">ОБНОВЛЕНО <time datetime="${escaped(a.updated)}">${escaped(dateLabel(a.updated))}</time></a>` : ''}<span class="thin-sep"></span><span>${escaped(a.readingMinutes)} МИН</span><span class="thin-sep"></span><span><b data-stat="views">${fmt(stats.views)}</b> <span data-plural="views">${plural(stats.views, ['ПРОСМОТР', 'ПРОСМОТРА', 'ПРОСМОТРОВ'])}</span></span><span class="thin-sep"></span><a href="#comments">♥ <b data-stat="likes">${fmt(stats.likes)}</b> · <b data-stat="comments">${fmt(stats.comments)}</b> КОММ.</a></div>
     </header>
     <div class="container feature-image"><img src="${escaped(asset(a.cover))}" width="1200" height="630" alt="Редакционная иллюстрация к статье ${escaped(a.cardTitle)}" fetchpriority="high">
     <div class="image-caption micro">LEIMAN LAB / ${escaped(a.issue)} &nbsp; · &nbsp; EDITORIAL ILLUSTRATION</div></div>
     <div class="content-layout container"><aside class="article-sidebar"><div class="micro muted">RESEARCH NOTE<br>${escaped(a.issue)} / 2026</div><div class="aside-divider"></div><div class="mono small">LEIMAN<br>LAB<span class="accent">.</span></div></aside>
-    <div class="article-prose" itemprop="articleBody">${a.paragraphs.map(renderBlock).join('\n')}
+    <div class="article-prose" itemprop="articleBody">${storyBox}${a.paragraphs.map(renderBlock).join('\n')}
       <section class="sources"><div class="sources-head"><span class="eyebrow" data-edit="sourcesLabel">${escaped(a.sourcesLabel || 'ИСТОЧНИКИ / SOURCES')}</span><span class="micro muted">${a.sources.length} LINKS</span></div>
       <ol>${a.sources.map((s,i)=>`<li><a href="${escaped(s.url)}" rel="noopener noreferrer" target="_blank"><span data-edit="s.${i}">${escaped(s.title)}</span> ↗</a>${s.type ? `<span class="micro muted">${escaped(s.type)}</span>` : ''}</li>`).join('')}</ol>
       <p class="micro muted source-note" data-edit="sourceNote">${escaped(a.sourceNote || 'Факты относятся к дате публикации. В продолжающихся расследованиях оценки могут измениться. Заявления компаний помечены в тексте как заявления компаний.')}</p></section>
+      ${a.tags?.length ? `<nav class="tag-list" aria-label="Теги">${a.tags.map(t => `<a href="${escaped(tagUrl(t))}">#${escaped(t)}</a>`).join('')}</nav>` : ''}
+      ${changes.length ? `<section class="changes" id="changes"><div class="sources-head"><span class="eyebrow">ИСТОРИЯ ПРАВОК</span><span class="micro muted">${changes.length}</span></div><ul>${changes.map(c => `<li><time class="micro muted" datetime="${escaped(c.date)}">${escaped(dateLabel(c.date))}</time><span>${escaped(c.text)}</span></li>`).join('')}</ul></section>` : ''}
       <div class="share-row"><button class="button button-line ll-like" type="button" aria-pressed="false"><span class="ll-heart">♡</span> НРАВИТСЯ <b data-stat="likes">${fmt(stats.likes)}</b></button><a class="button button-primary" href="${escaped(share)}" target="_blank" rel="noopener noreferrer">ПОДЕЛИТЬСЯ В TELEGRAM ↗</a><button id="copy-link" class="button button-line" type="button" data-url="${escaped(pageUrl)}">КОПИРОВАТЬ ССЫЛКУ</button></div>
       <script>document.getElementById('copy-link')?.addEventListener('click',async e=>{try{await navigator.clipboard.writeText(e.currentTarget.dataset.url);e.currentTarget.textContent='ССЫЛКА СКОПИРОВАНА ✓'}catch(e){e.currentTarget.textContent='КОПИРОВАНИЕ НЕДОСТУПНО'}})</script>
+      <aside class="tg-follow"><p>${siteText('follow.text')}</p><a class="button button-primary" href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer">ЧИТАТЬ В TELEGRAM ↗</a></aside>
       <section class="ll-comments" id="comments" aria-labelledby="comments-title"><div class="sources-head"><h2 id="comments-title" class="eyebrow">КОММЕНТАРИИ / <span data-stat="comments">${fmt(stats.comments)}</span></h2><span class="micro muted">ВЫДЕЛИТЕ ТЕКСТ, ЧТОБЫ ОБСУДИТЬ ФРАГМЕНТ</span></div>
       <div class="ll-comment-list"></div><noscript><p class="micro muted">Комментарии работают с включённым JavaScript.</p></noscript></section>
     </div></div>
@@ -230,7 +297,7 @@ function articleView(a, origin) {
   ${related.length?`<section class="container more-stories"><div class="section-rule"><h2>ДАЛЬШЕ <span class="accent">/</span></h2><a class="micro muted" href="/">ВЕСЬ ЖУРНАЛ ↗</a></div><div class="featured-story">${related.map(x=>card(x,'featured')).join('')}</div></section>`:''}
   </main>`;
   const description = a.description || a.summary;
-  return page({content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${asset(a.cover)}`,type:'article',date:a.date,bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@type':'NewsArticle',headline:a.title,description,image:[`${origin}${asset(a.cover)}`],datePublished:a.date,inLanguage:'ru',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'}}});
+  return page({content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${asset(a.cover)}`,type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@type':'NewsArticle',headline:a.title,description,image:[`${origin}${asset(a.cover)}`],datePublished:a.date,...(a.updated?{dateModified:a.updated}:{}),inLanguage:'ru',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'}}});
 }
 
 function write(res, code, data, mime='text/html; charset=utf-8', more={}) {
@@ -259,6 +326,10 @@ function applyArticleEdits(a, edits) {
     else if (key === 'deck') next[next.deck !== undefined ? 'deck' : 'summary'] = required(value, key);
     else if (key === 'title' || key === 'summary') next[key] = required(value, key);
     else if (key === 'rubric') { if (!rubricBySlug.has(value)) throw new EditError(`Нет такой рубрики: ${value}`); next.rubric = value; }
+    else if (key === 'draft') { if (value === '1') next.draft = true; else if (value === '0') delete next.draft; else throw new EditError('draft: 0 или 1'); }
+    else if (key === 'changeNote') { if (value) { next.updated = today(); next.changes = [...(next.changes || []), { date: next.updated, text: oneLine(value).slice(0, 500) }]; } }
+    else if (key === 'tags') next.tags = [...new Set(value.split(',').map(t => oneLine(t).replace(/^#/, '').trim()).filter(Boolean))].slice(0, 8).map(t => t.slice(0, 40));
+    else if (key === 'story') { if (value) next.story = oneLine(value).slice(0, 80); else delete next.story; }
     else if (OPTIONAL_FIELDS.includes(key)) { if (value) next[key] = oneLine(value); else delete next[key]; }
     else if (block && b[2] === undefined && typeof block.text === 'string') blockText.set(Number(b[1]), value);
     else if (block && b[2] === 'label' && block.type === 'aside') block.label = oneLine(value);
@@ -328,6 +399,11 @@ async function adminApi(req, res, pathname) {
     }
   }
 
+  if (pathname === '/api/admin/stats' && req.method === 'GET') return sendJson(res, 200, { articles: articles.map(a => {
+    const s = engagement.stats(a.slug);
+    const telegram = s.utm.filter(r => r.tag.startsWith('telegram')).reduce((sum, r) => ({ views: sum.views + r.views, reads: sum.reads + r.reads }), { views: 0, reads: 0 });
+    return { slug: a.slug, title: a.title, date: a.date, draft: !!a.draft, views: s.views, reads: s.reads, likes: s.likes, comments: s.comments, telegramViews: telegram.views, telegramReads: telegram.reads };
+  }) });
   const stats = pathname.match(/^\/api\/admin\/stats\/([a-z0-9-]+)$/);
   if (stats && req.method === 'GET' && articleBySlug.has(stats[1])) return sendJson(res, 200, engagement.stats(stats[1]));
 
@@ -400,11 +476,11 @@ const server = http.createServer((req,res)=>{
   if(pathname==='/health')return write(res,200,'OK','text/plain; charset=utf-8',{'Cache-Control':'no-store'});
   if(pathname==='/robots.txt')return write(res,200,`User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n`,'text/plain; charset=utf-8');
   if(pathname==='/sitemap.xml'){
-    const paths=['/',...rubrics.map(r=>'/rubrics/'+r.slug),...articles.map(a=>'/articles/'+a.slug)];
+    const paths=['/','/about',...rubrics.map(r=>'/rubrics/'+r.slug),...published().map(a=>'/articles/'+a.slug)];
     return write(res,200,`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${paths.map(p=>`<url><loc>${xmlSafe(origin+p)}</loc></url>`).join('')}</urlset>`,'application/xml; charset=utf-8');
   }
   if(pathname==='/rss.xml'){
-    const items=articles.map(a=>`<item><title>${xmlSafe(a.title)}</title><link>${origin}/articles/${a.slug}</link><guid>${origin}/articles/${a.slug}</guid><pubDate>${new Date(a.date+'T12:00:00Z').toUTCString()}</pubDate><description>${xmlSafe(a.summary)}</description></item>`).join('');
+    const items=published().map(a=>`<item><title>${xmlSafe(a.title)}</title><link>${origin}/articles/${a.slug}</link><guid>${origin}/articles/${a.slug}</guid><pubDate>${new Date(a.date+'T12:00:00Z').toUTCString()}</pubDate><description>${xmlSafe(a.summary)}</description></item>`).join('');
     return write(res,200,`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Leiman Lab</title><link>${origin}/</link><description>Исследования, технологии и искусство</description><language>ru</language>${items}</channel></rss>`,'application/rss+xml; charset=utf-8');
   }
   if(pathname==='/')return write(res,200,home(origin));
@@ -413,6 +489,18 @@ const server = http.createServer((req,res)=>{
   if(legacyOg && articleBySlug.has(legacyOg[1])){const data=readFileSync(path.join(PUBLIC,articleBySlug.get(legacyOg[1]).cover));return write(res,200,data,'image/png',{'Cache-Control':'public,max-age=600','Content-Length':data.length});}
   if(pathname==='/style.css')return write(res,301,'','text/plain',{Location:'/assets/site.css'});
   if(pathname==='/favicon.ico')return write(res,301,'','text/plain',{Location:'/favicon.svg'});
+  if(pathname==='/about'||pathname==='/about/')return write(res,200,aboutView(origin));
+  if(pathname==='/search'){
+    const q=String(url.searchParams.get('q')||'').slice(0,120).trim();
+    const form=`<form class="search-form" action="/search" role="search"><input name="q" value="${escaped(q)}" placeholder="Например: Anduril, LiteLLM, агенты" aria-label="Поиск по журналу" autofocus><button class="button button-primary" type="submit">НАЙТИ</button></form>`;
+    return write(res,200,listPage({origin,path:'/search'+(q?`?q=${encodeURIComponent(q)}`:''),pill:'ПОИСК',title:q?`«${q}»`:'Поиск по журналу',list:q?search(q):[],empty:q?'Ничего не нашлось. Попробуйте другое слово или посмотрите рубрики.':'Введите слово: имя, компанию, тему.',extra:form,noindex:true}));
+  }
+  const tagMatch=pathname.match(/^\/tags\/([^/]+)\/?$/);
+  if(tagMatch){
+    let tag='';try{tag=decodeURIComponent(tagMatch[1]);}catch{}
+    const list=published().filter(a=>(a.tags||[]).some(t=>norm(t)===norm(tag)));
+    if(list.length)return write(res,200,listPage({origin,path:tagUrl(tag),pill:'ТЕГ',title:`#${tag}`,list,empty:''}));
+  }
   const rubricMatch=pathname.match(/^\/rubrics\/([a-z0-9-]+)\/?$/);
   if(rubricMatch && rubricBySlug.has(rubricMatch[1]))return write(res,200,rubricView(rubricBySlug.get(rubricMatch[1]),origin));
   const match=pathname.match(/^\/articles\/([a-z0-9-]+)\/?$/);

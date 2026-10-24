@@ -51,8 +51,70 @@ async function main() {
   assert.ok(!page.includes('главный вопрос не в том'));
   console.log('✓ homepage includes both articles');
   await rubricTests();
+  await featureTests();
   await editorTests();
   console.log('\nALL TESTS PASSED');
+}
+
+const html = async route => (await get(route)).text();
+const editArticle = async (slug, edits) => {
+  const { json } = await api('GET', `/api/admin/article/${slug}`);
+  const r = await api('POST', `/api/admin/article/${slug}`, { version: json.version, edits });
+  assert.equal(r.status, 200, JSON.stringify(r.json));
+};
+
+async function featureTests() {
+  // About page, Telegram follow block
+  const about = await get('/about');
+  assert.equal(about.status, 200);
+  assert.ok((await about.text()).includes('data-edit="about.lead"'));
+  assert.equal((await api('POST', '/api/admin/site', { edits: { 'about.1': 'Новый текст об авторе' } })).status, 200);
+  assert.ok((await html('/about')).includes('Новый текст об авторе'));
+  assert.ok((await html('/articles/warhound')).includes('class="tg-follow"'));
+  await api('DELETE', '/api/admin/site');
+  console.log('✓ about page and Telegram block');
+
+  // Search and tags
+  assert.ok((await html('/search?q=anduril')).includes('href="/articles/warhound"'));
+  assert.ok((await html(`/search?q=${encodeURIComponent('черный')}`)).includes('href="/articles/black-october"'), 'ё-insensitive search');
+  assert.ok((await html('/search')).includes('name="robots" content="noindex"'));
+  const tag = (await (await api('GET', '/api/admin/article/black-october')).json).article.tags[0];
+  assert.equal((await get(`/tags/${encodeURIComponent(tag)}`)).status, 200);
+  assert.equal((await get('/tags/no-such-tag')).status, 404);
+  assert.ok((await html('/articles/black-october')).includes('class="tag-list"'));
+  await editArticle('warhound', { tags: 'Тест-тег, #Генетика' });
+  assert.ok((await html(`/tags/${encodeURIComponent('Тест-тег')}`)).includes('href="/articles/warhound"'), 'tags edited in editor');
+  console.log('✓ search and tags');
+
+  // Change log
+  await editArticle('black-october', { changeNote: 'Уточнена цифра по LiteLLM' });
+  const changed = await html('/articles/black-october');
+  assert.ok(changed.includes('id="changes"') && changed.includes('Уточнена цифра по LiteLLM') && changed.includes('ОБНОВЛЕНО'), 'change log');
+  assert.ok(changed.includes('property="article:modified_time"') && changed.includes('"dateModified"'));
+  console.log('✓ change log and modified date');
+
+  // Stories: a box appears when two published articles share a story
+  await editArticle('black-october', { story: 'Тестовый сюжет' });
+  assert.ok(!(await html('/articles/black-october')).includes('class="story-box"'), 'story box with one part');
+  await editArticle('warhound', { story: 'Тестовый сюжет' });
+  const story = await html('/articles/warhound');
+  assert.ok(story.includes('class="story-box"') && story.includes('href="/articles/black-october"'), 'story box');
+  console.log('✓ stories');
+
+  // Drafts: hidden from lists, open by link, published from the editor
+  await editArticle('warhound', { draft: '1' });
+  const draftPage = await get('/articles/warhound');
+  assert.equal(draftPage.status, 200);
+  const draftHtml = await draftPage.text();
+  assert.ok(draftHtml.includes('draft-banner') && draftHtml.includes('content="noindex"'));
+  for (const route of ['/', '/rubrics/ai', '/sitemap.xml', '/rss.xml', '/search?q=anduril', '/about']) assert.ok(!(await html(route)).includes('/articles/warhound'), `draft visible in ${route}`);
+  const { json: all } = await api('GET', '/api/admin/stats');
+  assert.equal(all.articles.length, 2); assert.equal(all.articles.find(a => a.slug === 'warhound').draft, true);
+  await editArticle('warhound', { draft: '0' });
+  assert.ok((await html('/')).includes('/articles/warhound'), 'published again');
+  console.log('✓ drafts and publishing, overall stats');
+
+  for (const slug of ['warhound', 'black-october']) assert.equal((await api('DELETE', `/api/admin/article/${slug}`)).status, 200);
 }
 
 async function rubricTests() {
