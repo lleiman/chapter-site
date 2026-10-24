@@ -185,7 +185,7 @@ function listPage({ origin, path: pagePath, pill, title, deck, list, empty, extr
     ${list.length ? `<div class="featured-story">${list.map(a => card(a, 'featured')).join('')}</div>` : `<div class="rubric-empty"><p>${escaped(empty)}</p></div>`}
   </section>
   </main>`;
-  return page({ content: body, title: `${title} — Leiman Lab`, description: deck || title, canonical: origin + pagePath, cover: `${origin}${asset((list[0] || articles[0]).cover)}`, bodyData: ' data-page="list"', noindex });
+  return page({ content: body, title: `${title} — Leiman Lab`, description: deck || title, canonical: origin + pagePath, cover: `${origin}${asset((list[0] || published()[0] || articles[0]).cover)}`, bodyData: ' data-page="list"', noindex });
 }
 
 function search(q) {
