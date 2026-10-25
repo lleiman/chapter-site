@@ -270,6 +270,18 @@ function renderBlock(block, i) {
     case 'lead': return `<p class="body-lead">${t}${inlineLinks(block, i)}</p>`;
     case 'p': return `<p>${t}${inlineLinks(block, i)}</p>`;
     case 'resource': return resourceBlock(block, i);
+    case 'comparison': {
+      const safeSource = /^\/articles\/[a-z0-9-]+$/.test(block.source || '') ? block.source : '';
+      const link = safeSource ? `<a class="compare-link micro" href="${escaped(safeSource)}">ОТКРЫТЬ ПУБЛИКАЦИЮ ↗</a>` : '';
+      return `<figure class="edit-comparison" aria-label="Пример редакторской правки">
+        <figcaption class="compare-caption micro"><span>РЕДАКТОРСКАЯ ПРАВКА</span><span>${escaped(block.label || '')}</span></figcaption>
+        <div class="compare-grid">
+          <div class="compare-cell compare-before"><span class="micro">БЫЛО</span><p>${escaped(block.before || '')}</p></div>
+          <div class="compare-cell compare-after"><span class="micro">СТАЛО</span><p>${escaped(block.after || '')}</p></div>
+        </div>
+        ${block.note ? `<p class="compare-note">${escaped(block.note)}</p>` : ''}${link}
+      </figure>`;
+    }
     case 'h2': return `<h2>${t}</h2>`;
     case 'h3': return `<h3>${t}</h3>`;
     case 'aside': { const label = block.label ?? 'НАБЛЮДЕНИЕ'; return `<aside class="callout">${label ? `<span class="micro accent" data-edit="b.${i}.label">${escaped(label)}</span>` : ''}<p>${t}</p></aside>`; }
