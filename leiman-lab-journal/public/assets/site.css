@@ -91,3 +91,62 @@ mark.ll-note.ll-flash{animation:ll-flash 1.6s}@keyframes ll-flash{0%,60%{backgro
 .article-prose .kit p{font-size:17px;line-height:1.65;margin:0 0 12px;color:#d7d3cd}
 .kit-meta{margin-bottom:18px}.kit-actions{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center}.kit-actions .micro{max-width:360px;line-height:1.5}
 @media(max-width:760px){.kit{padding:20px 18px}.kit-actions .button{width:100%;justify-content:center}}
+
+
+/* LEIMAN LAB / 2026-10-25: legible long-form reading, subtle product highlight, editorial comparison blocks. */
+:root{--quiet:#bbb8b3;--soft:#e1ddd8}
+body{font-size:17px;line-height:1.7}
+.micro{font-size:12px;line-height:1.6;letter-spacing:.07em}
+.article-prose{max-width:760px}
+.article-prose p{font-size:21px;line-height:1.72;color:#e8e5e0;margin-bottom:30px}
+.article-prose .body-lead{font-size:clamp(22px,2.25vw,26px);line-height:1.58;color:#f6f4f0}
+.article-prose ul{font-size:20px;line-height:1.74;color:#e2dfda}
+.article-prose li{margin:10px 0}
+.article-deck{color:#e3dfd9}
+.story-card p{font-size:18px;line-height:1.68;color:#ddd9d2}
+.image-caption{color:#bebbb6}
+.article-prose a:not(.button){text-decoration-thickness:1px;text-underline-offset:.2em}
+.article-prose a:not(.button):hover{color:#ff6d76}
+.sources li{color:#cdc9c3}
+.kit{position:relative;overflow:hidden;margin:60px 0;padding:33px 35px 37px;
+  background:linear-gradient(124deg,rgba(238,41,54,.20),rgba(238,41,54,.055) 44%,#171417 100%);
+  border:1px solid #9a3b45;border-left:5px solid var(--red);box-shadow:inset 0 1px 0 rgba(255,255,255,.065)}
+.kit:after{content:"";position:absolute;right:-35px;top:-45px;width:130px;height:130px;border:1px solid rgba(255,90,102,.21);transform:rotate(45deg);pointer-events:none}
+.kit-head{color:#e3b6bb}.kit-badge{color:#ff727b;font-weight:750}
+.kit-title{font-size:clamp(30px,3vw,38px);line-height:1.14;color:#fff;margin:22px 0 16px}
+.article-prose .kit p{font-size:20px;line-height:1.64;color:#f0e8e5}
+.kit-meta{color:#ded5d2}
+.kit-actions .button-primary{background:var(--red);color:#fff;font-weight:750;padding:15px 23px;border-color:var(--red)}
+.kit-actions .button-primary:hover{background:#ff4854;border-color:#ff4854;color:#fff}
+.kit-actions .micro{color:#e5c9c9}
+.edit-comparison{margin:28px 0 34px;padding:0;border:1px solid #454044;background:#151416}
+.compare-caption{display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap;padding:15px 21px;color:#cfbfc0;border-bottom:1px solid #454044}
+.compare-caption span:first-child{color:#ff6b74}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr}
+.compare-cell{min-width:0;padding:24px 24px 26px}
+.compare-before{border-right:1px solid #454044;background:rgba(255,255,255,.025)}
+.compare-cell .micro{display:block;margin-bottom:14px}
+.compare-before .micro{color:#c4b5b3}
+.compare-after .micro{color:#ff6b74}
+.article-prose .edit-comparison p{font-size:19px;line-height:1.56;color:#d4cfca;margin:0}
+.article-prose .edit-comparison .compare-after p{color:#fff;font-weight:620}
+.article-prose .edit-comparison .compare-note{font-size:16px;line-height:1.56;color:#c9c4bf;padding:18px 23px 10px;border-top:1px solid #454044}
+.compare-link{display:inline-block;padding:0 23px 19px;color:#f7a3a8!important;font-weight:700}
+@media(max-width:760px){
+ body{font-size:16px}
+ .article-prose p{font-size:19px;line-height:1.72;margin-bottom:26px}
+ .article-prose .body-lead{font-size:22px;line-height:1.57}
+ .article-prose ul{font-size:19px;line-height:1.7}
+ .article-deck{font-size:20px}
+ .image-caption{font-size:11px}
+ .story-card p{font-size:17px;line-height:1.7}
+ .kit{padding:26px 21px 28px;margin:44px 0}
+ .kit-title{font-size:30px}
+ .article-prose .kit p{font-size:19px}
+ .compare-grid{grid-template-columns:1fr}
+ .compare-before{border-right:0;border-bottom:1px solid #454044}
+ .compare-cell{padding:21px}
+ .article-prose .edit-comparison p{font-size:19px}
+ .article-prose .edit-comparison .compare-note{padding:17px 20px 10px}
+}
+@media(max-width:420px){.micro{font-size:11px}.compare-caption{font-size:11px}}
