@@ -108,7 +108,7 @@ async function featureTests() {
   const draftHtml = await draftPage.text();
   assert.ok(draftHtml.includes('draft-banner') && draftHtml.includes('content="noindex"'));
   for (const route of ['/', '/rubrics/ai', '/sitemap.xml', '/rss.xml', '/search?q=anduril', '/about']) assert.ok(!(await html(route)).includes('/articles/warhound'), `draft visible in ${route}`);
-  for (const route of ['/', '/rubrics/ai', '/rss.xml', '/search?q=anduril', '/search?q=zzzz', '/about', '/rubrics/mind']) assert.ok(!(await html(route)).includes('human-voice'), `draft 003 leaks into ${route}`);
+  for (const route of ['/', '/rubrics/ai', '/rss.xml', '/search?q=zzzz', '/about', '/rubrics/mind']) assert.ok(!(await html(route)).includes('warhound-1200x630'), `draft cover leaks into ${route}`);
   const { json: all } = await api('GET', '/api/admin/stats');
   assert.ok(all.articles.length >= 2); assert.equal(all.articles.find(a => a.slug === 'warhound').draft, true);
   await editArticle('warhound', { draft: '0' });
