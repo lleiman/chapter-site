@@ -30,6 +30,29 @@ async def tg():
  if not client.is_connected():await client.connect()
  if not await client.is_user_authorized():raise HTTPException(401,"Reauthorize Telegram")
  return client
+@app.on_event("startup")
+async def check_telegram_bot_access():
+ # Read-only Telegram API check. Never include bot credentials or chat contents in logs.
+ token=os.getenv("TELEGRAM_BOT_TOKEN","")
+ channel=os.getenv("TELEGRAM_CHANNEL","")
+ status={"token_configured":bool(token),"channel_configured":bool(channel),"token_valid":False,"channel_access":False,"can_post_messages":False}
+ if token and channel:
+  try:
+   async with httpx.AsyncClient(timeout=12) as h:
+    identity=(await h.get("https://api.telegram.org/bot"+token+"/getMe")).json()
+    status["token_valid"]=bool(identity.get("ok"))
+    if status["token_valid"]:
+     uid=identity["result"]["id"]
+     rights=(await h.get("https://api.telegram.org/bot"+token+"/getChatMember",params={"chat_id":channel,"user_id":uid})).json()
+     if rights.get("ok"):
+      status["channel_access"]=True
+      member=rights.get("result") or {}
+      status["role"]=member.get("status","unknown")
+      status["can_post_messages"]=bool(member.get("can_post_messages",False))
+  except (httpx.HTTPError, ValueError, KeyError, TypeError):
+   status["probe_error"]="telegram_api_unreachable_or_invalid_response"
+ print("TELEGRAM_BOT_ACCESS "+json.dumps(status,sort_keys=True),flush=True)
+
 @app.get("/health")
 async def health():return {"ok":True}
 @app.get("/",dependencies=[Depends(admin)])
