@@ -24,3 +24,6 @@
 
 ## Publishing architecture
 GPT drafts and adapts. User reviews the preview. Telegram Bot API delivers approved content. Use a separate official vc.ru Telegram-import bot subject to vc.ru moderation for channel-to-vc.ru syndication. For Facebook Pages / Instagram Professional accounts, use authorized Meta integration or Metricool. Keep platform credentials outside the repo. Maintain per-platform delivery logs and do not retry blindly on ambiguous success.
+
+## Non-publishing permission diagnostic
+The service makes read-only `getMe`, `getChat`, and `getChatMember` Bot API requests at startup. Check the Railway deploy log entry `TELEGRAM_BOT_ACCESS` for bot identity, channel accessibility, and `can_post_messages`. It does not send a channel message, log credentials, or require a personal Telegram session.
