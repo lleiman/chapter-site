@@ -27,3 +27,5 @@ GPT drafts and adapts. User reviews the preview. Telegram Bot API delivers appro
 
 ## Non-publishing permission diagnostic
 The service makes read-only `getMe`, `getChat`, and `getChatMember` Bot API requests at startup. Check the Railway deploy log entry `TELEGRAM_BOT_ACCESS` for bot identity, channel accessibility, and `can_post_messages`. It does not send a channel message, log credentials, or require a personal Telegram session.
+
+Build note (2026-10-26): switched service to NIXPACKS as fallback after repeated BuildKit overlayfs I/O errors. Main application code unchanged; publishing stays disabled until verification.
