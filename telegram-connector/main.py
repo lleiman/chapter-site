@@ -32,23 +32,32 @@ async def tg():
  return client
 @app.on_event("startup")
 async def check_telegram_bot_access():
- # Read-only Telegram API check. Never include bot credentials or chat contents in logs.
+ # Read-only Telegram checks. Bot tokens and message content must never enter logs.
  token=os.getenv("TELEGRAM_BOT_TOKEN","")
  channel=os.getenv("TELEGRAM_CHANNEL","")
  status={"token_configured":bool(token),"channel_configured":bool(channel),"token_valid":False,"channel_access":False,"can_post_messages":False}
+ def api_error(payload):
+  return str(payload.get("description","unknown"))[:128].replace(token,"[redacted]")
  if token and channel:
   try:
    async with httpx.AsyncClient(timeout=12) as h:
-    identity=(await h.get("https://api.telegram.org/bot"+token+"/getMe")).json()
+    api="https://api.telegram.org/bot"+token+"/"
+    identity=(await h.get(api+"getMe")).json()
     status["token_valid"]=bool(identity.get("ok"))
     if status["token_valid"]:
-     uid=identity["result"]["id"]
-     rights=(await h.get("https://api.telegram.org/bot"+token+"/getChatMember",params={"chat_id":channel,"user_id":uid})).json()
+     bot=identity["result"]
+     status["bot_username"]=str(bot.get("username",""))[:80]
+     chat=(await h.get(api+"getChat",params={"chat_id":channel})).json()
+     status["chat_access"]=bool(chat.get("ok"))
+     if not chat.get("ok"):status["chat_error"]=api_error(chat)
+     rights=(await h.get(api+"getChatMember",params={"chat_id":channel,"user_id":bot["id"]})).json()
      if rights.get("ok"):
       status["channel_access"]=True
       member=rights.get("result") or {}
       status["role"]=member.get("status","unknown")
       status["can_post_messages"]=bool(member.get("can_post_messages",False))
+     else:status["permission_error"]=api_error(rights)
+    else:status["identity_error"]=api_error(identity)
   except (httpx.HTTPError, ValueError, KeyError, TypeError):
    status["probe_error"]="telegram_api_unreachable_or_invalid_response"
  print("TELEGRAM_BOT_ACCESS "+json.dumps(status,sort_keys=True),flush=True)
