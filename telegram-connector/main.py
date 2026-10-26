@@ -35,7 +35,7 @@ async def check_telegram_bot_access():
  # Read-only Telegram checks. Bot tokens and message content must never enter logs.
  token=os.getenv("TELEGRAM_BOT_TOKEN","")
  channel=os.getenv("TELEGRAM_CHANNEL","")
- status={"token_configured":bool(token),"token_format_valid":bool(__import__("re").fullmatch(r"[0-9]+:[A-Za-z0-9_-]{35,}",token)),"token_is_reference_literal":"${{" in token,"channel_configured":bool(channel),"token_valid":False,"channel_access":False,"can_post_messages":False}
+ status={"token_configured":bool(token),"token_format_valid":bool(__import__("re").fullmatch(r"[0-9]+:[A-Za-z0-9_-]{35,}",token)),"token_length":len(token),"token_has_colon":":" in token,"token_starts_digit":bool(token and token[0].isdigit()),"token_has_outer_whitespace":bool(token!=token.strip()),"token_is_reference_literal":"${{" in token,"channel_configured":bool(channel),"token_valid":False,"channel_access":False,"can_post_messages":False}
  def api_error(payload):
   return str(payload.get("description","unknown"))[:128].replace(token,"[redacted]")
  if token and channel:
