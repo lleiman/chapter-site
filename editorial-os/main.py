@@ -193,7 +193,7 @@ app=FastAPI(lifespan=lifespan,docs_url=None,redoc_url=None,openapi_url=None)
 @app.get("/health")
 def health():
  research_render=render_page(1)
- return {"ok":True,"service":"adepts-editorial","database":"mounted","magazine_render_ok":'class="spread"' in research_render and 'class="facttable"' in research_render}
+ return {"ok":True,"service":"adepts-editorial","database":"mounted","magazine_render_ok":'class="reading"' in research_render and 'class="facttable"' in research_render}
 @app.get("/login")
 def login(req:Request):
  return page(req,"Вход","<div class='eyebrow'>PRIVATE EDITORIAL</div><h1>Вход в редакцию</h1><div class='panel'><form method='post' action='/login'><label>Пароль<input type='password' name='password' required autocomplete='current-password'></label><button>Войти</button></form></div>")
