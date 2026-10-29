@@ -5,7 +5,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 import httpx
-from research_security_2026 import ARTICLE_TITLE, ARTICLE_BODY, article_html
+from research_security_2026 import ARTICLE_TITLE, ARTICLE_BODY
+from research_magazine_2026 import article_html
 
 DB_PATH=os.getenv("EDITORIAL_DB_PATH","/data/editorial.sqlite3")
 TZ=ZoneInfo("Asia/Makassar")
