@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 import httpx
+from research_security_2026 import ARTICLE_TITLE, ARTICLE_BODY, article_html
 
 DB_PATH=os.getenv("EDITORIAL_DB_PATH","/data/editorial.sqlite3")
 TZ=ZoneInfo("Asia/Makassar")
@@ -56,6 +57,9 @@ def initialize():
     "SYSTEM TEST 01",
     "AI ADEPTS / SYSTEM TEST 01\n\nПроверяем новую систему подготовки и публикации материалов.\n\nИдея → редактура → согласование → отложенная публикация.\n\nЦель теста — проверить форматирование и работу редакционного процесса до выхода материала в канал.\n\nЭто технический черновик. Не является анонсом.",
     "draft",ts(),ts()))
+  if not c.execute("SELECT id FROM posts WHERE title=?",(ARTICLE_TITLE,)).fetchone():
+   c.execute("INSERT INTO posts(title,body,status,created_at,updated_at) VALUES(?,?,?,?,?)",
+             (ARTICLE_TITLE,ARTICLE_BODY,"draft",ts(),ts()))
   c.commit()
  finally:c.close()
 
@@ -77,7 +81,7 @@ def redirect(path="/"):return RedirectResponse(path,status_code=303)
 def field(name,value=""):return '<input type="hidden" name="'+name+'" value="'+E(value)+'">'
 def head(req,title):
  active=authorized(req)
- nav=('<nav><a href="/">Обзор</a><a href="/new">Новый пост</a><a href="/calendar">Расписание</a><a href="/settings">Настройки</a><a href="/logout">Выход</a></nav>') if active else ''
+ nav=('<nav><a href="/">Обзор</a><a href="/new">Новый пост</a><a href="/calendar">Расписание</a><a href="/research/security-2026">Исследование</a><a href="/settings">Настройки</a><a href="/logout">Выход</a></nav>') if active else ''
  return """<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
  <title>"""+E(title)+""" · ADEPTS Editorial</title>
  <style>
@@ -219,6 +223,7 @@ def dashboard(req:Request):
  body+="<div class='cards'><div class='panel'><div class='muted'>Черновики</div><div class='num'>"+str(counts.get("draft",0))+"</div></div><div class='panel'><div class='muted'>Запланировано</div><div class='num'>"+str(counts.get("scheduled",0))+"</div></div><div class='panel'><div class='muted'>Опубликовано</div><div class='num'>"+str(counts.get("published",0))+"</div></div></div>"
  armed=setting("armed","0")=="1"
  body+=("<p class='hint'>Автоматическая публикация активирована. Отправляются только утверждённые и запланированные посты.</p>" if armed else "<p class='hint'>Автопубликация выключена. Черновики и отложенные записи безопасны.</p>")
+ body+="<div class='panel'><div class='eyebrow'>НОВОЕ ИССЛЕДОВАНИЕ · 29 ОКТЯБРЯ</div><h2>После «Чёрного октября»: безопасность интернета в 2026</h2><p class='muted'>Полноформатный материал с диаграммами, верифицированными источниками и выводами. Статус: черновик.</p><a href='/research/security-2026' class='btn'>Смотреть исследование и графики</a></div>"
  body+="<div class='actions'><a href='/new' class='btn'>Создать пост</a><a href='/settings' class='btn secondary'>Подключить Telegram-превью</a></div><div class='panel'><h2>Материалы</h2>"
  if not posts:body+="<p class='muted'>Материалов пока нет</p>"
  for v in posts:
@@ -260,6 +265,8 @@ def detail(req:Request,pid:int):
   body+="<hr><form method='post' action='/post/"+str(pid)+"/schedule'>"+csrf()+"<label>Дата и время (Бали, UTC+8)<input type='datetime-local' name='when' value='"+local+"' required></label><button>Поставить в расписание</button></form>"
  if status in ("scheduled","approved","missed","uncertain"):
   body+="<form method='post' action='/post/"+str(pid)+"/unschedule'>"+csrf()+"<button class='danger'>Снять с расписания / вернуть на согласование</button></form>"
+ if v["title"]==ARTICLE_TITLE:
+  body+="<p><a href='/research/security-2026' class='btn'>Открыть статью с графиками</a></p>"
  body+="</section></div><a class='btn secondary' href='/'>Все материалы</a>"
  return page(req,v["title"],body)
 @app.post("/post/{pid}/edit")
@@ -361,3 +368,13 @@ def arm(req:Request,csrf_token:str=Form(alias="csrf"),mode:str=Form(),confirmati
   put_setting("armed","1")
  else:put_setting("armed","0")
  return redirect("/settings")
+
+@app.get("/research/security-2026")
+def security_research(req:Request):
+ require(req)
+ c=conn()
+ try:
+  v=c.execute("SELECT id FROM posts WHERE title=? ORDER BY id DESC LIMIT 1",(ARTICLE_TITLE,)).fetchone()
+ finally:c.close()
+ if not v:raise HTTPException(404,"Article not found")
+ return page(req,ARTICLE_TITLE,article_html(v["id"]))
