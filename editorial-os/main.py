@@ -6,7 +6,7 @@ from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 import httpx
 from research_security_2026 import ARTICLE_TITLE, ARTICLE_BODY
-from research_magazine_2026 import article_html
+from research_print_2026 import render_page
 
 DB_PATH=os.getenv("EDITORIAL_DB_PATH","/data/editorial.sqlite3")
 TZ=ZoneInfo("Asia/Makassar")
@@ -192,8 +192,8 @@ app=FastAPI(lifespan=lifespan,docs_url=None,redoc_url=None,openapi_url=None)
 
 @app.get("/health")
 def health():
- research_render=article_html(1)
- return {"ok":True,"service":"adepts-editorial","database":"mounted","magazine_render_ok":'class="mag-hero"' in research_render and 'class="mag-geo"' in research_render}
+ research_render=render_page(1)
+ return {"ok":True,"service":"adepts-editorial","database":"mounted","magazine_render_ok":'class="spread"' in research_render and 'class="facttable"' in research_render}
 @app.get("/login")
 def login(req:Request):
  return page(req,"Вход","<div class='eyebrow'>PRIVATE EDITORIAL</div><h1>Вход в редакцию</h1><div class='panel'><form method='post' action='/login'><label>Пароль<input type='password' name='password' required autocomplete='current-password'></label><button>Войти</button></form></div>")
@@ -379,4 +379,4 @@ def security_research(req:Request):
   v=c.execute("SELECT id FROM posts WHERE title=? ORDER BY id DESC LIMIT 1",(ARTICLE_TITLE,)).fetchone()
  finally:c.close()
  if not v:raise HTTPException(404,"Article not found")
- return page(req,ARTICLE_TITLE,article_html(v["id"]))
+ return HTMLResponse(render_page(v["id"]),headers={"Cache-Control":"no-store","X-Frame-Options":"DENY","Referrer-Policy":"no-referrer","Content-Security-Policy":"default-src 'self';style-src 'unsafe-inline';base-uri 'none';frame-ancestors 'none'"})
