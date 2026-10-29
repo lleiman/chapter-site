@@ -121,7 +121,7 @@ def _evidence():
  return '<section class="section"><div class="ey">05 / Эпистемическая карта</div><h2>Что мы знаем, а что нет</h2><p>В исследованиях кибербезопасности принципиально важно не выдавать гипотезы за установленные факты.</p><table class="mag-evidence"><thead><tr><th>Тезис</th><th>Основание</th><th>Статус</th></tr></thead><tbody>'+tr+'</tbody></table></section>'
 
 def article_html(pid):
- old=original_article(pid)
+ old=original_article(pid).replace('<article class="res">','<article class="research">',1)
  start=old.index('<article class="research">')
  first=old.index(' <section class="section">',start)
  old=old[:start]+'<article class="research">'+_hero()+old[first:]
