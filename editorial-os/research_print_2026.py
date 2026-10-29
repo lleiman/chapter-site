@@ -79,6 +79,100 @@ h2{font:400 clamp(26px,2.65vw,41px)/1.08 Georgia,serif;letter-spacing:-.035em;ma
 @media(max-width:1230px){.layout{grid-template-columns:185px minmax(0,1fr)}.side{padding:22px 13px}.page{padding:22px 20px}.timeline{grid-template-columns:1fr 1fr;gap:17px}.timeline:before{display:none}.event{border-top:1px solid #b2ada7;padding-top:9px}.event:before{top:-5px}}
 @media(max-width:970px){.layout{display:block}.side{position:static;height:auto;display:flex;flex-direction:row;align-items:center;justify-content:space-between}.side-issue,.side .tiny{display:none}.side nav{flex-direction:row;flex-wrap:wrap;border:0;padding:0}.side nav a{font-size:9px;padding:7px}.spread{grid-template-columns:1fr}.page:first-child{border-right:0;border-bottom:1px solid var(--line)}.page{padding:28px 34px}.timeline{grid-template-columns:repeat(4,1fr)}.timeline:before{display:block}.event{padding:0;border:0}.event:before{top:-15px}h1{font-size:clamp(65px,9vw,95px)}}
 @media(max-width:600px){.side{display:block}.side nav{margin-top:10px}.top{padding:14px;flex-wrap:wrap}.page{padding:22px 16px}h1{font-size:clamp(52px,11vw,76px)}.sec-head{grid-template-columns:42px 1fr;gap:10px}.trio{grid-template-columns:1fr}.trio div{border-right:0;border-bottom:1px solid var(--line);padding:9px 0}.timeline{grid-template-columns:1fr 1fr;gap:15px}.timeline:before{display:none}.event{border-top:1px solid #b2ada7;padding-top:10px}.event:before{top:-5px}.metricgroup,.lowercharts,.bottom{grid-template-columns:1fr}.bottom{padding:25px 16px}.sources{grid-template-columns:1fr}.facttable td:nth-child(2){white-space:normal}}
+
+/* READING EDITION 002: one continuous scroll, not a side-by-side spread.
+   Body measure and hierarchy follow long-form editorial reading conventions. */
+.reading{display:block;width:100%}
+.reading .page{width:min(100%,960px);max-width:960px;margin:0 auto;padding:48px 44px 0}
+.reading .page:first-child{border-right:0;border-bottom:0}
+.reading .data-page{padding-top:0;padding-bottom:54px}
+.reading .kicker{font-size:12px;letter-spacing:.12em}
+.reading h1{font:400 clamp(59px,6.3vw,98px)/.98 Georgia,"Times New Roman",serif;letter-spacing:-.063em;max-width:880px;margin:20px 0 26px}
+.reading .deck{font:400 clamp(23px,2.8vw,32px)/1.3 Georgia,serif;max-width:760px;color:#67635f;margin:10px 0 24px}
+.reading .meta{font-size:14px;margin-bottom:45px}
+.reading .copy{font:400 19px/1.77 Georgia,"Times New Roman",serif;letter-spacing:-.008em;color:#383632;max-width:770px}
+.reading .copy p{margin-bottom:26px}
+.reading .section{padding-top:28px;margin-top:57px}
+.reading .sec-head{grid-template-columns:66px minmax(0,1fr);gap:25px;margin-bottom:27px}
+.reading .num{font-size:43px}
+.reading h2{font:400 clamp(35px,4vw,52px)/1.1 Georgia,"Times New Roman",serif;letter-spacing:-.035em;max-width:780px}
+.reading .subtitle{font-size:16px;line-height:1.62;max-width:725px;margin-top:16px}
+.reading .trio{gap:0;margin:25px 0 38px}
+.reading .trio div{padding:0 21px 24px}
+.reading .trio div:first-child{padding-left:0}
+.reading .trio strong{font-size:17px;line-height:1.3}
+.reading .trio p{font-size:14px;line-height:1.64;margin-top:12px}
+.reading .fig{padding-top:19px;margin:33px 0 31px}
+.reading .fig-label{font-size:11px}
+.reading .diagram{gap:12px;margin-top:15px}
+.reading .node{padding:17px 7px;min-height:94px}
+.reading .node b{font-size:14px}
+.reading .node span{font-size:12px}
+.reading .diagram .arrow{top:32px;font-size:22px}
+.reading .note{font-size:12px;line-height:1.6}
+.reading .rsection{padding:44px 0 45px;margin:0;border-bottom:1px solid var(--line)}
+.reading .rsection:first-child{border-top:1px solid #b7b3aa;margin-top:56px}
+.reading .rhead{grid-template-columns:66px minmax(0,1fr);gap:25px;margin-bottom:27px}
+.reading .rhead .num{font-size:43px}
+.reading .timeline{gap:23px;padding-top:36px}
+.reading .timeline:before{top:23px}
+.reading .event:before{top:-16px;width:9px;height:9px}
+.reading .event time{font-size:13px;margin-bottom:13px}
+.reading .event strong{font-size:15px;line-height:1.36}
+.reading .event p{font-size:13px;line-height:1.58;margin-top:6px}
+.reading .metricgroup{grid-template-columns:minmax(0,1.9fr) minmax(205px,.8fr);gap:14px;margin-top:26px;margin-bottom:14px}
+.reading .lowercharts{grid-template-columns:minmax(0,1.55fr) minmax(220px,.9fr);gap:14px}
+.reading .bigchart{padding:21px 18px 15px}
+.reading .chart-title{font-size:18px}
+.reading .chart-desc{font-size:13px;margin-top:8px}
+.reading .metric{padding:22px}
+.reading .metric b{font-size:clamp(38px,4.1vw,58px)}
+.reading .metric p{font-size:14px}
+.reading .facttable{font-size:15px;line-height:1.55}
+.reading .facttable th{font-size:12px}
+.reading .facttable td,.reading .facttable th{padding:16px 14px 16px 0}
+.bottom{max-width:960px;margin:0 auto;padding:48px 44px 80px;display:grid;grid-template-columns:1fr;gap:36px}
+.bottom h2{font-size:40px;max-width:740px}
+.bottom p{font-size:17px;line-height:1.75;max-width:740px}
+.sources a{font-size:13px}
+@media(max-width:970px){
+  .reading .page{padding:36px 34px 0}
+  .reading h1{font-size:clamp(61px,8.6vw,91px)}
+  .reading .copy{font-size:18px}
+  .reading .timeline{grid-template-columns:repeat(2,1fr);gap:26px}
+  .reading .timeline:before{display:none}
+  .reading .event{border-top:1px solid #b2ada7;padding-top:14px}
+  .reading .event:before{top:-6px}
+  .bottom{padding:40px 34px 70px}
+}
+@media(max-width:600px){
+  .reading .page{padding:26px 20px 0}
+  .reading h1{font-size:clamp(48px,10.2vw,72px);line-height:1.04;overflow-wrap:break-word}
+  .reading .deck{font-size:24px;line-height:1.38}
+  .reading .meta{font-size:13px;margin-bottom:30px}
+  .reading .copy{font-size:18px;line-height:1.73}
+  .reading .section{margin-top:45px}
+  .reading .sec-head,.reading .rhead{grid-template-columns:43px minmax(0,1fr);gap:14px}
+  .reading .num,.reading .rhead .num{font-size:34px}
+  .reading h2{font-size:clamp(30px,7vw,42px)}
+  .reading .subtitle{font-size:15px}
+  .reading .trio{grid-template-columns:1fr}
+  .reading .trio div{border-right:0;border-bottom:1px solid var(--line);padding:16px 0}
+  .reading .diagram{grid-template-columns:repeat(2,1fr)}
+  .reading .diagram .arrow{display:none}
+  .reading .node{min-height:88px}
+  .reading .timeline{grid-template-columns:repeat(2,1fr)}
+  .reading .rsection{padding:35px 0}
+  .reading .metricgroup,.reading .lowercharts{grid-template-columns:1fr}
+  .reading .metric{min-height:140px}
+  .reading .facttable{font-size:13px}
+  .reading .facttable th{font-size:10px}
+  .reading .facttable td,.reading .facttable th{padding:12px 7px 12px 0;overflow-wrap:anywhere}
+  .bottom{padding:36px 20px 60px}
+  .bottom h2{font-size:32px}
+  .bottom p{font-size:16px}
+}
+
 """
 
 def _trend():
@@ -138,8 +232,8 @@ def render_page(pid):
       <p>Мы наблюдаем изменение границ доверия между человеком и машиной.</p></div>
     </aside>
     <main class="main"><header class="top"><span>LEIMAN LAB / RESEARCH NOTE 002</span><div><a href="#chronology">Хронология</a><a href="#figures">Данные</a><a href="#evidence">Факты</a></div></header>
-    <div class="spread">
-      <article class="page"><div class="kicker">Технологии и общество</div>
+    <div class="reading" id="article">
+      <article class="page article-page"><div class="kicker">Технологии и общество</div>
         <h1><span>После</span><span>чёрного октября</span></h1>
         <p class="deck">Что теперь происходит с безопасностью интернета в эпоху ИИ-агентов</p>
         <div class="meta">Лев Лейман　·　29 октября 2026　·　Исследовательский черновик</div>
@@ -158,7 +252,7 @@ def render_page(pid):
         <div class="copy"><p>Когда модель просто читает страницу, ошибка может остаться в ответе. Когда агент получает доступ к файлам, банковским операциям или аккаунтам, последствия определяются полномочиями и механизмами подтверждения.</p>
         <p>Новая задача защиты: недоверенный текст не должен становиться привилегированной командой только потому, что оказался внутри контекста модели.</p></div></section>
       </article>
-      <div class="page">
+      <div class="page data-page">
         <section class="rsection" id="chronology"><div class="rhead"><div class="num">02</div><div><h2>Хронология ключевых событий</h2><p class="subtitle">Публикации осени 2026 года говорят о разных классах угроз.</p></div></div><div class="timeline">{events}</div></section>
         <section class="rsection" id="figures"><div class="rhead"><div class="num">03</div><div><h2>Масштаб интернет-преступлений</h2><p class="subtitle">Зарегистрированные потери растут. Но эти цифры не измеряют AI-атаки.</p></div></div>
          <div class="metricgroup"><div class="bigchart"><h3 class="chart-title">Потери по обращениям FBI IC3</h3><p class="chart-desc">США, 2023–2025 · млрд USD</p>{_trend()}
