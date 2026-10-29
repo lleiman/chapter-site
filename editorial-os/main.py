@@ -61,6 +61,9 @@ def initialize():
   if not c.execute("SELECT id FROM posts WHERE title=?",(ARTICLE_TITLE,)).fetchone():
    c.execute("INSERT INTO posts(title,body,status,created_at,updated_at) VALUES(?,?,?,?,?)",
              (ARTICLE_TITLE,ARTICLE_BODY,"draft",ts(),ts()))
+  if not c.execute("SELECT id FROM posts WHERE title=?",("TG / После чёрного октября — анонс",)).fetchone():
+   c.execute("INSERT INTO posts(title,body,status,created_at,updated_at) VALUES(?,?,?,?,?)",
+             ("TG / После чёрного октября — анонс","После чёрного октября\n\nЧто происходит с безопасностью интернета, когда ИИ перестаёт только отвечать на вопросы и получает доступ к браузеру, файлам и инструментам?\n\nЗа несколько недель появились новости об инциденте Railway, исследованиях критических уязвимостей и самораспространяющихся prompt injection. Их легко сложить в эффектную историю о том, как ИИ «взламывает интернет». Но факты не дают оснований для такого вывода.\n\nВ новом исследовании Leiman Lab я разбираю, что действительно произошло, что показано только в экспериментах и почему главным вопросом становятся границы полномочий между человеком, ИИ-агентом и инфраструктурой.\n\nС цифрами, хронологией и первоисточниками.\n\nГлавная мысль: безопасность теперь зависит не только от защиты кода, но и от того, может ли чужой текст превратиться в команду.\n\n[Ссылка на статью появится после публикации]","draft",ts(),ts()))
   c.commit()
  finally:c.close()
 
@@ -82,7 +85,7 @@ def redirect(path="/"):return RedirectResponse(path,status_code=303)
 def field(name,value=""):return '<input type="hidden" name="'+name+'" value="'+E(value)+'">'
 def head(req,title):
  active=authorized(req)
- nav=('<nav><a href="/">Обзор</a><a href="/new">Новый пост</a><a href="/calendar">Расписание</a><a href="/research/security-2026">Исследование</a><a href="/settings">Настройки</a><a href="/logout">Выход</a></nav>') if active else ''
+ nav=('<nav><a href="/">Обзор</a><a href="/new">Новый пост</a><a href="/calendar">Расписание</a><a href="/research/security-2026">Исследование</a><a href="/draft/telegram-security-2026">ТГ-анонс</a><a href="/style">Стиль журнала</a><a href="/settings">Настройки</a><a href="/logout">Выход</a></nav>') if active else ''
  return """<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
  <title>"""+E(title)+""" · ADEPTS Editorial</title>
  <style>
@@ -380,3 +383,23 @@ def security_research(req:Request):
  finally:c.close()
  if not v:raise HTTPException(404,"Article not found")
  return HTMLResponse(render_page(v["id"]),headers={"Cache-Control":"no-store","X-Frame-Options":"DENY","Referrer-Policy":"no-referrer","Content-Security-Policy":"default-src 'self';style-src 'unsafe-inline';base-uri 'none';frame-ancestors 'none'"})
+
+@app.get("/draft/telegram-security-2026")
+def tg_security_draft(req:Request):
+ require(req)
+ c=conn()
+ try:
+  v=c.execute("SELECT id FROM posts WHERE title=? ORDER BY id DESC LIMIT 1",("TG / После чёрного октября — анонс",)).fetchone()
+ finally:c.close()
+ if not v:raise HTTPException(404,"Telegram draft not found")
+ return redirect("/post/"+str(v["id"]))
+
+@app.get("/style")
+def journal_style_page(req:Request):
+ require(req)
+ from pathlib import Path
+ spec=Path(__file__).with_name("JOURNAL_STYLE.md").read_text(encoding="utf-8")
+ body="<div class='eyebrow'>LEIMAN LAB / EDITORIAL STANDARDS</div><h1>Журнальный стандарт v1.0</h1>"
+ body+="<p>Утверждённый стиль для будущих исследований и эссе. <a href='/research/security-2026'>Открыть эталонную статью</a>.</p>"
+ body+="<div class='panel'><pre style='white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.7 system-ui,sans-serif'>"+E(spec)+"</pre></div>"
+ return page(req,"Журнальный стандарт",body)
