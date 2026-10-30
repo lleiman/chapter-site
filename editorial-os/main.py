@@ -4,6 +4,8 @@ from zoneinfo import ZoneInfo
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi.exception_handlers import http_exception_handler
+from urllib.parse import urlencode
 import httpx
 from research_security_2026 import ARTICLE_TITLE, ARTICLE_BODY
 from research_print_2026 import render_page
@@ -193,24 +195,39 @@ async def lifespan(app):
 
 app=FastAPI(lifespan=lifespan,docs_url=None,redoc_url=None,openapi_url=None)
 
+def safe_return_path(path):
+ if not isinstance(path,str) or len(path)>600:return "/"
+ if not path.startswith("/") or path.startswith("//") or "\\" in path or path.startswith("/login"):return "/"
+ return path
+
+@app.exception_handler(HTTPException)
+async def editor_http_error(req:Request, exc:HTTPException):
+ if exc.status_code==401 and req.method=="GET":
+  target=safe_return_path(req.url.path)
+  return redirect("/login?"+urlencode({"next":target}))
+ return await http_exception_handler(req,exc)
+
 @app.get("/health")
 def health():
  research_render=render_page(1)
  return {"ok":True,"service":"adepts-editorial","database":"mounted","magazine_render_ok":'class="reading"' in research_render and 'class="facttable"' in research_render}
 @app.get("/login")
-def login(req:Request):
- return page(req,"Вход","<div class='eyebrow'>PRIVATE EDITORIAL</div><h1>Вход в редакцию</h1><div class='panel'><form method='post' action='/login'><label>Пароль<input type='password' name='password' required autocomplete='current-password'></label><button>Войти</button></form></div>")
+def login(req:Request,next:str="/"):
+ destination=safe_return_path(next)
+ if authorized(req):return redirect(destination)
+ return page(req,"Вход","<div class='eyebrow'>PRIVATE EDITORIAL</div><h1>Вход в редакцию</h1><p class='muted'>После входа откроется нужный материал.</p><div class='panel'><form method='post' action='/login'>"+field("next",destination)+"<label>Пароль<input type='password' name='password' required autocomplete='current-password'></label><button>Войти</button></form></div>")
 @app.post("/login")
-def login_post(req:Request,password:str=Form()):
+def login_post(req:Request,password:str=Form(),next:str=Form("/")):
  if len(PW)<20:raise HTTPException(503,"ADMIN_PASSWORD is not configured")
  ip=req.client.host if req.client else "unknown"
  t=time.monotonic();attempts=[x for x in login_attempts.get(ip,[]) if t-x<300]
  if len(attempts)>=12:raise HTTPException(429,"Попробуйте позже")
  if not hmac.compare_digest(password,PW):
   attempts.append(t);login_attempts[ip]=attempts
-  return page(req,"Ошибка входа","<h1>Неверный пароль</h1><a class='btn secondary' href='/login'>Повторить</a>")
+  destination=safe_return_path(next)
+  return page(req,"Ошибка входа","<h1>Неверный пароль</h1><a class='btn secondary' href='/login?"+E(urlencode({"next":destination}))+"'>Повторить</a>")
  login_attempts.pop(ip,None)
- r=redirect("/")
+ r=redirect(safe_return_path(next))
  r.set_cookie(COOKIE,session_value(),max_age=60*60*24*7,httponly=True,secure=True,samesite="strict",path="/")
  return r
 @app.get("/logout")
