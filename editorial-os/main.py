@@ -131,18 +131,57 @@ async def tg(method,data):
   result=response.json()
  if not result.get("ok"):raise RuntimeError(str(result.get("description","Telegram API error"))[:160])
  return result["result"]
-async def connect_chat(code):
- if not BOT:raise RuntimeError("Bot token unavailable")
- async with httpx.AsyncClient(timeout=15) as h:
-  res=(await h.get("https://api.telegram.org/bot"+BOT+"/getUpdates",params={"limit":100,"timeout":0,"allowed_updates":json.dumps(["message","channel_post"])})).json()
- if not res.get("ok"):raise RuntimeError(str(res.get("description","Updates unavailable"))[:160])
- for update in reversed(res.get("result",[])):
-  msg=update.get("message") or update.get("channel_post") or {}
-  if (msg.get("text") or "").strip()=="/connect "+code:
-   chat=msg.get("chat") or {}
-   if chat.get("type") not in ("private","supergroup","channel"):continue
-   return str(chat["id"]),str(chat.get("title") or chat.get("first_name") or "Telegram preview")[:120]
- raise RuntimeError("Команда /connect ещё не найдена. Проверь отправку и повтори.")
+def preview_webhook_secret():
+ return hmac.new(PW.encode(),b"leiman-editor-telegram-webhook-v1",hashlib.sha256).hexdigest()
+
+async def enable_preview_webhook():
+ # The publishing bot is dedicated to Leiman Lab. Never overwrite another webhook.
+ if not BOT or len(PW)<20:return False,"Токен бота или пароль редакции не настроен"
+ domain=os.getenv("RAILWAY_PUBLIC_DOMAIN","")
+ if not domain or not all(ch.isalnum() or ch in ".-" for ch in domain):
+  return False,"Публичный домен Railway не настроен"
+ target="https://"+domain+"/telegram/webhook"
+ try:
+  async with httpx.AsyncClient(timeout=15) as h:
+   info=(await h.get("https://api.telegram.org/bot"+BOT+"/getWebhookInfo")).json()
+   if not info.get("ok"):return False,"Telegram не подтвердил настройки webhook"
+   existing=str(info.get("result",{}).get("url",""))
+   if existing and existing!=target:
+    return False,"У бота уже настроен другой webhook. Его настройки не изменены."
+   result=(await h.post("https://api.telegram.org/bot"+BOT+"/setWebhook",
+    data={"url":target,"secret_token":preview_webhook_secret(),
+          "allowed_updates":json.dumps(["message"]),
+          "drop_pending_updates":"false","max_connections":"4"})).json()
+   if not result.get("ok"):
+    return False,"Telegram не разрешил подключить webhook: "+str(result.get("description","ошибка"))[:100]
+  return True,"Webhook подключён. Открой бота и отправь код через ссылку."
+ except Exception:
+  return False,"Не получилось связаться с Telegram API. Повторите проверку."
+
+async def receive_connect_command(update):
+ msg=update.get("message") or {}
+ chat=msg.get("chat") or {}
+ if chat.get("type")!="private":return
+ content=(msg.get("text") or "").strip().split()
+ if len(content)<2:return
+ command=content[0].split("@",1)[0].lower()
+ if command not in ("/connect","/start"):return
+ submitted=content[1].upper()
+ if submitted.startswith("CONNECT_"):submitted=submitted[len("CONNECT_"):]
+ code=setting("connect_code","")
+ if len(code)<24 or not secrets.compare_digest(submitted,code.upper()):return
+ chat_id=str(chat["id"])
+ person=msg.get("from") or {}
+ name=str(person.get("first_name") or chat.get("first_name") or "Личный Telegram")[:90]
+ put_setting("preview_chat",chat_id)
+ put_setting("preview_name",name)
+ put_setting("connect_code",secrets.token_hex(16).upper())
+ try:
+  await tg("sendMessage",{"chat_id":chat_id,
+   "text":"Leiman Lab: приватный предпросмотр подключён. Черновики будут приходить сюда только по команде из редакции."})
+ except Exception:
+  # Connection is stored; a confirmation-send failure must not trigger replays.
+  print("EDITORIAL_PREVIEW_CONFIRMATION_FAILED",flush=True)
 
 async def publish_post(post):
  pid=post["id"]
@@ -187,6 +226,10 @@ async def scheduler():
 async def lifespan(app):
  global worker
  initialize()
+ if len(setting("connect_code",""))<24:put_setting("connect_code",secrets.token_hex(16).upper())
+ ready,reason=await enable_preview_webhook()
+ put_setting("webhook_status","ready" if ready else reason)
+ print("EDITORIAL_WEBHOOK "+("READY" if ready else "NOT_CONFIGURED"),flush=True)
  worker=asyncio.create_task(scheduler())
  yield
  worker.cancel()
@@ -194,6 +237,21 @@ async def lifespan(app):
  except asyncio.CancelledError:pass
 
 app=FastAPI(lifespan=lifespan,docs_url=None,redoc_url=None,openapi_url=None)
+
+@app.post("/telegram/webhook")
+async def telegram_webhook(req:Request):
+ if not PW or not BOT:return JSONResponse({"ok":False},status_code=503)
+ secret=req.headers.get("x-telegram-bot-api-secret-token","")
+ if not hmac.compare_digest(secret,preview_webhook_secret()):
+  return JSONResponse({"ok":False},status_code=403)
+ if int(req.headers.get("content-length","0") or "0")>32768:
+  return JSONResponse({"ok":False},status_code=413)
+ try:
+  data=await req.json()
+  if isinstance(data,dict):await receive_connect_command(data)
+ except Exception:
+  print("EDITORIAL_WEBHOOK_HANDLER_FAILED",flush=True)
+ return {"ok":True}
 
 def safe_return_path(path):
  if not isinstance(path,str) or len(path)>600:return "/"
@@ -349,34 +407,45 @@ def calendar(req:Request):
  for v in posts:body+="<div class='line postrow'><div><span class='tag "+E(v["status"])+"'>"+E(statusname(v["status"]))+"</span><h3><a href='/post/"+str(v["id"])+"'>"+E(v["title"])+"</a></h3><time>"+E(stamp(v["scheduled_at"]))+"</time></div><a class='btn secondary' href='/post/"+str(v["id"])+"'>Открыть</a></div>"
  return page(req,"Календарь",body+("</div>" if posts else "<p class='muted'>Нет запланированных записей.</p></div>"))
 @app.get("/settings")
-def settings(req:Request):
+def settings(req:Request,notice:str=""):
  require(req)
  code=setting("connect_code","")
- if not code:
-  code=secrets.token_hex(3).upper()
+ if len(code)<24:
+  code=secrets.token_hex(16).upper()
   put_setting("connect_code",code)
  chat=setting("preview_chat","")
  armed=setting("armed","0")=="1"
+ webhook_status=setting("webhook_status","")
  body="<div class='eyebrow'>CONFIGURATION</div><h1>Настройки</h1><div class='grid'><section class='panel'><h2>Telegram-предпросмотр</h2>"
- if chat:body+="<p class='hint'>Подключено: "+E(setting("preview_name","Приватный чат"))+" (ID "+E(chat)+").</p>"
- else:body+="<p>Открой <a href='https://t.me/leimanlab_content_os_bot' target='_blank' rel='noopener'>@leimanlab_content_os_bot</a>, нажми Start и отправь ему команду:</p><div class='preview'>/connect "+E(code)+"</div><p class='muted'>Или добавь бота в отдельный закрытый канал/группу администратором и отправь эту команду туда. Публичный @aiadepts здесь не используем.</p>"
- body+="<form method='post' action='/settings/connect'>"+csrf()+"<button class='secondary'>Проверить подключение</button></form>"
- if chat:body+="<form method='post' action='/settings/disconnect'>"+csrf()+"<button class='danger'>Отключить чат предпросмотра</button></form>"
+ if chat:
+  body+="<p class='hint'>Подключено: "+E(setting("preview_name","Личный Telegram"))+".</p><p class='muted'>Ни одного сообщения в @aiadepts не отправлено.</p>"
+ else:
+  bot_url="https://t.me/leimanlab_content_os_bot?start=connect_"+code
+  if notice=="waiting":body+="<p class='hint'>Telegram подключён к редакции. Теперь открой бота по ссылке ниже и нажми Start. После сообщения от бота обнови эту страницу.</p>"
+  elif notice=="telegram_error":body+="<p class='hint'>"+E(webhook_status)+"</p>"
+  body+="<p>1. Нажми кнопку для перехода в личный чат с ботом.</p>"
+  body+="<p><a class='btn' href='"+E(bot_url)+"' target='_blank' rel='noopener'>Открыть Telegram и подключить предпросмотр</a></p>"
+  body+="<p>2. Нажми <strong>Start</strong> в Telegram. Бот должен ответить, что предпросмотр подключён.</p>"
+  body+="<p class='muted'>Если Telegram не подставил команду, отправь вручную:</p><div class='preview'>/connect "+E(code)+"</div>"
+  body+="<p class='muted'>3. Обнови эту страницу, чтобы увидеть подключённый чат. Используй личный чат с ботом, не основной канал.</p>"
+  body+="<form method='post' action='/settings/connect'>"+csrf()+"<button class='secondary'>Проверить настройки Telegram</button></form>"
+  if webhook_status and webhook_status!="ready":body+="<p class='muted'>Состояние webhook: "+E(webhook_status)+"</p>"
+ if chat:
+  body+="<form method='post' action='/settings/disconnect'>"+csrf()+"<button class='danger'>Отключить предпросмотр</button></form>"
  body+="</section><section class='panel'><h2>Автопубликация</h2><p>Целевой канал: <strong>"+E(CHANNEL)+"</strong></p><p>Статус: <strong>"+("Активирована" if armed else "Выключена")+"</strong></p>"
  if os.getenv("ENABLE_PUBLISHING")!="true":body+="<p class='hint'>Защитный переключатель Railway ENABLE_PUBLISHING отключён. Автоматическая публикация невозможна.</p>"
  elif armed:body+="<form method='post' action='/settings/arm'>"+csrf()+field("mode","off")+"<button class='danger'>Остановить очередь</button></form>"
- else:body+="<p class='muted'>Включение разрешает отправку только одобренных материалов в назначенное время. Пропущенные более чем на 10 минут публикации не отправляются автоматически.</p><form method='post' action='/settings/arm'>"+csrf()+field("mode","on")+"<label>Для активации введи ВКЛЮЧИТЬ<input name='confirmation' required></label><button>Активировать очередь</button></form>"
+ else:body+="<p class='muted'>Включение разрешает отправку только одобренных материалов в назначенное время.</p><form method='post' action='/settings/arm'>"+csrf()+field("mode","on")+"<label>Для активации введи ВКЛЮЧИТЬ<input name='confirmation' required></label><button>Активировать очередь</button></form>"
  body+="</section></div>"
  return page(req,"Настройки",body)
+
 @app.post("/settings/connect")
 async def connect(req:Request,csrf_token:str=Form(alias="csrf")):
  verify(req,csrf_token)
- code=setting("connect_code")
- try:chat,name=await connect_chat(code)
- except Exception as exc:raise HTTPException(400,str(exc)[:160])
- if chat==CHANNEL or name.lower().strip()=="ai adepts":raise HTTPException(400,"Основной канал нельзя использовать как предпросмотр")
- put_setting("preview_chat",chat);put_setting("preview_name",name);put_setting("connect_code",secrets.token_hex(3).upper())
- return redirect("/settings")
+ if setting("preview_chat",""):return redirect("/settings")
+ ready,reason=await enable_preview_webhook()
+ put_setting("webhook_status","ready" if ready else reason)
+ return redirect("/settings?notice="+("waiting" if ready else "telegram_error"))
 @app.post("/settings/disconnect")
 def disconnect(req:Request,csrf_token:str=Form(alias="csrf")):
  verify(req,csrf_token)
