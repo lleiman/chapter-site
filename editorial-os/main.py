@@ -214,6 +214,59 @@ async def publish_post(post):
  c=conn()
  try:c.execute("UPDATE posts SET status='published',published_at=?,published_message_id=?,updated_at=?,last_error=NULL WHERE id=?",(ts(),message["message_id"],ts(),pid));c.commit()
  finally:c.close()
+EMOJI_PACK_NAME="Lab373"
+EMOJI_ORDER=("SEE","VOICE","WRITE","SIGNAL","SOURCE","CONNECT","VERIFY","EDIT")
+EMOJI_REPLACEMENTS={"◢":"SIGNAL","◉":"VERIFY","△":"SEE","▣":"SOURCE","✦":"CONNECT"}
+
+async def refresh_emoji_manifest():
+ if not BOT:return False
+ try:
+  async with httpx.AsyncClient(timeout=18) as client:
+   response=await client.post("https://api.telegram.org/bot"+BOT+"/getStickerSet",
+     data={"name":EMOJI_PACK_NAME})
+   response.raise_for_status()
+   result=response.json()
+  if not result.get("ok"):
+   print("EDITORIAL_EMOJI_PACK_API_REJECTED",flush=True);return False
+  info=result["result"]
+  stickers=info.get("stickers",[])
+  if info.get("sticker_type")!="custom_emoji" or len(stickers)!=len(EMOJI_ORDER):
+   print("EDITORIAL_EMOJI_PACK_UNEXPECTED_TYPE_OR_COUNT",flush=True);return False
+  entries={}
+  for role,sticker in zip(EMOJI_ORDER,stickers):
+   emoji=sticker.get("emoji")
+   custom_id=sticker.get("custom_emoji_id")
+   if not emoji or not custom_id:
+    print("EDITORIAL_EMOJI_PACK_MISSING_IDS",flush=True);return False
+   entries[role]={"emoji":emoji,"id":str(custom_id)}
+  put_setting("emoji_manifest_v1",json.dumps(entries,ensure_ascii=False))
+  print("EDITORIAL_EMOJI_PACK_READY "+str(len(entries)),flush=True)
+  return True
+ except Exception as exc:
+  print("EDITORIAL_EMOJI_PACK_ERROR "+type(exc).__name__,flush=True)
+  return False
+
+def compose_branded_caption(body):
+ try:manifest=json.loads(setting("emoji_manifest_v1","{}"))
+ except Exception:manifest={}
+ if len(manifest)!=8:return body[:950],[]
+ text=""
+ entities=[]
+ for char in body:
+  role=EMOJI_REPLACEMENTS.get(char)
+  selected=manifest.get(role) if role else None
+  if not selected:
+   text+=char
+   continue
+  replacement=selected.get("emoji") or char
+  start=len(text.encode("utf-16-le"))//2
+  text+=replacement
+  entities.append({"type":"custom_emoji","offset":start,
+    "length":len(replacement.encode("utf-16-le"))//2,
+    "custom_emoji_id":selected["id"]})
+ if len(text)>950:return body[:950],[]
+ return text,entities
+
 def media_url(n):
  domain=os.getenv("RAILWAY_PUBLIC_DOMAIN","")
  if not domain or not all(ch.isalnum() or ch in ".-" for ch in domain):
@@ -222,19 +275,35 @@ def media_url(n):
 
 async def send_test_album(chat,body):
  if not BOT:raise RuntimeError("Bot token not configured")
- media=[]
- files={}
- for n in (1,2,3):
-  attachment="photo"+str(n)
-  media.append({"type":"photo","media":"attach://"+attachment,
-    **({"caption":body[:950]} if n==1 else {})})
-  files[attachment]=(str(n)+".png",png_for(n),"image/png")
- async with httpx.AsyncClient(timeout=45) as client:
-  response=await client.post("https://api.telegram.org/bot"+BOT+"/sendMediaGroup",
-   data={"chat_id":chat,"media":json.dumps(media,ensure_ascii=False),"disable_notification":"true"},
-   files=files)
-  result=response.json()
- if not result.get("ok"):raise RuntimeError(str(result.get("description","Telegram media error"))[:200])
+ caption,entities=compose_branded_caption(body)
+ async def send(include_custom):
+  media=[]
+  files={}
+  for n in (1,2,3):
+   attachment="photo"+str(n)
+   item={"type":"photo","media":"attach://"+attachment}
+   if n==1:
+    item["caption"]=caption if include_custom else body[:950]
+    if include_custom and entities:item["caption_entities"]=entities
+   media.append(item)
+   files[attachment]=(str(n)+".png",png_for(n),"image/png")
+  async with httpx.AsyncClient(timeout=45) as client:
+   response=await client.post("https://api.telegram.org/bot"+BOT+"/sendMediaGroup",
+    data={"chat_id":chat,"media":json.dumps(media,ensure_ascii=False),
+     "disable_notification":"true"},files=files)
+   result=response.json()
+  return result
+ result=await send(bool(entities))
+ if not result.get("ok"):
+  description=str(result.get("description","Telegram media error"))[:200]
+  # Retry only after an explicit Telegram refusal about custom-emoji permissions;
+  # never retry on ambiguous network failures (to avoid duplicate posts).
+  if entities and ("custom emoji" in description.lower() or "custom_emoji" in description.lower()):
+   print("EDITORIAL_EMOJI_BOT_PERMISSIONS_UNAVAILABLE",flush=True)
+   result=await send(False)
+ if not result.get("ok"):
+  raise RuntimeError(str(result.get("description","Telegram media error"))[:200])
+ if entities:print("EDITORIAL_EMOJI_ALBUM_WITH_CUSTOM_ENTITIES_ATTEMPTED",flush=True)
  return result["result"]
 
 async def one_time_test_preview():
@@ -255,6 +324,32 @@ async def one_time_test_preview():
   put_setting("media_test_v1","error")
   print("EDITORIAL_MEDIA_TEST_FAILED "+type(exc).__name__+" "+str(exc)[:170],flush=True)
 
+async def one_time_emoji_preview():
+ await asyncio.sleep(15)
+ if setting("media_test_v2") in ("done","attempted"):return
+ chat=setting("preview_chat","")
+ if not chat:return
+ c=conn()
+ try:v=c.execute("SELECT body FROM posts WHERE title=? ORDER BY id DESC LIMIT 1",
+  ("TEST / После чёрного октября — визуальный комплект",)).fetchone()
+ finally:c.close()
+ if not v:return
+ put_setting("media_test_v2","attempted")
+ try:
+  from PIL import Image
+  from io import BytesIO
+  for n in (1,2,3):
+   png=png_for(n)
+   with Image.open(BytesIO(png)) as im:
+    if im.size!=(1080,1350):raise RuntimeError("wrong_dimensions")
+  print("EDITORIAL_IMAGES_3_VERIFIED_1080x1350",flush=True)
+  await send_test_album(chat,v["body"])
+  put_setting("media_test_v2","done")
+  print("EDITORIAL_BRANDED_ALBUM_SENT_PRIVATE",flush=True)
+ except Exception as exc:
+  put_setting("media_test_v2","error")
+  print("EDITORIAL_BRANDED_ALBUM_FAILED "+type(exc).__name__+" "+str(exc)[:190],flush=True)
+
 async def scheduler():
  while True:
   try:
@@ -273,10 +368,12 @@ async def lifespan(app):
  initialize()
  if len(setting("connect_code",""))<24:put_setting("connect_code",secrets.token_hex(16).upper())
  ready,reason=await enable_preview_webhook()
+ await refresh_emoji_manifest()
  put_setting("webhook_status","ready" if ready else reason)
  print("EDITORIAL_WEBHOOK "+("READY" if ready else "NOT_CONFIGURED"),flush=True)
  worker=asyncio.create_task(scheduler())
  asyncio.create_task(one_time_test_preview())
+ asyncio.create_task(one_time_emoji_preview())
  yield
  worker.cancel()
  try:await worker
