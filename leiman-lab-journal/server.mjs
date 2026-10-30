@@ -93,7 +93,7 @@ const editorLoader = `<script>(()=>{const load=()=>import('/assets/admin.js');le
 addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.shiftKey&&e.code==='KeyE'){e.preventDefault();window.llAdmin?window.llAdmin.toggle():load()}});
 if(on||/[?&]edit(=|&|$)/.test(location.search))load()})()</script>`;
 
-function page({ content, title, description, canonical, cover, type = 'website', date, modified, schema, bodyData = '', noindex = false }) {
+function page({ content, title, description, canonical, cover, type = 'website', date, modified, schema, bodyData = '', noindex = false, extraStylesheet = '' }) {
   const structured = schema ? `<script type="application/ld+json">${jsonSafe(schema)}</script>` : '';
   return `<!doctype html>
 <html lang="ru"><head>
@@ -110,7 +110,7 @@ function page({ content, title, description, canonical, cover, type = 'website',
 <meta property="og:image" content="${escaped(cover)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta property="og:image:type" content="image/png"><meta name="twitter:card" content="summary_large_image">
 ${date ? `<meta property="article:published_time" content="${escaped(date)}">` : ''}${modified ? `<meta property="article:modified_time" content="${escaped(modified)}">` : ''}${noindex ? '<meta name="robots" content="noindex">' : ''}
-<link rel="stylesheet" href="${asset('/assets/site.css')}">${structured}
+<link rel="stylesheet" href="${asset('/assets/site.css')}">${extraStylesheet ? `<link rel="stylesheet" href="${escaped(asset(extraStylesheet))}">` : ''}${structured}
 </head><body${bodyData}>
 <header class="site-header"><div class="container header-inner">
 <a class="identity" href="/" aria-label="Leiman Lab — главная">${logo}<span class="wordmark">LEIMAN <b>LAB</b></span></a>
@@ -290,6 +290,41 @@ function renderBlock(block, i) {
     default: return '';
   }
 }
+function paperResearchView(a, origin) {
+  // Trusted authored JSON: special layout does not affect existing dark editions.
+  const pageUrl = origin + '/articles/' + a.slug;
+  const draftBanner = a.draft
+    ? '<div class="draft-banner micro"><div class="container">ПРЕДПРОСМОТР · НОВАЯ СВЕТЛАЯ РЕДАКЦИЯ · В ЖУРНАЛЕ ПОКА НЕ ПОКАЗЫВАЕТСЯ</div></div>' : '';
+  const sections = [
+    ['#timeline','Хронология'], ['#cases','Подтверждённые случаи'],
+    ['#defense','Личная защита'], ['#teams','Для проектов'],
+    ['#incident-response','После взлома'], ['#sources','Источники']
+  ];
+  const navigation = sections.map(pair=>'<a href="'+pair[0]+'">'+escaped(pair[1])+'</a>').join('');
+  const footerLink = '<div class="report-related">Эта статья продолжает <a href="/articles/black-october">«Чёрный октябрь»</a>. Оригинальная публикация остаётся в прежнем тёмном оформлении.</div>';
+  const content = '<main>'+draftBanner+
+    '<div class="report-paper"><aside class="report-index" aria-label="Навигация по исследованию">'+
+    '<div class="report-index-inner"><div class="report-brand">LEIMAN LAB<span style="color:#c72b34">.</span></div>'+
+    '<div class="report-kicker">RESEARCH / PAPER EDITION 004</div>'+
+    (a.draft?'<div class="report-status">РЕДАКЦИОННЫЙ ПРЕДПРОСМОТР</div>':'')+
+    '<nav class="report-nav">'+navigation+
+    '<a class="current" href="/articles/black-october">Первая часть · тёмная ↗</a></nav>'+
+    '<div class="report-kicker">30 OCT 2026 / LEV LEIMAN</div></div></aside>'+
+    '<div class="report-main"><div class="report-toolbar">'+
+    '<a href="/">← ЖУРНАЛ</a><span>004 / SPECIAL REPORT</span>'+
+    '<a href="/articles/black-october">ТЁМНАЯ ПЕРВАЯ ЧАСТЬ ↗</a></div>'+
+    '<article class="full" itemscope itemtype="https://schema.org/Article">'+a.longformHtml+'</article>'+
+    footerLink+'</div></div></main>';
+  return page({content,title:a.title+' — Leiman Lab',description:a.description||a.summary,
+    canonical:pageUrl,cover:origin+asset('/assets/black-october-1200x630.png'),
+    type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,
+    extraStylesheet:'/assets/paper-report.css',
+    bodyData:' data-page="paper-research" data-slug="'+escaped(a.slug)+'"',
+    schema:{'@context':'https://schema.org','@type':'Article',headline:a.title,
+      description:a.description||a.summary,datePublished:a.date,inLanguage:'ru',
+      author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'}}});
+}
+
 function articleView(a, origin) {
   const pageUrl = `${origin}/articles/${a.slug}`;
   const share = `https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(a.title)}`;
@@ -538,7 +573,11 @@ const server = http.createServer((req,res)=>{
   const rubricMatch=pathname.match(/^\/rubrics\/([a-z0-9-]+)\/?$/);
   if(rubricMatch && rubricBySlug.has(rubricMatch[1]))return write(res,200,rubricView(rubricBySlug.get(rubricMatch[1]),origin));
   const match=pathname.match(/^\/articles\/([a-z0-9-]+)\/?$/);
-  if(match && articleBySlug.has(match[1]))return write(res,200,articleView(articleBySlug.get(match[1]),origin));
+  if(match && articleBySlug.has(match[1])) {
+    const a = articleBySlug.get(match[1]);
+    return write(res,200,a.slug === 'after-black-october' && a.theme === 'paper' ? paperResearchView(a,origin) : articleView(a,origin),
+      'text/html; charset=utf-8', a.draft ? {'Cache-Control':'no-store'} : {});
+  }
   const fileMatch=pathname.match(/^\/files\/([a-z0-9][a-z0-9._-]*)$/);
   if(fileMatch){
     try{
