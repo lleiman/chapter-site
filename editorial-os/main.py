@@ -3,10 +3,11 @@ from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Form, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse, Response
 from fastapi.exception_handlers import http_exception_handler
 from urllib.parse import urlencode
 import httpx
+from security_media_2026 import png_for
 from research_security_2026 import ARTICLE_TITLE, ARTICLE_BODY
 from research_print_2026 import render_page
 
@@ -66,6 +67,9 @@ def initialize():
   if not c.execute("SELECT id FROM posts WHERE title=?",("TG / После чёрного октября — анонс",)).fetchone():
    c.execute("INSERT INTO posts(title,body,status,created_at,updated_at) VALUES(?,?,?,?,?)",
              ("TG / После чёрного октября — анонс","После чёрного октября\n\nЧто происходит с безопасностью интернета, когда ИИ перестаёт только отвечать на вопросы и получает доступ к браузеру, файлам и инструментам?\n\nЗа несколько недель появились новости об инциденте Railway, исследованиях критических уязвимостей и самораспространяющихся prompt injection. Их легко сложить в эффектную историю о том, как ИИ «взламывает интернет». Но факты не дают оснований для такого вывода.\n\nВ новом исследовании Leiman Lab я разбираю, что действительно произошло, что показано только в экспериментах и почему главным вопросом становятся границы полномочий между человеком, ИИ-агентом и инфраструктурой.\n\nС цифрами, хронологией и первоисточниками.\n\nГлавная мысль: безопасность теперь зависит не только от защиты кода, но и от того, может ли чужой текст превратиться в команду.\n\n[Ссылка на статью появится после публикации]","draft",ts(),ts()))
+  if not c.execute("SELECT id FROM posts WHERE title=?",("TEST / После чёрного октября — визуальный комплект",)).fetchone():
+   c.execute("INSERT INTO posts(title,body,status,created_at,updated_at) VALUES(?,?,?,?,?)",
+             ("TEST / После чёрного октября — визуальный комплект","◢ После чёрного октября\n\nЗа несколько недель в одном потоке сошлись инцидент Railway, исследования критических уязвимостей и самораспространяющиеся prompt injection.\n\nИз этого легко собрать историю о том, что ИИ уже самостоятельно «взламывает интернет». Но факты требуют большей точности.\n\n◉ Что подтверждено\n△ Что остаётся предварительной версией\n▣ Что новые полномочия агентов меняют в цифровой безопасности\n\n✦ Главный вопрос: может ли чужой текст стать командой?\n\nLeiman Lab / Research Note 002\n[Тестовый предпросмотр. Ссылку на публичную статью добавим перед публикацией.]","draft",ts(),ts()))
   c.commit()
  finally:c.close()
 
@@ -87,7 +91,7 @@ def redirect(path="/"):return RedirectResponse(path,status_code=303)
 def field(name,value=""):return '<input type="hidden" name="'+name+'" value="'+E(value)+'">'
 def head(req,title):
  active=authorized(req)
- nav=('<nav><a href="/">Обзор</a><a href="/new">Новый пост</a><a href="/calendar">Расписание</a><a href="/research/security-2026">Исследование</a><a href="/draft/telegram-security-2026">ТГ-анонс</a><a href="/style">Стиль журнала</a><a href="/settings">Настройки</a><a href="/logout">Выход</a></nav>') if active else ''
+ nav=('<nav><a href="/">Обзор</a><a href="/new">Новый пост</a><a href="/calendar">Расписание</a><a href="/research/security-2026">Исследование</a><a href="/draft/telegram-security-2026">ТГ-анонс</a><a href="/draft/telegram-security-2026-media">Медиа-тест</a><a href="/style">Стиль журнала</a><a href="/settings">Настройки</a><a href="/logout">Выход</a></nav>') if active else ''
  return """<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
  <title>"""+E(title)+""" · ADEPTS Editorial</title>
  <style>
@@ -210,6 +214,40 @@ async def publish_post(post):
  c=conn()
  try:c.execute("UPDATE posts SET status='published',published_at=?,published_message_id=?,updated_at=?,last_error=NULL WHERE id=?",(ts(),message["message_id"],ts(),pid));c.commit()
  finally:c.close()
+def media_url(n):
+ domain=os.getenv("RAILWAY_PUBLIC_DOMAIN","")
+ if not domain or not all(ch.isalnum() or ch in ".-" for ch in domain):
+  raise RuntimeError("Public domain missing")
+ return "https://"+domain+"/media/security-2026/"+str(n)+".png"
+
+async def send_test_album(chat,body):
+ media=[]
+ for n in (1,2,3):
+  entry={"type":"photo","media":media_url(n)}
+  if n==1:entry["caption"]=body[:950]
+  media.append(entry)
+ result=await tg("sendMediaGroup",{"chat_id":chat,"media":json.dumps(media,ensure_ascii=False),
+   "disable_notification":"true"})
+ return result
+
+async def one_time_test_preview():
+ await asyncio.sleep(12)
+ if setting("media_test_v1") in ("done","attempted"):return
+ chat=setting("preview_chat","")
+ if not chat:return
+ c=conn()
+ try:v=c.execute("SELECT * FROM posts WHERE title=? ORDER BY id DESC LIMIT 1",("TEST / После чёрного октября — визуальный комплект",)).fetchone()
+ finally:c.close()
+ if not v or v["status"]!="draft":return
+ put_setting("media_test_v1","attempted")
+ try:
+  await send_test_album(chat,v["body"])
+  put_setting("media_test_v1","done")
+  print("EDITORIAL_MEDIA_TEST_SENT_PRIVATE",flush=True)
+ except Exception as exc:
+  put_setting("media_test_v1","error")
+  print("EDITORIAL_MEDIA_TEST_FAILED "+type(exc).__name__+" "+str(exc)[:170],flush=True)
+
 async def scheduler():
  while True:
   try:
@@ -231,12 +269,23 @@ async def lifespan(app):
  put_setting("webhook_status","ready" if ready else reason)
  print("EDITORIAL_WEBHOOK "+("READY" if ready else "NOT_CONFIGURED"),flush=True)
  worker=asyncio.create_task(scheduler())
+ asyncio.create_task(one_time_test_preview())
  yield
  worker.cancel()
  try:await worker
  except asyncio.CancelledError:pass
 
 app=FastAPI(lifespan=lifespan,docs_url=None,redoc_url=None,openapi_url=None)
+
+@app.get("/media/security-2026/{n}.png")
+def security_image(n:int):
+ if n not in (1,2,3):raise HTTPException(404)
+ try:image=png_for(n)
+ except Exception as exc:
+  print("EDITORIAL_IMAGE_ERROR "+type(exc).__name__,flush=True)
+  raise HTTPException(503,"Image rendering temporarily unavailable")
+ return Response(content=image,media_type="image/png",
+   headers={"Cache-Control":"public,max-age=1800","X-Content-Type-Options":"nosniff"})
 
 @app.post("/telegram/webhook")
 async def telegram_webhook(req:Request):
@@ -332,6 +381,13 @@ def detail(req:Request,pid:int):
  status=v["status"]
  body="<div class='eyebrow'>MATERIAL #"+str(pid)+"</div><h1>"+E(v["title"])+"</h1><div class='tag "+E(status)+"'>"+E(statusname(status))+"</div>"
  body+="<div class='grid'><section class='panel'><h2>Предпросмотр</h2><p class='muted'>Текст без Markdown-разметки, как он будет отправлен через Bot API.</p><div class='preview'>"+E(v["body"])+"</div></section><section class='panel'><h2>Управление</h2>"
+ if v["title"]=="TEST / После чёрного октября — визуальный комплект":
+  body+="<div style='display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:24px 0'>"
+  for n in (1,2,3):
+   body+="<a href='/media/security-2026/"+str(n)+".png' target='_blank' rel='noopener'><img alt='Карточка "+str(n)+"' src='/media/security-2026/"+str(n)+".png' style='width:100%;height:auto;border:1px solid #444;display:block'></a>"
+  body+="</div><p class='muted'>3 изображения для тестового альбома. Точные значения на графиках взяты из FBI IC3.</p>"
+  if status in ("draft","approved","scheduled"):
+   body+="<form method='post' action='/post/"+str(pid)+"/preview-media'>"+csrf()+"<button class='secondary'>Отправить 3 картинки и пост в личный Telegram</button></form>"
  if v["last_error"]:body+="<p class='hint'>"+E(v["last_error"])+"</p>"
  if v["scheduled_at"]:body+="<p>Дата: <strong>"+E(stamp(v["scheduled_at"]))+"</strong></p>"
  if v["published_message_id"]:body+="<p><a target='_blank' rel='noopener' href='https://t.me/"+E(CHANNEL.lstrip("@"))+"/"+str(v["published_message_id"])+"'>Открыть опубликованный пост</a></p>"
@@ -381,6 +437,22 @@ def unschedule(req:Request,pid:int,csrf_token:str=Form(alias="csrf")):
  try:c.execute("UPDATE posts SET status='approved',scheduled_at=NULL,last_error=NULL,updated_at=? WHERE id=? AND status IN ('scheduled','approved','missed','uncertain')",(ts(),pid));c.commit()
  finally:c.close()
  return redirect("/post/"+str(pid))
+@app.post("/post/{pid}/preview-media")
+async def preview_media(req:Request,pid:int,csrf_token:str=Form(alias="csrf")):
+ verify(req,csrf_token)
+ chat=setting("preview_chat","")
+ if not chat:return redirect("/settings")
+ c=conn()
+ try:v=c.execute("SELECT * FROM posts WHERE id=?",(pid,)).fetchone()
+ finally:c.close()
+ if not v or v["title"]!="TEST / После чёрного октября — визуальный комплект":
+  raise HTTPException(404)
+ try:
+  await send_test_album(chat,v["body"])
+ except Exception as exc:
+  return page(req,"Не удалось отправить медиапревью","<h1>Предпросмотр не отправлен</h1><p class='hint'>"+E(str(exc)[:180])+"</p><a class='btn secondary' href='/post/"+str(pid)+"'>Назад к черновику</a>")
+ return redirect("/post/"+str(pid))
+
 @app.post("/post/{pid}/preview")
 async def preview(req:Request,pid:int,csrf_token:str=Form(alias="csrf")):
  verify(req,csrf_token)
@@ -469,6 +541,15 @@ def security_research(req:Request):
  finally:c.close()
  if not v:raise HTTPException(404,"Article not found")
  return HTMLResponse(render_page(v["id"]),headers={"Cache-Control":"no-store","X-Frame-Options":"DENY","Referrer-Policy":"no-referrer","Content-Security-Policy":"default-src 'self';style-src 'unsafe-inline';base-uri 'none';frame-ancestors 'none'"})
+
+@app.get("/draft/telegram-security-2026-media")
+def tg_security_media_draft(req:Request):
+ require(req)
+ c=conn()
+ try:v=c.execute("SELECT id FROM posts WHERE title=? ORDER BY id DESC LIMIT 1",("TEST / После чёрного октября — визуальный комплект",)).fetchone()
+ finally:c.close()
+ if not v:raise HTTPException(404)
+ return redirect("/post/"+str(v["id"]))
 
 @app.get("/draft/telegram-security-2026")
 def tg_security_draft(req:Request):
