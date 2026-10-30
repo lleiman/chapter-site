@@ -8,6 +8,7 @@ from fastapi.exception_handlers import http_exception_handler
 from urllib.parse import urlencode
 import httpx
 from security_media_2026 import png_for
+from security_editorial_post import TITLE as RESEARCH_POST_TITLE, BODY as RESEARCH_POST_BODY, IMAGE_CAPTION, rendered as render_research_markup
 from research_security_2026 import ARTICLE_TITLE, ARTICLE_BODY
 from research_print_2026 import render_page
 
@@ -70,6 +71,9 @@ def initialize():
   if not c.execute("SELECT id FROM posts WHERE title=?",("TEST / После чёрного октября — визуальный комплект",)).fetchone():
    c.execute("INSERT INTO posts(title,body,status,created_at,updated_at) VALUES(?,?,?,?,?)",
              ("TEST / После чёрного октября — визуальный комплект","◢ После чёрного октября\n\nЗа несколько недель в одном потоке сошлись инцидент Railway, исследования критических уязвимостей и самораспространяющиеся prompt injection.\n\nИз этого легко собрать историю о том, что ИИ уже самостоятельно «взламывает интернет». Но факты требуют большей точности.\n\n◉ Что подтверждено\n△ Что остаётся предварительной версией\n▣ Что новые полномочия агентов меняют в цифровой безопасности\n\n✦ Главный вопрос: может ли чужой текст стать командой?\n\nLeiman Lab / Research Note 002\n[Тестовый предпросмотр. Ссылку на публичную статью добавим перед публикацией.]","draft",ts(),ts()))
+  if not c.execute("SELECT id FROM posts WHERE title=?",(RESEARCH_POST_TITLE,)).fetchone():
+   c.execute("INSERT INTO posts(title,body,status,created_at,updated_at) VALUES(?,?,?,?,?)",
+             (RESEARCH_POST_TITLE,RESEARCH_POST_BODY,"draft",ts(),ts()))
   c.commit()
  finally:c.close()
 
@@ -91,7 +95,7 @@ def redirect(path="/"):return RedirectResponse(path,status_code=303)
 def field(name,value=""):return '<input type="hidden" name="'+name+'" value="'+E(value)+'">'
 def head(req,title):
  active=authorized(req)
- nav=('<nav><a href="/">Обзор</a><a href="/new">Новый пост</a><a href="/calendar">Расписание</a><a href="/research/security-2026">Исследование</a><a href="/draft/telegram-security-2026">ТГ-анонс</a><a href="/draft/telegram-security-2026-media">Медиа-тест</a><a href="/style">Стиль журнала</a><a href="/settings">Настройки</a><a href="/logout">Выход</a></nav>') if active else ''
+ nav=('<nav><a href="/">Обзор</a><a href="/new">Новый пост</a><a href="/calendar">Расписание</a><a href="/research/security-2026">Исследование</a><a href="/draft/telegram-security-2026">ТГ-анонс</a><a href="/draft/telegram-security-2026-media">Медиа-тест</a><a href="/draft/security-editorial-v2">Редакционный пост</a><a href="/style">Стиль журнала</a><a href="/settings">Настройки</a><a href="/logout">Выход</a></nav>') if active else ''
  return """<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
  <title>"""+E(title)+""" · ADEPTS Editorial</title>
  <style>
@@ -350,6 +354,46 @@ async def one_time_emoji_preview():
   put_setting("media_test_v2","error")
   print("EDITORIAL_BRANDED_ALBUM_FAILED "+type(exc).__name__+" "+str(exc)[:190],flush=True)
 
+async def send_research_preview(chat,body):
+ # A photo album cannot hold a long researched essay within the caption limits.
+ # Send images with a short heading, then the full formatted article as a second message.
+ await send_test_album(chat,IMAGE_CAPTION)
+ try:manifest=json.loads(setting("emoji_manifest_v1","{}"))
+ except Exception:manifest={}
+ html_body=render_research_markup(body,manifest)
+ if len(body)>4096:raise RuntimeError("Post body exceeds Telegram limits")
+ try:
+  result=await tg("sendMessage",{"chat_id":chat,"text":html_body,
+    "parse_mode":"HTML","link_preview_options":json.dumps({"is_disabled":True}),
+    "disable_notification":"true"})
+ except RuntimeError as exc:
+  err=str(exc).lower()
+  if "parse entities" not in err and "custom emoji" not in err and "custom_emoji" not in err:raise
+  # Retry a failed custom-emoji parse only, not an ambiguous network failure.
+  html_body=render_research_markup(body,{})
+  result=await tg("sendMessage",{"chat_id":chat,"text":html_body,
+    "parse_mode":"HTML","link_preview_options":json.dumps({"is_disabled":True}),
+    "disable_notification":"true"})
+ return result
+
+async def one_time_research_preview():
+ await asyncio.sleep(17)
+ if setting("research_post_v2_preview") in ("done","attempted"):return
+ chat=setting("preview_chat","")
+ if not chat:return
+ c=conn()
+ try:v=c.execute("SELECT body,status FROM posts WHERE title=? ORDER BY id DESC LIMIT 1",(RESEARCH_POST_TITLE,)).fetchone()
+ finally:c.close()
+ if not v or v["status"]!="draft":return
+ put_setting("research_post_v2_preview","attempted")
+ try:
+  await send_research_preview(chat,v["body"])
+  put_setting("research_post_v2_preview","done")
+  print("EDITORIAL_RESEARCH_V2_SENT_PRIVATE_WITH_MEDIA",flush=True)
+ except Exception as exc:
+  put_setting("research_post_v2_preview","error")
+  print("EDITORIAL_RESEARCH_V2_FAILED "+type(exc).__name__+" "+str(exc)[:160],flush=True)
+
 async def scheduler():
  while True:
   try:
@@ -374,6 +418,7 @@ async def lifespan(app):
  worker=asyncio.create_task(scheduler())
  asyncio.create_task(one_time_test_preview())
  asyncio.create_task(one_time_emoji_preview())
+ asyncio.create_task(one_time_research_preview())
  yield
  worker.cancel()
  try:await worker
@@ -492,13 +537,20 @@ def detail(req:Request,pid:int):
   body+="</div><p class='muted'>3 изображения для тестового альбома. Точные значения на графиках взяты из FBI IC3.</p>"
   if status in ("draft","approved","scheduled"):
    body+="<form method='post' action='/post/"+str(pid)+"/preview-media'>"+csrf()+"<button class='secondary'>Отправить 3 картинки и пост в личный Telegram</button></form>"
- if v["last_error"]:body+="<p class='hint'>"+E(v["last_error"])+"</p>"
+ if v["title"]==RESEARCH_POST_TITLE:
+  body+="<div class='panel'><div class='eyebrow'>LEIMAN LAB · TELEGRAM</div><h2>Оформленный предпросмотр</h2><p class='muted'>Сначала альбом из трёх карточек, затем длинный пост с оформлением и ссылками.</p><div style='display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0'>"
+  for n in (1,2,3):
+   body+="<a href='/media/security-2026/"+str(n)+".png' target='_blank' rel='noopener'><img src='/media/security-2026/"+str(n)+".png' alt='Карточка "+str(n)+"' style='width:100%;height:auto;display:block'></a>"
+  body+="</div><div style='max-width:740px;padding:26px;background:#222126;border:1px solid #49464a;border-radius:12px;white-space:pre-wrap;font:16px/1.65 system-ui,sans-serif'>"+render_research_markup(v["body"],{},False)+"</div></div>"
+  if status in ("draft","approved","scheduled"):
+   body+="<form action='/post/"+str(pid)+"/research-preview' method='post'>"+csrf()+"<button>Отправить оформленный пост и 3 изображения в личный Telegram</button></form>"
+"<p class='hint'>"+E(v["last_error"])+"</p>"
  if v["scheduled_at"]:body+="<p>Дата: <strong>"+E(stamp(v["scheduled_at"]))+"</strong></p>"
  if v["published_message_id"]:body+="<p><a target='_blank' rel='noopener' href='https://t.me/"+E(CHANNEL.lstrip("@"))+"/"+str(v["published_message_id"])+"'>Открыть опубликованный пост</a></p>"
  if status=="draft":
   body+="<form action='/post/"+str(pid)+"/edit' method='post'>"+csrf()+"<label>Внутреннее название<input name='title' maxlength='160' value='"+E(v["title"])+"' required></label><label>Текст<textarea maxlength='4096' name='body' required>"+E(v["body"])+"</textarea></label><button>Сохранить изменения</button></form>"
   body+="<form action='/post/"+str(pid)+"/approve' method='post'>"+csrf()+"<button class='secondary'>Одобрить материал</button></form>"
- if status in ("draft","approved","scheduled"):
+ if status in ("draft","approved","scheduled") and v["title"]!=RESEARCH_POST_TITLE:
   body+="<form action='/post/"+str(pid)+"/preview' method='post'>"+csrf()+"<button class='secondary'>Отправить предпросмотр в приватный Telegram</button></form>"
  if status in ("approved","scheduled"):
   local=(now()+timedelta(days=1)).astimezone(TZ).strftime("%Y-%m-%dT12:00")
@@ -541,6 +593,20 @@ def unschedule(req:Request,pid:int,csrf_token:str=Form(alias="csrf")):
  try:c.execute("UPDATE posts SET status='approved',scheduled_at=NULL,last_error=NULL,updated_at=? WHERE id=? AND status IN ('scheduled','approved','missed','uncertain')",(ts(),pid));c.commit()
  finally:c.close()
  return redirect("/post/"+str(pid))
+@app.post("/post/{pid}/research-preview")
+async def research_preview(req:Request,pid:int,csrf_token:str=Form(alias="csrf")):
+ verify(req,csrf_token)
+ chat=setting("preview_chat","")
+ if not chat:return redirect("/settings")
+ c=conn()
+ try:v=c.execute("SELECT * FROM posts WHERE id=?",(pid,)).fetchone()
+ finally:c.close()
+ if not v or v["title"]!=RESEARCH_POST_TITLE:raise HTTPException(404)
+ try:await send_research_preview(chat,v["body"])
+ except Exception as exc:
+  return page(req,"Проблема отправки","<h1>Не удалось завершить предпросмотр</h1><p class='hint'>"+E(str(exc)[:200])+"</p><p>Если альбом уже пришёл, повторная отправка может создать дубликат.</p><a class='btn secondary' href='/post/"+str(pid)+"'>Назад</a>")
+ return redirect("/post/"+str(pid))
+
 @app.post("/post/{pid}/preview-media")
 async def preview_media(req:Request,pid:int,csrf_token:str=Form(alias="csrf")):
  verify(req,csrf_token)
@@ -645,6 +711,15 @@ def security_research(req:Request):
  finally:c.close()
  if not v:raise HTTPException(404,"Article not found")
  return HTMLResponse(render_page(v["id"]),headers={"Cache-Control":"no-store","X-Frame-Options":"DENY","Referrer-Policy":"no-referrer","Content-Security-Policy":"default-src 'self';style-src 'unsafe-inline';base-uri 'none';frame-ancestors 'none'"})
+
+@app.get("/draft/security-editorial-v2")
+def security_editorial_v2(req:Request):
+ require(req)
+ c=conn()
+ try:v=c.execute("SELECT id FROM posts WHERE title=? ORDER BY id DESC LIMIT 1",(RESEARCH_POST_TITLE,)).fetchone()
+ finally:c.close()
+ if not v:raise HTTPException(404)
+ return redirect("/post/"+str(v["id"]))
 
 @app.get("/draft/telegram-security-2026-media")
 def tg_security_media_draft(req:Request):
