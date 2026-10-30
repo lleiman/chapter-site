@@ -10,7 +10,8 @@ import httpx
 from security_media_2026 import png_for
 from security_editorial_post import TITLE as RESEARCH_POST_TITLE, BODY as RESEARCH_POST_BODY, IMAGE_CAPTION, rendered as render_research_markup
 from research_security_2026 import ARTICLE_TITLE, ARTICLE_BODY
-from research_print_2026 import render_page
+from security_full_report_2026 import render_page
+from security_short_post_2026 import TITLE as SHORT_POST_TITLE, BODY as SHORT_POST_BODY
 
 DB_PATH=os.getenv("EDITORIAL_DB_PATH","/data/editorial.sqlite3")
 TZ=ZoneInfo("Asia/Makassar")
@@ -74,6 +75,9 @@ def initialize():
   if not c.execute("SELECT id FROM posts WHERE title=?",(RESEARCH_POST_TITLE,)).fetchone():
    c.execute("INSERT INTO posts(title,body,status,created_at,updated_at) VALUES(?,?,?,?,?)",
              (RESEARCH_POST_TITLE,RESEARCH_POST_BODY,"draft",ts(),ts()))
+  if not c.execute("SELECT id FROM posts WHERE title=?",(SHORT_POST_TITLE,)).fetchone():
+   c.execute("INSERT INTO posts(title,body,status,created_at,updated_at) VALUES(?,?,?,?,?)",
+             (SHORT_POST_TITLE,SHORT_POST_BODY,"draft",ts(),ts()))
   c.commit()
  finally:c.close()
 
@@ -95,7 +99,7 @@ def redirect(path="/"):return RedirectResponse(path,status_code=303)
 def field(name,value=""):return '<input type="hidden" name="'+name+'" value="'+E(value)+'">'
 def head(req,title):
  active=authorized(req)
- nav=('<nav><a href="/">Обзор</a><a href="/new">Новый пост</a><a href="/calendar">Расписание</a><a href="/research/security-2026">Исследование</a><a href="/draft/telegram-security-2026">ТГ-анонс</a><a href="/draft/telegram-security-2026-media">Медиа-тест</a><a href="/draft/security-editorial-v2">Редакционный пост</a><a href="/style">Стиль журнала</a><a href="/settings">Настройки</a><a href="/logout">Выход</a></nav>') if active else ''
+ nav=('<nav><a href="/">Обзор</a><a href="/new">Новый пост</a><a href="/calendar">Расписание</a><a href="/research/security-2026">Исследование</a><a href="/draft/telegram-security-2026">ТГ-анонс</a><a href="/draft/telegram-security-2026-media">Медиа-тест</a><a href="/draft/security-editorial-short">ТГ: короткий пост</a><a href="/draft/security-editorial-v2">Полный ТГ-тест</a><a href="/style">Стиль журнала</a><a href="/settings">Настройки</a><a href="/logout">Выход</a></nav>') if active else ''
  return """<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
  <title>"""+E(title)+""" · ADEPTS Editorial</title>
  <style>
@@ -394,6 +398,25 @@ async def one_time_research_preview():
   put_setting("research_post_v2_preview","error")
   print("EDITORIAL_RESEARCH_V2_FAILED "+type(exc).__name__+" "+str(exc)[:160],flush=True)
 
+async def one_time_short_preview():
+ await asyncio.sleep(17)
+ if setting("short_binance_2026_preview") in ("done","attempted"):return
+ chat=setting("preview_chat","")
+ if not chat:return
+ c=conn()
+ try:v=c.execute("SELECT body,status FROM posts WHERE title=? ORDER BY id DESC LIMIT 1",
+  (SHORT_POST_TITLE,)).fetchone()
+ finally:c.close()
+ if not v or v["status"]!="draft":return
+ put_setting("short_binance_2026_preview","attempted")
+ try:
+  await send_research_preview(chat,v["body"])
+  put_setting("short_binance_2026_preview","done")
+  print("EDITORIAL_SHORT_BINANCE_SENT_PRIVATE",flush=True)
+ except Exception as exc:
+  put_setting("short_binance_2026_preview","error")
+  print("EDITORIAL_SHORT_BINANCE_FAILED "+type(exc).__name__+" "+str(exc)[:165],flush=True)
+
 async def scheduler():
  while True:
   try:
@@ -419,6 +442,7 @@ async def lifespan(app):
  asyncio.create_task(one_time_test_preview())
  asyncio.create_task(one_time_emoji_preview())
  asyncio.create_task(one_time_research_preview())
+ asyncio.create_task(one_time_short_preview())
  yield
  worker.cancel()
  try:await worker
@@ -466,7 +490,7 @@ async def editor_http_error(req:Request, exc:HTTPException):
 @app.get("/health")
 def health():
  research_render=render_page(1)
- return {"ok":True,"service":"adepts-editorial","database":"mounted","magazine_render_ok":'class="reading"' in research_render and 'class="facttable"' in research_render}
+ return {"ok":True,"service":"adepts-editorial","database":"mounted","magazine_render_ok":'class="full"' in research_render and 'class="evidence"' in research_render and 'Binance' in research_render}
 @app.get("/login")
 def login(req:Request,next:str="/"):
  destination=safe_return_path(next)
@@ -537,7 +561,7 @@ def detail(req:Request,pid:int):
   body+="</div><p class='muted'>3 изображения для тестового альбома. Точные значения на графиках взяты из FBI IC3.</p>"
   if status in ("draft","approved","scheduled"):
    body+="<form method='post' action='/post/"+str(pid)+"/preview-media'>"+csrf()+"<button class='secondary'>Отправить 3 картинки и пост в личный Telegram</button></form>"
- if v["title"]==RESEARCH_POST_TITLE:
+ if v["title"] in (RESEARCH_POST_TITLE,SHORT_POST_TITLE):
   body+="<div class='panel'><div class='eyebrow'>LEIMAN LAB · TELEGRAM</div><h2>Оформленный предпросмотр</h2><p class='muted'>Сначала альбом из трёх карточек, затем длинный пост с оформлением и ссылками.</p><div style='display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0'>"
   for n in (1,2,3):
    body+="<a href='/media/security-2026/"+str(n)+".png' target='_blank' rel='noopener'><img src='/media/security-2026/"+str(n)+".png' alt='Карточка "+str(n)+"' style='width:100%;height:auto;display:block'></a>"
@@ -550,7 +574,7 @@ def detail(req:Request,pid:int):
  if status=="draft":
   body+="<form action='/post/"+str(pid)+"/edit' method='post'>"+csrf()+"<label>Внутреннее название<input name='title' maxlength='160' value='"+E(v["title"])+"' required></label><label>Текст<textarea maxlength='4096' name='body' required>"+E(v["body"])+"</textarea></label><button>Сохранить изменения</button></form>"
   body+="<form action='/post/"+str(pid)+"/approve' method='post'>"+csrf()+"<button class='secondary'>Одобрить материал</button></form>"
- if status in ("draft","approved","scheduled") and v["title"]!=RESEARCH_POST_TITLE:
+ if status in ("draft","approved","scheduled") and v["title"] not in (RESEARCH_POST_TITLE,SHORT_POST_TITLE):
   body+="<form action='/post/"+str(pid)+"/preview' method='post'>"+csrf()+"<button class='secondary'>Отправить предпросмотр в приватный Telegram</button></form>"
  if status in ("approved","scheduled"):
   local=(now()+timedelta(days=1)).astimezone(TZ).strftime("%Y-%m-%dT12:00")
@@ -601,7 +625,7 @@ async def research_preview(req:Request,pid:int,csrf_token:str=Form(alias="csrf")
  c=conn()
  try:v=c.execute("SELECT * FROM posts WHERE id=?",(pid,)).fetchone()
  finally:c.close()
- if not v or v["title"]!=RESEARCH_POST_TITLE:raise HTTPException(404)
+ if not v or v["title"] not in (RESEARCH_POST_TITLE,SHORT_POST_TITLE):raise HTTPException(404)
  try:await send_research_preview(chat,v["body"])
  except Exception as exc:
   return page(req,"Проблема отправки","<h1>Не удалось завершить предпросмотр</h1><p class='hint'>"+E(str(exc)[:200])+"</p><p>Если альбом уже пришёл, повторная отправка может создать дубликат.</p><a class='btn secondary' href='/post/"+str(pid)+"'>Назад</a>")
@@ -711,6 +735,15 @@ def security_research(req:Request):
  finally:c.close()
  if not v:raise HTTPException(404,"Article not found")
  return HTMLResponse(render_page(v["id"]),headers={"Cache-Control":"no-store","X-Frame-Options":"DENY","Referrer-Policy":"no-referrer","Content-Security-Policy":"default-src 'self';style-src 'unsafe-inline';base-uri 'none';frame-ancestors 'none'"})
+
+@app.get("/draft/security-editorial-short")
+def short_security_post(req:Request):
+ require(req)
+ c=conn()
+ try:v=c.execute("SELECT id FROM posts WHERE title=? ORDER BY id DESC LIMIT 1",(SHORT_POST_TITLE,)).fetchone()
+ finally:c.close()
+ if not v:raise HTTPException(404,"Short draft not found")
+ return redirect("/post/"+str(v["id"]))
 
 @app.get("/draft/security-editorial-v2")
 def security_editorial_v2(req:Request):
