@@ -1,0 +1,78 @@
+/* LEIMAN LAB / PAPER RESEARCH EDITION. Scoped to one article. Older dark pages stay unchanged. */
+.report-paper{background:#f4f2ee;color:#1c1b19;display:grid;grid-template-columns:232px minmax(0,1fr);min-height:75vh;border-bottom:1px solid #c9c4bd}
+.report-paper .report-index{background:#151516;color:#f4f2ee;padding:35px 24px;position:relative}
+.report-paper .report-index-inner{position:sticky;top:20px}
+.report-paper .report-kicker{font:700 10px/1.65 var(--mono);letter-spacing:.1em;color:#b8b5af}
+.report-paper .report-brand{font:700 19px/1.25 var(--sans);letter-spacing:.08em;margin:0 0 8px}
+.report-paper .report-nav{display:grid;gap:0;margin:45px 0;border-top:1px solid #444344}
+.report-paper .report-nav a{font:600 11px/1.5 var(--sans);letter-spacing:.04em;color:#c3c0bb;padding:13px 0;border-bottom:1px solid #3b3939}
+.report-paper .report-nav a:hover{color:white}
+.report-paper .report-nav a.current{color:#fa4b52}
+.report-paper .report-status{font:600 10px/1.55 var(--mono);border:1px solid #706e6d;color:#d0cbc5;padding:10px;margin:24px 0}
+.report-paper .report-main{min-width:0;width:100%}
+.report-paper .report-toolbar{padding:24px 44px;display:flex;gap:22px;justify-content:space-between;align-items:center;border-bottom:1px solid #d6d1cb;font:700 10px/1.5 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:#69645e}
+.report-paper .report-toolbar a:hover{color:#b72532}
+.report-paper .report-toolbar span{color:#b52532}
+.report-paper .full{padding-top:42px}
+.report-paper .full h1{max-width:900px;overflow-wrap:normal}
+.report-paper .full .risk-list{max-width:870px;gap:12px}
+.report-paper .full .risk-list>div{padding-right:17px}
+.report-paper .full .intro{color:#292622}
+.report-paper .full .event:before{content:"";display:block;position:absolute;width:8px;height:8px;border-radius:50%;background:#c72b34;top:-5px;left:1px}
+.report-paper .full .figure{max-width:870px}
+.report-paper .full .sources{max-width:870px}
+.report-paper .full a{text-decoration:underline;text-underline-offset:3px}
+.report-paper .full .article-foot a{text-decoration:none}
+.report-paper .report-related{border-top:1px solid #c9c4bd;background:#eae7e0;padding:27px 46px;font:600 13px/1.6 var(--sans);color:#4b4640}
+.report-paper .report-related a{color:#b82b36;text-decoration:underline}
+.report-paper + .site-footer{background:#0b0b0d}
+@media(max-width:980px){.report-paper{grid-template-columns:175px minmax(0,1fr)}.report-paper .report-index{padding:24px 16px}.report-paper .report-toolbar{padding:20px 25px}}
+@media(max-width:700px){.report-paper{grid-template-columns:1fr}.report-paper .report-index{padding:20px}.report-paper .report-index-inner{position:static}.report-paper .report-nav{display:flex;overflow-x:auto;gap:20px;white-space:nowrap;margin:16px 0 0;border:0;padding:0}.report-paper .report-nav a{border:0;padding:0 0 5px}.report-paper .report-status{margin:10px 0 0;display:inline-block}.report-paper .report-toolbar{padding:16px 20px}.report-paper .full{padding-top:29px}.report-paper .report-related{padding:22px}}
+
+
+.full{max-width:1015px;margin:0 auto;padding:48px 52px 85px;font-family:Georgia,"Times New Roman",serif;color:#26231f}
+.full .overline{font:700 11px/1.5 Arial,sans-serif;letter-spacing:.11em;color:#c72b34;text-transform:uppercase}
+.full h1{font:400 clamp(48px,6vw,83px)/1.05 Georgia,serif;letter-spacing:-.056em;margin:18px 0 24px;max-width:880px}
+.full h2{font:400 clamp(29px,3.3vw,46px)/1.13 Georgia,serif;letter-spacing:-.035em;margin:0 0 20px}
+.full h3{font:700 23px/1.23 Georgia,serif;margin:30px 0 15px}
+.full p,.full li{font:400 19px/1.79 Georgia,serif;color:#38342f;max-width:765px}
+.full p{margin:0 0 23px}.full strong{font-weight:700;color:#171717}
+.full a{color:#aa2930;text-decoration:underline;text-underline-offset:3px}
+.full .deck{font:400 clamp(23px,3vw,31px)/1.35 Georgia,serif;color:#68635e;max-width:805px;margin:17px 0 25px}
+.full .metadata{font:500 12px/1.8 Arial,sans-serif;color:#69645e;padding-bottom:27px;border-bottom:1px solid #c9c4bd}
+.full .intro{font:400 22px/1.58 Georgia,serif;color:#292622;margin:39px 0 24px;max-width:785px}
+.full section.chapter{margin:60px 0 0;border-top:1px solid #c9c4bd;padding-top:26px}
+.full .chapter-top{font:700 11px/1.45 Arial,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:#bd2a33;margin-bottom:14px}
+.full .sources{display:grid;grid-template-columns:1fr;gap:0;margin-top:19px}
+.full .sources a{color:#403d3a;padding:15px 0;font:500 14px/1.55 Arial,sans-serif;border-top:1px solid #d1cdc6;display:block}
+.full .factline{border-left:3px solid #c72b34;padding:9px 0 10px 22px;margin:32px 0;font:italic 23px/1.5 Georgia,serif;color:#272421;max-width:785px}
+.full .figure{background:#eeece6;border:1px solid #cec9c0;margin:34px 0;padding:27px 30px 23px}
+.full .figure h3{font:700 17px/1.3 Arial,sans-serif;margin:5px 0 9px}
+.full .figure figcaption{font:400 12px/1.65 Arial,sans-serif;color:#77726b;margin:12px 0 0}
+.full .figure svg{width:100%;height:auto;display:block}
+.full .figure .micro{font:700 10px Arial,sans-serif;letter-spacing:.08em;color:#c72b34}
+.full .evidence{width:100%;border-collapse:collapse;font:400 14px/1.5 Arial,sans-serif;margin:26px 0}
+.full .evidence th{text-align:left;font:700 11px/1.5 Arial,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:#78736e}
+.full .evidence th,.full .evidence td{border-bottom:1px solid #c9c4bd;padding:15px 15px 15px 0;vertical-align:top}
+.full .evidence .status{font-weight:700;white-space:nowrap}
+.full .evidence .pending{color:#94663f}.full .evidence .unproven{color:#88817b}
+.full .timeline{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin:25px 0 36px;padding:0}
+.full .timeline:before{display:none}
+.full .event{border-top:1px solid #a59f98;position:relative;margin:0;padding:18px 16px 18px 0}
+.full .event:before{top:-5px;left:1px}
+.full .event time{font:700 12px Arial,sans-serif;color:#c72b34}
+.full .event strong{font:700 16px/1.3 Georgia,serif}
+.full .event p{font:400 13px/1.6 Georgia,serif;color:#69645f;margin:8px 0 0}
+.full .risk-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;margin:26px 0}
+.full .risk-list>div{padding:20px 20px 22px 0;border-top:1px solid #c9c4bd}
+.full .risk-list b{font:700 16px/1.4 Georgia,serif}
+.full .risk-list p{font:400 14px/1.65 Georgia,serif;margin:8px 0 0}
+.full .stamp{font:400 12px/1.7 Arial,sans-serif;color:#79736e;margin:15px 0}
+.full .pill{font:700 10px Arial,sans-serif;display:inline-block;padding:5px 8px;border:1px solid #bdb7ad;letter-spacing:.07em;color:#625d57}
+.full .note-box{background:#ebe7df;border-left:3px solid #c72b34;padding:20px 23px;margin:25px 0}
+.full .note-box p{font:400 15px/1.65 Georgia,serif;margin:0}
+.full .article-foot{margin:55px 0 0;border-top:1px solid #c9c4bd;padding-top:25px}
+.full .article-foot p{font:400 13px/1.6 Arial,sans-serif;color:#68645e}
+.full .article-foot a{display:inline-block;border:1px solid #55504a;color:#222;padding:12px 18px;margin-top:15px;text-decoration:none;font:700 11px Arial,sans-serif}
+@media(max-width:850px){.full{padding:30px 24px 70px}.full .timeline{grid-template-columns:1fr 1fr}}
+@media(max-width:590px){.full{padding:26px 18px 60px}.full h1{font-size:clamp(39px,9vw,56px)}.full h2{font-size:31px}.full p,.full li{font-size:18px;line-height:1.73}.full .intro{font-size:20px}.full .figure{padding:17px 12px}.full .timeline,.full .risk-list{grid-template-columns:1fr}.full .evidence{font-size:12px}.full .evidence .status{white-space:normal}.full .evidence th,.full .evidence td{padding:11px 8px 11px 0}}
