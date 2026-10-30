@@ -221,14 +221,21 @@ def media_url(n):
  return "https://"+domain+"/media/security-2026/"+str(n)+".png"
 
 async def send_test_album(chat,body):
+ if not BOT:raise RuntimeError("Bot token not configured")
  media=[]
+ files={}
  for n in (1,2,3):
-  entry={"type":"photo","media":media_url(n)}
-  if n==1:entry["caption"]=body[:950]
-  media.append(entry)
- result=await tg("sendMediaGroup",{"chat_id":chat,"media":json.dumps(media,ensure_ascii=False),
-   "disable_notification":"true"})
- return result
+  attachment="photo"+str(n)
+  media.append({"type":"photo","media":"attach://"+attachment,
+    **({"caption":body[:950]} if n==1 else {})})
+  files[attachment]=(str(n)+".png",png_for(n),"image/png")
+ async with httpx.AsyncClient(timeout=45) as client:
+  response=await client.post("https://api.telegram.org/bot"+BOT+"/sendMediaGroup",
+   data={"chat_id":chat,"media":json.dumps(media,ensure_ascii=False),"disable_notification":"true"},
+   files=files)
+  result=response.json()
+ if not result.get("ok"):raise RuntimeError(str(result.get("description","Telegram media error"))[:200])
+ return result["result"]
 
 async def one_time_test_preview():
  await asyncio.sleep(12)
