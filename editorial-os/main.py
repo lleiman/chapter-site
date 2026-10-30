@@ -11,7 +11,7 @@ from security_media_2026 import png_for
 from security_editorial_post import TITLE as RESEARCH_POST_TITLE, BODY as RESEARCH_POST_BODY, IMAGE_CAPTION, rendered as render_research_markup
 from research_security_2026 import ARTICLE_TITLE, ARTICLE_BODY
 from security_full_report_2026 import render_page
-from security_short_post_2026 import TITLE as SHORT_POST_TITLE, BODY as SHORT_POST_BODY
+from security_short_post_2026 import TITLE as SHORT_POST_TITLE, BODY as SHORT_POST_BODY, IMAGE_CAPTION as SHORT_IMAGE_CAPTION
 
 DB_PATH=os.getenv("EDITORIAL_DB_PATH","/data/editorial.sqlite3")
 TZ=ZoneInfo("Asia/Makassar")
@@ -358,10 +358,10 @@ async def one_time_emoji_preview():
   put_setting("media_test_v2","error")
   print("EDITORIAL_BRANDED_ALBUM_FAILED "+type(exc).__name__+" "+str(exc)[:190],flush=True)
 
-async def send_research_preview(chat,body):
+async def send_research_preview(chat,body,caption=IMAGE_CAPTION):
  # A photo album cannot hold a long researched essay within the caption limits.
  # Send images with a short heading, then the full formatted article as a second message.
- await send_test_album(chat,IMAGE_CAPTION)
+ await send_test_album(chat,caption)
  try:manifest=json.loads(setting("emoji_manifest_v1","{}"))
  except Exception:manifest={}
  html_body=render_research_markup(body,manifest)
@@ -400,7 +400,7 @@ async def one_time_research_preview():
 
 async def one_time_short_preview():
  await asyncio.sleep(17)
- if setting("short_binance_2026_preview") in ("done","attempted"):return
+ if setting("short_binance_2026_preview_final") in ("done","attempted"):return
  chat=setting("preview_chat","")
  if not chat:return
  c=conn()
@@ -408,13 +408,13 @@ async def one_time_short_preview():
   (SHORT_POST_TITLE,)).fetchone()
  finally:c.close()
  if not v or v["status"]!="draft":return
- put_setting("short_binance_2026_preview","attempted")
+ put_setting("short_binance_2026_preview_final","attempted")
  try:
-  await send_research_preview(chat,v["body"])
-  put_setting("short_binance_2026_preview","done")
+  await send_research_preview(chat,v["body"],SHORT_IMAGE_CAPTION)
+  put_setting("short_binance_2026_preview_final","done")
   print("EDITORIAL_SHORT_BINANCE_SENT_PRIVATE",flush=True)
  except Exception as exc:
-  put_setting("short_binance_2026_preview","error")
+  put_setting("short_binance_2026_preview_final","error")
   print("EDITORIAL_SHORT_BINANCE_FAILED "+type(exc).__name__+" "+str(exc)[:165],flush=True)
 
 async def scheduler():
@@ -626,7 +626,7 @@ async def research_preview(req:Request,pid:int,csrf_token:str=Form(alias="csrf")
  try:v=c.execute("SELECT * FROM posts WHERE id=?",(pid,)).fetchone()
  finally:c.close()
  if not v or v["title"] not in (RESEARCH_POST_TITLE,SHORT_POST_TITLE):raise HTTPException(404)
- try:await send_research_preview(chat,v["body"])
+ try:await send_research_preview(chat,v["body"],SHORT_IMAGE_CAPTION if v["title"]==SHORT_POST_TITLE else IMAGE_CAPTION)
  except Exception as exc:
   return page(req,"Проблема отправки","<h1>Не удалось завершить предпросмотр</h1><p class='hint'>"+E(str(exc)[:200])+"</p><p>Если альбом уже пришёл, повторная отправка может создать дубликат.</p><a class='btn secondary' href='/post/"+str(pid)+"'>Назад</a>")
  return redirect("/post/"+str(pid))
