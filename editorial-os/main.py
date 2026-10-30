@@ -10,8 +10,8 @@ import httpx
 from security_media_2026 import png_for
 from security_editorial_post import TITLE as RESEARCH_POST_TITLE, BODY as RESEARCH_POST_BODY, IMAGE_CAPTION, rendered as render_research_markup
 from research_security_2026 import ARTICLE_TITLE, ARTICLE_BODY
-from security_full_report_2026 import render_page
-from security_short_post_2026 import TITLE as SHORT_POST_TITLE, BODY as SHORT_POST_BODY, IMAGE_CAPTION as SHORT_IMAGE_CAPTION
+from security_prevention_report_2026 import render_page
+from security_short_post_2026 import TITLE as SHORT_POST_TITLE, BODY as SHORT_POST_BODY, IMAGE_CAPTION as SHORT_IMAGE_CAPTION, OLD_TITLE as OLD_SHORT_POST_TITLE, OLD_BODY as OLD_SHORT_POST_BODY
 
 DB_PATH=os.getenv("EDITORIAL_DB_PATH","/data/editorial.sqlite3")
 TZ=ZoneInfo("Asia/Makassar")
@@ -75,6 +75,8 @@ def initialize():
   if not c.execute("SELECT id FROM posts WHERE title=?",(RESEARCH_POST_TITLE,)).fetchone():
    c.execute("INSERT INTO posts(title,body,status,created_at,updated_at) VALUES(?,?,?,?,?)",
              (RESEARCH_POST_TITLE,RESEARCH_POST_BODY,"draft",ts(),ts()))
+  c.execute("UPDATE posts SET title=?,body=?,updated_at=? WHERE title=? AND body=? AND status='draft'",
+            (SHORT_POST_TITLE,SHORT_POST_BODY,ts(),OLD_SHORT_POST_TITLE,OLD_SHORT_POST_BODY))
   if not c.execute("SELECT id FROM posts WHERE title=?",(SHORT_POST_TITLE,)).fetchone():
    c.execute("INSERT INTO posts(title,body,status,created_at,updated_at) VALUES(?,?,?,?,?)",
              (SHORT_POST_TITLE,SHORT_POST_BODY,"draft",ts(),ts()))
@@ -400,7 +402,7 @@ async def one_time_research_preview():
 
 async def one_time_short_preview():
  await asyncio.sleep(17)
- if setting("short_binance_2026_preview_final") in ("done","attempted"):return
+ if setting("short_protection_2026_preview_v1") in ("done","attempted"):return
  chat=setting("preview_chat","")
  if not chat:return
  c=conn()
@@ -408,14 +410,14 @@ async def one_time_short_preview():
   (SHORT_POST_TITLE,)).fetchone()
  finally:c.close()
  if not v or v["status"]!="draft":return
- put_setting("short_binance_2026_preview_final","attempted")
+ put_setting("short_protection_2026_preview_v1","attempted")
  try:
   await send_research_preview(chat,v["body"],SHORT_IMAGE_CAPTION)
-  put_setting("short_binance_2026_preview_final","done")
-  print("EDITORIAL_SHORT_BINANCE_SENT_PRIVATE",flush=True)
+  put_setting("short_protection_2026_preview_v1","done")
+  print("EDITORIAL_SHORT_PREVENTION_SENT_PRIVATE",flush=True)
  except Exception as exc:
-  put_setting("short_binance_2026_preview_final","error")
-  print("EDITORIAL_SHORT_BINANCE_FAILED "+type(exc).__name__+" "+str(exc)[:165],flush=True)
+  put_setting("short_protection_2026_preview_v1","error")
+  print(""EDITORIAL_SHORT_PREVENTION_FAILED "+type(exc).__name__+" "+str(exc)[:165],flush=True)
 
 async def scheduler():
  while True:
@@ -490,7 +492,7 @@ async def editor_http_error(req:Request, exc:HTTPException):
 @app.get("/health")
 def health():
  research_render=render_page(1)
- return {"ok":True,"service":"adepts-editorial","database":"mounted","magazine_render_ok":'class="full"' in research_render and 'class="evidence"' in research_render and 'Binance' in research_render}
+ return {"ok":True,"service":"adepts-editorial","database":"mounted","magazine_render_ok":'class="full"' in research_render and 'class="evidence"' in research_render and 'LiteLLM' in research_render and 'как защитить' in research_render}
 @app.get("/login")
 def login(req:Request,next:str="/"):
  destination=safe_return_path(next)
