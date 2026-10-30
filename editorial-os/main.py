@@ -544,7 +544,7 @@ def detail(req:Request,pid:int):
   body+="</div><div style='max-width:740px;padding:26px;background:#222126;border:1px solid #49464a;border-radius:12px;white-space:pre-wrap;font:16px/1.65 system-ui,sans-serif'>"+render_research_markup(v["body"],{},False)+"</div></div>"
   if status in ("draft","approved","scheduled"):
    body+="<form action='/post/"+str(pid)+"/research-preview' method='post'>"+csrf()+"<button>Отправить оформленный пост и 3 изображения в личный Telegram</button></form>"
-"<p class='hint'>"+E(v["last_error"])+"</p>"
+ if v["last_error"]:body+="<p class='hint'>"+E(v["last_error"])+"</p>"
  if v["scheduled_at"]:body+="<p>Дата: <strong>"+E(stamp(v["scheduled_at"]))+"</strong></p>"
  if v["published_message_id"]:body+="<p><a target='_blank' rel='noopener' href='https://t.me/"+E(CHANNEL.lstrip("@"))+"/"+str(v["published_message_id"])+"'>Открыть опубликованный пост</a></p>"
  if status=="draft":
