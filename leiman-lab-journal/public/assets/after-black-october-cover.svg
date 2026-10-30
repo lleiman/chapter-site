@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="После чёрного октября: исследование безопасности Leiman Lab">
+<rect width="1200" height="630" fill="#f4f2ee"/><rect width="16" height="630" fill="#151516"/>
+<rect x="24" y="22" width="1154" height="585" fill="none" stroke="#c8c3bb" stroke-width="1"/>
+<g font-family="Arial,Helvetica,sans-serif"><text x="65" y="73" font-size="21" letter-spacing="5" font-weight="700" fill="#171718">LEIMAN LAB</text>
+<text x="66" y="108" font-size="12" letter-spacing="2" fill="#78736b">RESEARCH / TECHNOLOGY / SOCIETY</text>
+<text x="1047" y="75" font-size="15" font-weight="700" letter-spacing="2" fill="#c72b34">004 / 2026</text>
+</g><path d="M65 128H1134" stroke="#b5afa7" stroke-width="2"/>
+<g font-family="Georgia,'DejaVu Serif',serif" fill="#171718">
+<text x="64" y="270" font-size="92">После чёрного</text>
+<text x="64" y="377" font-size="92">октября.</text>
+</g>
+<path d="M65 411H222" stroke="#c72b34" stroke-width="5"/>
+<g font-family="Arial,Helvetica,sans-serif"><text x="66" y="465" font-size="28" fill="#322e2a">Подтверждённые взломы.</text><text x="66" y="506" font-size="28" fill="#322e2a">Конкретные меры защиты.</text>
+<text x="66" y="576" font-size="14" letter-spacing="1.2" font-weight="700" fill="#847e78">LEIMAN LAB  /  SECURITY FIELD REPORT</text></g>
+<g opacity=".42" stroke="#b7afa6" fill="none"><circle cx="1000" cy="397" r="150"/><circle cx="1000" cy="397" r="111"/><circle cx="1000" cy="397" r="74"/><path d="M840 397H1160M1000 230V560"/></g>
+<circle cx="1000" cy="397" r="9" fill="#c72b34"/>
+</svg>
