@@ -417,7 +417,7 @@ async def one_time_short_preview():
   print("EDITORIAL_SHORT_PREVENTION_SENT_PRIVATE",flush=True)
  except Exception as exc:
   put_setting("short_protection_2026_preview_v1","error")
-  print(""EDITORIAL_SHORT_PREVENTION_FAILED "+type(exc).__name__+" "+str(exc)[:165],flush=True)
+  print("EDITORIAL_SHORT_PREVENTION_FAILED "+type(exc).__name__+" "+str(exc)[:165],flush=True)
 
 async def scheduler():
  while True:
