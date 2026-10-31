@@ -55,11 +55,11 @@ likeButton?.addEventListener('click', async () => {
 });
 
 // ---------- Text fragments ----------
-const blocks = () => [...document.querySelectorAll('.article-prose span[data-edit]')].filter(s => /^b\.\d+$/.test(s.dataset.edit));
-const blockIndex = node => Number(node.dataset.edit.slice(2));
+const blocks = () => [...document.querySelectorAll('.article-prose span[data-edit], .paper-prose [data-comment-block]')].filter(s => s.dataset.commentBlock != null || /^b\.\d+$/.test(s.dataset.edit));
+const blockIndex = node => node.dataset.commentBlock != null ? Number(node.dataset.commentBlock) : Number(node.dataset.edit.slice(2));
 const blockOf = node => {
-  const host = (node.nodeType === 1 ? node : node.parentElement)?.closest('.article-prose span[data-edit]');
-  return host && /^b\.\d+$/.test(host.dataset.edit) ? host : null;
+  const host = (node.nodeType === 1 ? node : node.parentElement)?.closest('.article-prose span[data-edit], .paper-prose [data-comment-block]');
+  return host && (host.dataset.commentBlock != null || /^b\.\d+$/.test(host.dataset.edit)) ? host : null;
 };
 
 /** Finds where a fragment comment sits now: stored offsets first, then the quote in its block, then anywhere. */
@@ -80,6 +80,42 @@ function unwrapMarks() {
   });
 }
 
+// For the new paper edition, mark text-node ranges without deleting links,
+// strong emphasis, footnotes or other inline markup on a highlighted paragraph.
+function markPaperText(block,ranges) {
+  const walker=document.createTreeWalker(block,NodeFilter.SHOW_TEXT);
+  const originalNodes=[];
+  let node;
+  while((node=walker.nextNode()))originalNodes.push(node);
+  let offset=0;
+  for(const original of originalNodes) {
+    const plain=original.nodeValue||'';
+    const from=offset,to=from+plain.length;
+    offset=to;
+    if(!plain.length)continue;
+    const relevant=ranges.filter(r=>r.end>from && r.start<to);
+    if(!relevant.length)continue;
+    const cuts=[...new Set([0,plain.length,...relevant.flatMap(r=>[
+      Math.max(0,Math.min(plain.length,r.start-from)),
+      Math.max(0,Math.min(plain.length,r.end-from))
+    ])])].sort((a,b)=>a-b);
+    const fragment=document.createDocumentFragment();
+    for(let i=0;i<cuts.length-1;i++) {
+      const left=cuts[i],right=cuts[i+1];
+      if(right<=left)continue;
+      const active=relevant.filter(r=>r.start<=from+left && r.end>=from+right);
+      const value=plain.slice(left,right);
+      if(!active.length){fragment.append(value);continue;}
+      const mark=el('mark',{className:'ll-note',tabIndex:0,textContent:value});
+      mark.dataset.ids=active.map(r=>r.id).join(',');
+      const ending=active.filter(r=>r.end===from+right).length;
+      if(ending)mark.dataset.end=ending;
+      fragment.append(mark);
+    }
+    original.replaceWith(fragment);
+  }
+}
+
 function renderMarks() {
   unwrapMarks();
   if (editing()) return;
@@ -93,6 +129,7 @@ function renderMarks() {
     byBlock.get(spot.block).push({ ...spot, id: c.id });
   }
   for (const [block, ranges] of byBlock) {
+    if (block.dataset.commentBlock != null) { markPaperText(block,ranges); continue; }
     const text = block.textContent;
     const cuts = [...new Set([0, text.length, ...ranges.flatMap(r => [r.start, r.end])])].sort((a, b) => a - b);
     const frag = document.createDocumentFragment();
@@ -325,7 +362,7 @@ const utm = (() => {
 // ---------- «Дочитал»: 30 s of visible article text or a scroll past 75 % of it ----------
 // The text is measured from the start of .article-prose to the sources block, so comments do not count.
 (() => {
-  const prose = document.querySelector('.article-prose');
+  const prose = document.querySelector('.article-prose, .paper-prose');
   const end = prose?.querySelector('.sources');
   if (!prose || !end) return;
   const READ_MS = 30000, READ_SHARE = 0.75;
