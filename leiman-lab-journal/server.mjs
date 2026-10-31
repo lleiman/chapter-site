@@ -290,9 +290,25 @@ function renderBlock(block, i) {
     default: return '';
   }
 }
+// Connect the paper edition to the same per-article comment anchors as the journal.
+// We annotate only the authored p/h2/h3 blocks, preserving inline sources and typography.
+function paperCommentAnchors(a) {
+  let index=0;
+  const annotated=a.longformHtml.replace(/<(p|h2|h3)(\s[^>]*)?>([\s\S]*?)<\/\1>/g,(full,tag,attrs='',inner)=>{
+    const n=index++;
+    return '<'+tag+(attrs||'')+' data-comment-block="'+n+'">'+inner+'</'+tag+'>';
+  });
+  if(index!==a.paragraphs.length) {
+    console.warn('paper comment block count mismatch',index,a.paragraphs.length);
+  }
+  return annotated;
+}
+
 function paperResearchView(a, origin) {
   // Trusted authored JSON: special layout does not affect existing dark editions.
   const pageUrl = origin + '/articles/' + a.slug;
+  const stats = engagement.counts(a.slug);
+  const share = 'https://t.me/share/url?url='+encodeURIComponent(pageUrl)+'&text='+encodeURIComponent(a.title);
   const draftBanner = a.draft
     ? '<div class="draft-banner micro"><div class="container">ПРЕДПРОСМОТР · НОВАЯ СВЕТЛАЯ РЕДАКЦИЯ · В ЖУРНАЛЕ ПОКА НЕ ПОКАЗЫВАЕТСЯ</div></div>' : '';
   const sections = [
@@ -313,7 +329,26 @@ function paperResearchView(a, origin) {
     '<div class="report-main"><div class="report-toolbar">'+
     '<a href="/">← ЖУРНАЛ</a><span>004 / SPECIAL REPORT</span>'+
     '<a href="/articles/black-october">ТЁМНАЯ ПЕРВАЯ ЧАСТЬ ↗</a></div>'+
-    '<article class="full" itemscope itemtype="https://schema.org/Article">'+a.longformHtml+'</article>'+
+    '<div class="paper-stats micro" aria-label="Реакции на исследование">'+
+    '<span><b data-stat="views">'+fmt(stats.views)+'</b> просмотров</span>'+
+    '<span>♥ <b data-stat="likes">'+fmt(stats.likes)+'</b> лайков</span>'+
+    '<a href="#comments"><b data-stat="comments">'+fmt(stats.comments)+'</b> комментариев ↓</a></div>'+
+    '<article class="full paper-prose" itemscope itemtype="https://schema.org/Article">'+paperCommentAnchors(a)+
+    '<div class="paper-engagement">'+
+      '<div class="share-row">'+
+        '<button class="button button-line ll-like" type="button" aria-pressed="false"><span class="ll-heart">♡</span> НРАВИТСЯ <b data-stat="likes">'+fmt(stats.likes)+'</b></button>'+
+        '<a class="button button-primary" href="'+escaped(share)+'" target="_blank" rel="noopener noreferrer">ПОДЕЛИТЬСЯ В TELEGRAM ↗</a>'+
+        '<button class="button button-line" id="copy-link" data-url="'+escaped(pageUrl)+'" type="button">КОПИРОВАТЬ ССЫЛКУ</button>'+
+      '</div>'+
+      '<section class="ll-comments" id="comments" aria-labelledby="comments-title">'+
+        '<div class="sources-head"><h2 class="eyebrow" id="comments-title">КОММЕНТАРИИ / <span data-stat="comments">'+fmt(stats.comments)+'</span></h2>'+
+        '<span class="micro muted">МОЖНО КОММЕНТИРОВАТЬ ТЕКСТ ИЛИ ОТДЕЛЬНЫЙ ФРАГМЕНТ</span></div>'+
+        '<div class="ll-comment-list"></div>'+
+        '<noscript><p class="micro muted">Для комментариев требуется JavaScript.</p></noscript>'+
+      '</section>'+
+    '</div></article>'+
+    '<script type="module" src="'+asset('/assets/engage.js')+'"></script>'+
+    '<script>document.getElementById("copy-link")?.addEventListener("click",async e=>{try{await navigator.clipboard.writeText(e.currentTarget.dataset.url);e.currentTarget.textContent="ССЫЛКА СКОПИРОВАНА ✓"}catch{e.currentTarget.textContent="КОПИРОВАНИЕ НЕДОСТУПНО"}})</script>'+
     footerLink+'</div></div></main>';
   return page({content,title:a.title+' — Leiman Lab',description:a.description||a.summary,
     canonical:pageUrl,cover:origin+asset('/assets/black-october-1200x630.png'),
