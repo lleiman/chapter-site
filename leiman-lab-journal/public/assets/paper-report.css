@@ -366,3 +366,24 @@
   .report-paper .report-toolbar{padding-left:16px;padding-right:16px}
   .report-paper .report-related{padding-left:16px;padding-right:16px}
 }
+
+
+/* Remove duplicate branding and toolbars above the article on narrow phones.
+   The site header already contains both the wordmark and journal link. */
+@media(max-width:700px){
+  .report-paper .report-index{padding-top:0;padding-bottom:0}
+  .report-paper .report-index-inner{display:block}
+  .report-paper .report-index .report-brand,
+  .report-paper .report-index .report-kicker,
+  .report-paper .report-toolbar{display:none}
+  .report-paper .report-nav{
+    margin:0;padding:0;border-top:0;
+    gap:20px;max-width:100%;
+  }
+  .report-paper .report-nav a{
+    min-height:48px;
+    border-bottom:2px solid transparent;
+    padding:14px 0 12px;
+  }
+  .report-paper .report-nav a.current{border-bottom-color:#e23640}
+}
