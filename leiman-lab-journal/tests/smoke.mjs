@@ -72,6 +72,8 @@ async function aiIndexTests() {
     assert.ok(index.includes(text), 'missing AI Index component: ' + text);
   }
   assert.ok(index.includes('name="viewport"'), 'AI Index viewport');
+  assert.ok(index.includes('Как я буду проверять'), 'AI Index must use the singular author voice');
+  assert.ok(!index.includes('Как мы будем проверять'), 'avoid collective editorial voice');
   assert.ok(index.includes('rel="canonical" href="http://127.0.0.1:37839/ai-index"'), 'AI Index canonical');
   for (const asset of ['/assets/ai-index.css', '/assets/ai-index.html', '/assets/ai-index.js', '/assets/ai-index-cover.svg', '/assets/ai-index-article.css']) {
     const result = await get(asset);
@@ -82,6 +84,8 @@ async function aiIndexTests() {
   assert.equal(aiArticle.status, 200);
   const article = await aiArticle.text();
   assert.ok(article.includes('Калькулятор') || article.includes('калькулятор'), 'AI Index article');
+  assert.ok(article.includes('Я собрал AI Index'), 'article should use the first-person author voice');
+  assert.ok(!article.includes('Мы собрали AI Index'), 'remove collective author voice');
   assert.ok(article.includes('ai-index-article.css') && article.includes('ai-index-cover.svg'), 'paper styling and cover');
   const home = await html('/');
   assert.ok(home.includes('href="/ai-index"') && home.includes('href="/articles/ai-index-2026"'), 'AI Index navigation and story card');
