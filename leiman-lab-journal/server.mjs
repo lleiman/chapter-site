@@ -108,7 +108,7 @@ function page({ content, title, description, canonical, cover, type = 'website',
 <meta property="og:description" content="${escaped(description)}">
 <meta property="og:url" content="${escaped(canonical)}">
 <meta property="og:image" content="${escaped(cover)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
-<meta property="og:image:type" content="image/png"><meta name="twitter:card" content="summary_large_image">
+<meta property="og:image:type" content="${cover?.includes('.svg') ? 'image/svg+xml' : 'image/png'}"><meta name="twitter:card" content="summary_large_image">
 ${date ? `<meta property="article:published_time" content="${escaped(date)}">` : ''}${modified ? `<meta property="article:modified_time" content="${escaped(modified)}">` : ''}${noindex ? '<meta name="robots" content="noindex">' : ''}
 <link rel="stylesheet" href="${asset('/assets/site.css')}">${extraStylesheet ? `<link rel="stylesheet" href="${escaped(asset(extraStylesheet))}">` : ''}${structured}
 </head><body${bodyData}>
@@ -399,7 +399,7 @@ function articleView(a, origin) {
   ${related.length?`<section class="container more-stories"><div class="section-rule"><h2>ДАЛЬШЕ <span class="accent">/</span></h2><a class="micro muted" href="/">ВЕСЬ ЖУРНАЛ ↗</a></div><div class="featured-story">${related.map(x=>card(x,'featured')).join('')}</div></section>`:''}
   </main>`;
   const description = a.description || a.summary;
-  return page({content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${asset(a.cover)}`,type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@type':'NewsArticle',headline:a.title,description,image:[`${origin}${asset(a.cover)}`],datePublished:a.date,...(a.updated?{dateModified:a.updated}:{}),inLanguage:'ru',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'}}});
+  return page({content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${asset(a.cover)}`,type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,extraStylesheet:a.slug==='ai-index-2026'?'/assets/ai-index-article.css':'',bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@type':'NewsArticle',headline:a.title,description,image:[`${origin}${asset(a.cover)}`],datePublished:a.date,...(a.updated?{dateModified:a.updated}:{}),inLanguage:'ru',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'}}});
 }
 
 function write(res, code, data, mime='text/html; charset=utf-8', more={}) {
@@ -590,7 +590,7 @@ const server = http.createServer((req,res)=>{
   if(pathname==='/')return write(res,200,home(origin));
    if(pathname==='/ai-index'||pathname==='/ai-index/'){
      const content=readFileSync(path.join(PUBLIC,'assets','ai-index.html'),'utf8');
-     return write(res,200,page({content,title:'AI Index: какую нейросеть для чего использовать — Leiman Lab',description:'Независимый путеводитель по моделям ИИ: 20 систем, 14 сценариев, сравнение, калькулятор затрат, первоисточники и протокол испытаний. 4 ноября 2026.',canonical:origin+'/ai-index',cover:origin+asset('/assets/black-october-1200x630.png'),extraStylesheet:'/assets/ai-index.css',bodyData:' data-page="ai-index"',schema:{'@context':'https://schema.org','@type':'TechArticle',headline:'Какую нейросеть для чего использовать',datePublished:'2026-11-04',dateModified:'2026-11-04',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'},inLanguage:'ru'}}));
+     return write(res,200,page({content,title:'AI Index: какую нейросеть для чего использовать — Leiman Lab',description:'Независимый путеводитель по моделям ИИ: 20 систем, 14 сценариев, сравнение, калькулятор затрат, первоисточники и протокол испытаний. 4 ноября 2026.',canonical:origin+'/ai-index',cover:origin+asset('/assets/ai-index-cover.svg'),extraStylesheet:'/assets/ai-index.css',bodyData:' data-page="ai-index"',schema:{'@context':'https://schema.org','@type':'TechArticle',headline:'Какую нейросеть для чего использовать',datePublished:'2026-11-04',dateModified:'2026-11-04',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'},inLanguage:'ru'}}));
    }
   // Legacy URLs of the first Railway Function version: Telegram previews already point here.
   const legacyOg=pathname.match(/^\/og\/([a-z0-9-]+)\.png$/);
