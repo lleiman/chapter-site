@@ -50,6 +50,7 @@ async function main() {
   assert.ok(page.includes('Чёрный октябрь'));
   assert.ok(!page.includes('главный вопрос не в том'));
   console.log('✓ homepage includes both articles');
+  await aiIndexTests();
   await rubricTests();
   await featureTests();
   await editorTests();
@@ -62,6 +63,32 @@ const editArticle = async (slug, edits) => {
   const r = await api('POST', `/api/admin/article/${slug}`, { version: json.version, edits });
   assert.equal(r.status, 200, JSON.stringify(r.json));
 };
+
+async function aiIndexTests() {
+  const route = await get('/ai-index');
+  assert.equal(route.status, 200, 'AI Index route');
+  const index = await route.text();
+  for (const text of ['Какую', 'AI INDEX', 'ai-task', 'ai-model-grid', 'ai-compare-output', 'ai-result-cost', 'id="method"']) {
+    assert.ok(index.includes(text), 'missing AI Index component: ' + text);
+  }
+  assert.ok(index.includes('name="viewport"'), 'AI Index viewport');
+  assert.ok(index.includes('rel="canonical" href="http://127.0.0.1:37839/ai-index"'), 'AI Index canonical');
+  for (const asset of ['/assets/ai-index.css', '/assets/ai-index.html', '/assets/ai-index.js', '/assets/ai-index-cover.svg', '/assets/ai-index-article.css']) {
+    const result = await get(asset);
+    assert.equal(result.status, 200, asset + ' available');
+    assert.ok((await result.text()).length > 100);
+  }
+  const aiArticle = await get('/articles/ai-index-2026');
+  assert.equal(aiArticle.status, 200);
+  const article = await aiArticle.text();
+  assert.ok(article.includes('Калькулятор') || article.includes('калькулятор'), 'AI Index article');
+  assert.ok(article.includes('ai-index-article.css') && article.includes('ai-index-cover.svg'), 'paper styling and cover');
+  const home = await html('/');
+  assert.ok(home.includes('href="/ai-index"') && home.includes('href="/articles/ai-index-2026"'), 'AI Index navigation and story card');
+  const map = await html('/sitemap.xml');
+  assert.ok(map.includes('/ai-index') && map.includes('/articles/ai-index-2026'), 'AI Index in sitemap');
+  console.log('✓ AI Index: route, interactive components, article, assets and sitemap');
+}
 
 async function featureTests() {
   // About page, Telegram follow block

@@ -108,13 +108,13 @@ function page({ content, title, description, canonical, cover, type = 'website',
 <meta property="og:description" content="${escaped(description)}">
 <meta property="og:url" content="${escaped(canonical)}">
 <meta property="og:image" content="${escaped(cover)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
-<meta property="og:image:type" content="image/png"><meta name="twitter:card" content="summary_large_image">
+<meta property="og:image:type" content="${cover?.includes('.svg') ? 'image/svg+xml' : 'image/png'}"><meta name="twitter:card" content="summary_large_image">
 ${date ? `<meta property="article:published_time" content="${escaped(date)}">` : ''}${modified ? `<meta property="article:modified_time" content="${escaped(modified)}">` : ''}${noindex ? '<meta name="robots" content="noindex">' : ''}
 <link rel="stylesheet" href="${asset('/assets/site.css')}">${extraStylesheet ? `<link rel="stylesheet" href="${escaped(asset(extraStylesheet))}">` : ''}${structured}
 </head><body${bodyData}>
 <header class="site-header"><div class="container header-inner">
 <a class="identity" href="/" aria-label="Leiman Lab — главная">${logo}<span class="wordmark">LEIMAN <b>LAB</b></span></a>
-<nav aria-label="Основная навигация"><a href="/#journal">Журнал</a><a href="/about">Об авторе</a><a href="/search">Поиск</a><a href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer"><span class="nav-long">Telegram</span><span class="nav-short">TG</span> ↗</a></nav>
+<nav aria-label="Основная навигация"><a href="/#journal">Журнал</a><a href="/ai-index">AI INDEX</a><a href="/about">Об авторе</a><a href="/search">Поиск</a><a href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer"><span class="nav-long">Telegram</span><span class="nav-short">TG</span> ↗</a></nav>
 </div></header>
 ${content}
 <footer class="site-footer"><div class="container footer-inner">
@@ -399,7 +399,7 @@ function articleView(a, origin) {
   ${related.length?`<section class="container more-stories"><div class="section-rule"><h2>ДАЛЬШЕ <span class="accent">/</span></h2><a class="micro muted" href="/">ВЕСЬ ЖУРНАЛ ↗</a></div><div class="featured-story">${related.map(x=>card(x,'featured')).join('')}</div></section>`:''}
   </main>`;
   const description = a.description || a.summary;
-  return page({content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${asset(a.cover)}`,type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@type':'NewsArticle',headline:a.title,description,image:[`${origin}${asset(a.cover)}`],datePublished:a.date,...(a.updated?{dateModified:a.updated}:{}),inLanguage:'ru',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'}}});
+  return page({content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${asset(a.cover)}`,type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,extraStylesheet:a.slug==='ai-index-2026'?'/assets/ai-index-article.css':'',bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@type':'NewsArticle',headline:a.title,description,image:[`${origin}${asset(a.cover)}`],datePublished:a.date,...(a.updated?{dateModified:a.updated}:{}),inLanguage:'ru',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'}}});
 }
 
 function write(res, code, data, mime='text/html; charset=utf-8', more={}) {
@@ -580,7 +580,7 @@ const server = http.createServer((req,res)=>{
   if(pathname==='/health')return write(res,200,'OK','text/plain; charset=utf-8',{'Cache-Control':'no-store'});
   if(pathname==='/robots.txt')return write(res,200,`User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n`,'text/plain; charset=utf-8');
   if(pathname==='/sitemap.xml'){
-    const paths=['/','/about',...rubrics.map(r=>'/rubrics/'+r.slug),...published().map(a=>'/articles/'+a.slug)];
+    const paths=['/','/about','/ai-index',...rubrics.map(r=>'/rubrics/'+r.slug),...published().map(a=>'/articles/'+a.slug)];
     return write(res,200,`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${paths.map(p=>`<url><loc>${xmlSafe(origin+p)}</loc></url>`).join('')}</urlset>`,'application/xml; charset=utf-8');
   }
   if(pathname==='/rss.xml'){
@@ -588,6 +588,10 @@ const server = http.createServer((req,res)=>{
     return write(res,200,`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Leiman Lab</title><link>${origin}/</link><description>Исследования, технологии и искусство</description><language>ru</language>${items}</channel></rss>`,'application/rss+xml; charset=utf-8');
   }
   if(pathname==='/')return write(res,200,home(origin));
+   if(pathname==='/ai-index'||pathname==='/ai-index/'){
+     const content=readFileSync(path.join(PUBLIC,'assets','ai-index.html'),'utf8');
+     return write(res,200,page({content,title:'AI Index: какую нейросеть для чего использовать — Leiman Lab',description:'Независимый путеводитель по моделям ИИ: 20 систем, 14 сценариев, сравнение, калькулятор затрат, первоисточники и протокол испытаний. 4 ноября 2026.',canonical:origin+'/ai-index',cover:origin+asset('/assets/ai-index-cover.svg'),extraStylesheet:'/assets/ai-index.css',bodyData:' data-page="ai-index"',schema:{'@context':'https://schema.org','@type':'TechArticle',headline:'Какую нейросеть для чего использовать',datePublished:'2026-11-04',dateModified:'2026-11-04',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'},inLanguage:'ru'}}));
+   }
   // Legacy URLs of the first Railway Function version: Telegram previews already point here.
   const legacyOg=pathname.match(/^\/og\/([a-z0-9-]+)\.png$/);
   if(legacyOg && articleBySlug.has(legacyOg[1])){const data=readFileSync(path.join(PUBLIC,articleBySlug.get(legacyOg[1]).cover));return write(res,200,data,'image/png',{'Cache-Control':'public,max-age=600','Content-Length':data.length});}
