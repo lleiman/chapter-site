@@ -9,7 +9,7 @@ const port = 37839;
 const origin = `http://127.0.0.1:${port}`;
 const dataDir = mkdtempSync(path.join(tmpdir(), 'leiman-lab-test-'));
 const PASSWORD = 'test-password';
-const child = spawn(process.execPath, ['server.mjs'], { env: { ...process.env, PORT: String(port), DATA_DIR: dataDir, ADMIN_PASSWORD: PASSWORD }, stdio: ['ignore', 'pipe', 'pipe'] });
+const child = spawn(process.execPath, ['server.mjs'], { env: { ...process.env, PORT: String(port), DATA_DIR: dataDir, ADMIN_PASSWORD: PASSWORD, GOOGLE_SITE_VERIFICATION: 'gsc-sample-token' }, stdio: ['ignore', 'pipe', 'pipe'] });
 let errors = '';
 child.stderr.on('data', b => errors += b.toString());
 async function get(path) { return fetch(origin + path); }
@@ -47,6 +47,8 @@ async function main() {
   assert.equal(p404.status, 404);
   console.log('✓ 404 handling');
   const page = await (await get('/')).text();
+  assert.ok(page.includes('<meta name="google-site-verification" content="gsc-sample-token">'), 'Search Console ownership tag must be in the HTML head');
+  assert.ok(page.indexOf('google-site-verification') < page.indexOf('</head>'), 'Google verification tag must appear inside head');
   assert.ok(page.includes('Warhound'));
   assert.ok(page.includes('Чёрный октябрь'));
   assert.ok(!page.includes('главный вопрос не в том'));
