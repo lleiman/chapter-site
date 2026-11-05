@@ -19,6 +19,10 @@ const PORT = Number(process.env.PORT || 3000);
 const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(ROOT, 'data'));
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 const HISTORY_LIMIT = 100;
+// Google Search Console URL-prefix verification.
+// Set GOOGLE_SITE_VERIFICATION in Railway only after Google issues the token.
+// The tag must remain available for Google's periodic ownership checks.
+const GOOGLE_SITE_VERIFICATION = String(process.env.GOOGLE_SITE_VERIFICATION || '').trim();
 const PUBLIC_ORIGIN = (process.env.PUBLIC_URL || 'https://leimanlab.com').replace(/\/$/, '');
 const ogPngCache = new Map();
 const engagement = createEngagement(DATA_DIR);
@@ -123,6 +127,7 @@ function page({ content, title, description, canonical, cover, type = 'website',
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0B0B0D"><meta name="color-scheme" content="dark">
 <meta name="description" content="${escaped(description)}">
+${GOOGLE_SITE_VERIFICATION ? `<meta name="google-site-verification" content="${escaped(GOOGLE_SITE_VERIFICATION)}">` : ''}
 <title>${escaped(title)}</title>
 <link rel="canonical" href="${escaped(canonical)}"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="${escaped(type)}"><meta property="og:locale" content="ru_RU">
