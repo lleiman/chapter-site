@@ -31,7 +31,8 @@ async function main() {
     const html = await (await get('/articles/'+slug)).text();
     assert.ok(html.includes('property="og:title"'), 'OG title missing');
     assert.ok(html.includes('property="og:image"'), 'OG image missing');
-    assert.ok(html.includes('"@type":"NewsArticle"'), 'JSON-LD missing');
+    assert.ok(html.includes('"@type":"Article"'), 'JSON-LD article missing');
+    assert.ok(html.includes('"mainEntityOfPage"'), 'schema canonical entity missing');
     assert.ok(html.includes('<section class="sources">'), 'Primary sources missing');
     assert.ok(html.includes('LEIMAN LAB'), 'Brand missing');
     console.log('✓ article metadata', slug);
@@ -50,6 +51,7 @@ async function main() {
   assert.ok(page.includes('Чёрный октябрь'));
   assert.ok(!page.includes('главный вопрос не в том'));
   console.log('✓ homepage includes both articles');
+  await seoTests();
   await aiIndexTests();
   await rubricTests();
   await featureTests();
@@ -63,6 +65,30 @@ const editArticle = async (slug, edits) => {
   const r = await api('POST', `/api/admin/article/${slug}`, { version: json.version, edits });
   assert.equal(r.status, 200, JSON.stringify(r.json));
 };
+
+async function seoTests() {
+  const homepage=await html('/');
+  assert.ok(homepage.includes('rel="canonical" href="'+origin+'/"'), 'local canonical should use testing origin');
+  assert.ok(homepage.includes('property="og:image" content="'+origin+'/og/ai-index-2026.png?v='), 'home OG should be raster PNG');
+  const article=await html('/articles/ai-index-2026');
+  assert.ok(article.includes('"@type":"Article"') && article.includes('"mainEntityOfPage"'), 'article metadata');
+  assert.ok(article.includes('/og/ai-index-2026.png?v='), 'AI Index OG PNG');
+  const articleAlt=await html('/articles/after-black-october');
+  assert.ok(articleAlt.includes('/og/after-black-october.png?v='), 'research OG PNG');
+  for (const route of ['/og/ai-index-2026.png','/og/after-black-october.png']) {
+    const response=await get(route);
+    assert.equal(response.status,200,'raster OG '+route);
+    assert.equal(response.headers.get('content-type'),'image/png');
+    const bytes=new Uint8Array(await response.arrayBuffer());
+    assert.ok(bytes.length>10000 && bytes[0]===137 && bytes[1]===80 && bytes[2]===78 && bytes[3]===71,'PNG signature '+route);
+  }
+  const sitemap=await html('/sitemap.xml');
+  assert.ok(sitemap.includes('<lastmod>2026-11-04</lastmod>'), 'sitemap modification dates');
+  const legacy=await fetch(origin+'/articles/ai-index-2026?utm_source=telegram',{redirect:'manual',headers:{'X-Forwarded-Host':'journal-web-production-bf39.up.railway.app'}});
+  assert.equal(legacy.status,308,'legacy Railway host should redirect');
+  assert.equal(legacy.headers.get('location'),'https://leimanlab.com/articles/ai-index-2026?utm_source=telegram');
+  console.log('✓ SEO: canonical host, page metadata, sitemap and raster social covers');
+}
 
 async function aiIndexTests() {
   const route = await get('/ai-index');
@@ -176,7 +202,9 @@ async function rubricTests() {
   const home = await (await get('/')).text();
   assert.ok(home.includes('class="rubric-nav"') && home.includes('href="/rubrics/ai"'), 'rubric nav on home');
   assert.ok((await (await get('/articles/warhound')).text()).includes('class="micro rubric-link" href="/rubrics/ai"'), 'rubric link in article');
-  assert.ok((await (await get('/sitemap.xml')).text()).includes('/rubrics/mind'), 'rubrics in sitemap');
+  assert.ok((await (await get('/sitemap.xml')).text()).includes('/rubrics/ai'), 'populated rubrics in sitemap');
+  assert.ok(!(await html('/sitemap.xml')).includes('/rubrics/mind'), 'empty rubrics excluded from sitemap');
+  assert.ok((await html('/rubrics/mind')).includes('name="robots" content="noindex"'), 'empty rubric must not be indexed');
   const { json: before } = await api('GET', '/api/admin/article/warhound');
   assert.equal(before.rubrics.length, 4);
   assert.equal((await api('POST', '/api/admin/article/warhound', { version: before.version, edits: { rubric: 'nope' } })).status, 400);
@@ -299,18 +327,18 @@ async function engagementTests() {
   console.log('✓ comments: rate limit, data saved to disk');
 }
 
-// Without ADMIN_PASSWORD (production setup) the editor works with no password at all.
+// Editor must fail closed when ADMIN_PASSWORD is not configured.
 async function openEditorTest() {
   const openPort = port + 1, openDir = mkdtempSync(path.join(tmpdir(), 'leiman-lab-open-'));
   const open = spawn(process.execPath, ['server.mjs'], { env: { ...process.env, PORT: String(openPort), DATA_DIR: openDir, ADMIN_PASSWORD: '' }, stdio: 'ignore' });
   try {
     const url = `http://127.0.0.1:${openPort}`;
     for (let i = 0; i < 50; i++) { try { if ((await fetch(url + '/health')).ok) break; } catch {} await new Promise(r => setTimeout(r, 100)); }
-    assert.equal((await fetch(url + '/api/admin/login', { method: 'POST' })).status, 200);
+    assert.equal((await fetch(url + '/api/admin/login', { method: 'POST' })).status, 401);
     const save = await fetch(url + '/api/admin/site', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ edits: { 'home.lead': 'Без пароля' } }) });
-    assert.equal(save.status, 200);
-    assert.ok((await (await fetch(url + '/')).text()).includes('Без пароля'));
-    console.log('✓ editor: open without ADMIN_PASSWORD');
+    assert.equal(save.status, 401);
+    assert.ok(!(await (await fetch(url + '/')).text()).includes('Без пароля'));
+    console.log('✓ editor: fails closed without ADMIN_PASSWORD');
   } finally {
     const exited = new Promise(resolve => open.once('exit', resolve));
     open.kill('SIGTERM'); await exited;
