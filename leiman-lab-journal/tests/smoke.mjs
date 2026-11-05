@@ -53,6 +53,10 @@ async function main() {
   assert.ok(page.includes('Чёрный октябрь'));
   assert.ok(!page.includes('главный вопрос не в том'));
   console.log('✓ homepage includes both articles');
+  const gsc=await get('/google6203997034e41be1.html');
+  assert.equal(gsc.status,200,'Google verification URL');
+  assert.equal((await gsc.text()).trim(),'google-site-verification: google6203997034e41be1.html','Google verification file content');
+  assert.ok(gsc.headers.get('content-type').startsWith('text/html'),'Google verification content-type');
   await seoTests();
   await aiIndexTests();
   await rubricTests();
