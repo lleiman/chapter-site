@@ -6,6 +6,7 @@
  */
 import http from 'node:http';
 import { createHash, timingSafeEqual } from 'node:crypto';
+import sharp from 'sharp';
 import { readFileSync, readdirSync, statSync, writeFileSync, renameSync, mkdirSync, unlinkSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -18,6 +19,8 @@ const PORT = Number(process.env.PORT || 3000);
 const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(ROOT, 'data'));
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 const HISTORY_LIMIT = 100;
+const PUBLIC_ORIGIN = (process.env.PUBLIC_URL || 'https://leimanlab.com').replace(/\/$/, '');
+const ogPngCache = new Map();
 const engagement = createEngagement(DATA_DIR);
 const plural = (n, [one, few, many]) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many; };
 const fmt = n => n.toLocaleString('ru-RU');
@@ -74,13 +77,33 @@ const escaped = value => String(value ?? '').replace(/[&<>"']/g, ch => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
 }[ch]));
 const jsonSafe = data => JSON.stringify(data).replace(/</g, '\\u003c');
+const requestHost = req => String(req.headers['x-forwarded-host'] || req.headers.host || `localhost:${PORT}`).split(',')[0].trim().toLowerCase();
+const isLocalHost = host => /^(?:localhost|127\.0\.0\.1)(?::\d+)?$/.test(host);
 const canonicalOrigin = req => {
-  if (process.env.PUBLIC_URL) return process.env.PUBLIC_URL.replace(/\/$/, '');
-  let hostname = String(req.headers['x-forwarded-host'] || req.headers.host || `localhost:${PORT}`).split(',')[0].trim();
-  if (!/^[a-z0-9.:-]+$/i.test(hostname)) hostname = `localhost:${PORT}`;
-  const local = hostname.startsWith('localhost') || hostname.startsWith('127.');
-  return `${local ? 'http' : 'https'}://${hostname}`;
+  const host = requestHost(req);
+  return isLocalHost(host) ? `http://${host}` : PUBLIC_ORIGIN;
 };
+const socialCover = a => {
+  if (!/\.svg$/i.test(a.cover || '')) return asset(a.cover);
+  const src = a.slug === 'ai-index-2026' ? '/assets/ai-index-dark-og.svg' : a.cover;
+  const version = asset(src).split('?v=')[1] || '1';
+  return `/og/${a.slug}.png?v=${version}`;
+};
+const makeSocialSchema = (a, origin) => ({
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: a.title,
+  description: a.description || a.summary,
+  url: `${origin}/articles/${a.slug}`,
+  mainEntityOfPage: {'@type':'WebPage', '@id': `${origin}/articles/${a.slug}`},
+  image: [origin + socialCover(a)],
+  datePublished: a.date,
+  ...(a.updated ? {dateModified: a.updated} : {}),
+  inLanguage: 'ru-RU',
+  ...(a.tags?.length ? {keywords: a.tags.join(', ')} : {}),
+  author: {'@type':'Person', name:'Лев Лейман', url:origin+'/about'},
+  publisher: {'@type':'Organization', name:'Leiman Lab', url:origin+'/', logo:{'@type':'ImageObject',url:origin+'/assets/leiman-lab-monogram.png'}}
+});
 
 const logo = `<span class="ll-sign" aria-label="Leiman Lab">
   <span class="tile light"></span><span class="tile empty"></span><span class="tile empty"></span>
@@ -462,7 +485,7 @@ function snapshot(name, data) {
 
 // Without ADMIN_PASSWORD the editor is open to anyone (author's choice, 23.10.2026); setting it turns the password back on.
 function passwordOk(req) {
-  if (!ADMIN_PASSWORD) return true;
+  if (!ADMIN_PASSWORD) return false;
   const given = Buffer.from(String(req.headers['x-admin-password'] || ''));
   const expected = Buffer.from(ADMIN_PASSWORD);
   return given.length === expected.length && timingSafeEqual(given, expected);
@@ -577,11 +600,27 @@ const server = http.createServer((req,res)=>{
   const origin=canonicalOrigin(req);
   let url;try{url=new URL(req.url||'/',origin);}catch{return write(res,400,'Bad request','text/plain');}
   const pathname=url.pathname;
+  const host = requestHost(req);
+  const canonicalHost = new URL(PUBLIC_ORIGIN).host;
+  // Health checks remain accessible. Legacy Railway hostnames redirect to the canonical domain.
+  if (pathname !== '/health' && !isLocalHost(host) && host !== canonicalHost && (req.method === 'GET' || req.method === 'HEAD')) {
+    return write(res,308,'','text/plain; charset=utf-8',{Location:PUBLIC_ORIGIN+pathname+url.search,'Cache-Control':'public,max-age=3600'});
+  }
   if(pathname==='/health')return write(res,200,'OK','text/plain; charset=utf-8',{'Cache-Control':'no-store'});
   if(pathname==='/robots.txt')return write(res,200,`User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n`,'text/plain; charset=utf-8');
   if(pathname==='/sitemap.xml'){
-    const paths=['/','/about','/ai-index',...rubrics.map(r=>'/rubrics/'+r.slug),...published().map(a=>'/articles/'+a.slug)];
-    return write(res,200,`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${paths.map(p=>`<url><loc>${xmlSafe(origin+p)}</loc></url>`).join('')}</urlset>`,'application/xml; charset=utf-8');
+    const pub=published();
+    const lastArticleDate=pub.map(a=>a.updated||a.date).sort().at(-1)||'2026-10-01';
+    const entries=[
+      {path:'/',lastmod:lastArticleDate},
+      {path:'/about'},
+      {path:'/ai-index',lastmod:articleBySlug.get('ai-index-2026')?.updated||'2026-11-04'},
+      ...rubrics.map(r=>({path:'/rubrics/'+r.slug,items:pub.filter(a=>a.rubric===r.slug)}))
+        .filter(r=>r.items.length).map(r=>({path:r.path,lastmod:r.items.map(a=>a.updated||a.date).sort().at(-1)})),
+      ...pub.map(a=>({path:'/articles/'+a.slug,lastmod:a.updated||a.date}))
+    ];
+    const entriesXml=entries.map(e=>`<url><loc>${xmlSafe(origin+e.path)}</loc>${e.lastmod?`<lastmod>${xmlSafe(e.lastmod)}</lastmod>`:''}</url>`).join('');
+    return write(res,200,`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${entriesXml}</urlset>`,'application/xml; charset=utf-8');
   }
   if(pathname==='/rss.xml'){
     const items=published().map(a=>`<item><title>${xmlSafe(a.title)}</title><link>${origin}/articles/${a.slug}</link><guid>${origin}/articles/${a.slug}</guid><pubDate>${new Date(a.date+'T12:00:00Z').toUTCString()}</pubDate><description>${xmlSafe(a.summary)}</description></item>`).join('');
@@ -632,7 +671,7 @@ const server = http.createServer((req,res)=>{
     catch{return write(res,404,'Not found','text/plain');}
   }
   const missing=`<main class="container not-found"><div class="eyebrow">404 / NOT FOUND</div><h1>СТРАНИЦА НЕ НАЙДЕНА.</h1><p>Такого материала в журнале нет.</p><a class="button button-primary" href="/">ВЕРНУТЬСЯ В ЖУРНАЛ ↗</a></main>`;
-  return write(res,404,page({content:missing,title:'404 — Leiman Lab',description:'Страница не найдена',canonical:origin+pathname,cover:origin+asset('/assets/black-october-1200x630.png')}));
+  return write(res,404,page({content:missing,title:'404 — Leiman Lab',description:'Страница не найдена',canonical:origin+pathname,cover:origin+asset('/assets/black-october-1200x630.png'),noindex:true}));
 });
 for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { engagement.flush(); process.exit(0); });
 server.listen(PORT,'0.0.0.0',()=>console.log(`LEIMAN LAB listening on :${PORT} (${articles.length} articles)`));
