@@ -10,5 +10,10 @@
     "test": "node tests/smoke.mjs",
     "check": "node --check server.mjs && node --check tests/smoke.mjs"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "dependencies": {
+    "sharp": "0.35.5"
+  }
 }
