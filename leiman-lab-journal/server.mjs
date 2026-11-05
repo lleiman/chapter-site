@@ -614,6 +614,10 @@ const server = http.createServer((req,res)=>{
   if (pathname !== '/health' && !isLocalHost(host) && host !== canonicalHost && (req.method === 'GET' || req.method === 'HEAD')) {
     return write(res,308,'','text/plain; charset=utf-8',{Location:PUBLIC_ORIGIN+pathname+url.search,'Cache-Control':'public,max-age=3600'});
   }
+  if(pathname==='/google6203997034e41be1.html') {
+    const body=readFileSync(path.join(PUBLIC,'google6203997034e41be1.html'),'utf8');
+    return write(res,200,req.method==='HEAD'?'':body,'text/html; charset=utf-8',{'Cache-Control':'public,max-age=300'});
+  }
   if(pathname==='/health')return write(res,200,'OK','text/plain; charset=utf-8',{'Cache-Control':'no-store'});
   if(pathname==='/robots.txt')return write(res,200,`User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n`,'text/plain; charset=utf-8');
   if(pathname==='/sitemap.xml'){
