@@ -6,6 +6,7 @@
  */
 import http from 'node:http';
 import { createHash, timingSafeEqual } from 'node:crypto';
+import sharp from 'sharp';
 import { readFileSync, readdirSync, statSync, writeFileSync, renameSync, mkdirSync, unlinkSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -18,6 +19,8 @@ const PORT = Number(process.env.PORT || 3000);
 const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(ROOT, 'data'));
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 const HISTORY_LIMIT = 100;
+const PUBLIC_ORIGIN = (process.env.PUBLIC_URL || 'https://leimanlab.com').replace(/\/$/, '');
+const ogPngCache = new Map();
 const engagement = createEngagement(DATA_DIR);
 const plural = (n, [one, few, many]) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many; };
 const fmt = n => n.toLocaleString('ru-RU');
@@ -74,13 +77,33 @@ const escaped = value => String(value ?? '').replace(/[&<>"']/g, ch => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
 }[ch]));
 const jsonSafe = data => JSON.stringify(data).replace(/</g, '\\u003c');
+const requestHost = req => String(req.headers['x-forwarded-host'] || req.headers.host || `localhost:${PORT}`).split(',')[0].trim().toLowerCase();
+const isLocalHost = host => /^(?:localhost|127\.0\.0\.1)(?::\d+)?$/.test(host);
 const canonicalOrigin = req => {
-  if (process.env.PUBLIC_URL) return process.env.PUBLIC_URL.replace(/\/$/, '');
-  let hostname = String(req.headers['x-forwarded-host'] || req.headers.host || `localhost:${PORT}`).split(',')[0].trim();
-  if (!/^[a-z0-9.:-]+$/i.test(hostname)) hostname = `localhost:${PORT}`;
-  const local = hostname.startsWith('localhost') || hostname.startsWith('127.');
-  return `${local ? 'http' : 'https'}://${hostname}`;
+  const host = requestHost(req);
+  return isLocalHost(host) ? `http://${host}` : PUBLIC_ORIGIN;
 };
+const socialCover = a => {
+  if (!/\.svg$/i.test(a.cover || '')) return asset(a.cover);
+  const src = a.slug === 'ai-index-2026' ? '/assets/ai-index-dark-og.svg' : a.cover;
+  const version = asset(src).split('?v=')[1] || '1';
+  return `/og/${a.slug}.png?v=${version}`;
+};
+const makeSocialSchema = (a, origin) => ({
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: a.title,
+  description: a.description || a.summary,
+  url: `${origin}/articles/${a.slug}`,
+  mainEntityOfPage: {'@type':'WebPage', '@id': `${origin}/articles/${a.slug}`},
+  image: [origin + socialCover(a)],
+  datePublished: a.date,
+  ...(a.updated ? {dateModified: a.updated} : {}),
+  inLanguage: 'ru-RU',
+  ...(a.tags?.length ? {keywords: a.tags.join(', ')} : {}),
+  author: {'@type':'Person', name:'Лев Лейман', url:origin+'/about'},
+  publisher: {'@type':'Organization', name:'Leiman Lab', url:origin+'/', logo:{'@type':'ImageObject',url:origin+'/assets/leiman-lab-monogram.png'}}
+});
 
 const logo = `<span class="ll-sign" aria-label="Leiman Lab">
   <span class="tile light"></span><span class="tile empty"></span><span class="tile empty"></span>
@@ -171,7 +194,7 @@ function rubricView(r, origin) {
   </section>
   </main>`;
   const cover = list[0]?.cover || '/assets/black-october-1200x630.png';
-  return page({ content: body, title: `${r.title} — Leiman Lab`, description: r.description, canonical: `${origin}/rubrics/${r.slug}`, cover: `${origin}${asset(cover)}`, bodyData: ' data-page="rubric"' });
+  return page({ content: body, title: `${r.title} — Leiman Lab`, description: r.description, canonical: `${origin}/rubrics/${r.slug}`, cover: `${origin}${socialCover(list[0] || published()[0] || articles[0])}`, bodyData: ' data-page="rubric"', noindex:!list.length });
 }
 
 /** Page with a big title and a list of cards: used for tags and search. */
@@ -185,7 +208,7 @@ function listPage({ origin, path: pagePath, pill, title, deck, list, empty, extr
     ${list.length ? `<div class="featured-story">${list.map(a => card(a, 'featured')).join('')}</div>` : `<div class="rubric-empty"><p>${escaped(empty)}</p></div>`}
   </section>
   </main>`;
-  return page({ content: body, title: `${title} — Leiman Lab`, description: deck || title, canonical: origin + pagePath, cover: `${origin}${asset((list[0] || published()[0] || articles[0]).cover)}`, bodyData: ' data-page="list"', noindex });
+  return page({ content: body, title: `${title} — Leiman Lab`, description: deck || title, canonical: origin + pagePath, cover: `${origin}${socialCover(list[0] || published()[0] || articles[0])}`, bodyData: ' data-page="list"', noindex });
 }
 
 function search(q) {
@@ -217,7 +240,7 @@ function aboutView(origin) {
   <section class="container journal-section"><div class="section-rule"><h2>ПОСЛЕДНИЕ МАТЕРИАЛЫ <span class="accent">/</span></h2><a class="micro muted" href="/#journal">ВЕСЬ ЖУРНАЛ ↗</a></div>
     <div class="featured-story">${published().slice(0, 2).map(a => card(a, 'featured')).join('')}</div></section>
   </main>`;
-  return page({ content: body, title: 'Лев Лейман — Leiman Lab', description: siteTexts['about.lead'] ?? SITE_DEFAULTS['about.lead'], canonical: `${origin}/about`, cover: `${origin}${asset((published()[0] || articles[0]).cover)}`, bodyData: ' data-page="about"' });
+  return page({ content: body, title: 'Лев Лейман — Leiman Lab', description: siteTexts['about.lead'] ?? SITE_DEFAULTS['about.lead'], canonical: `${origin}/about`, cover: `${origin}${socialCover(published()[0] || articles[0])}`, bodyData: ' data-page="about"' });
 }
 
 function home(origin) {
@@ -242,7 +265,7 @@ function home(origin) {
   <div class="about-services"><span>AI-ПРОДАКШЕН</span><span>AI-ПРОДУКТЫ</span><span>R&D</span><span>СПЕЦПРОЕКТЫ</span></div>
   <div class="about-links"><a class="button button-line" href="/about">ПОДРОБНЕЕ ОБ АВТОРЕ ↗</a><a class="button button-line" href="https://t.me/leimanleo">СВЯЗАТЬСЯ ПО ПРОЕКТУ ↗</a></div></div></section>
   </main>`;
-  return page({content:html,title:'Leiman Lab — журнал исследований, технологий и экспериментов',description:'ИИ, технологии, бизнес, психология, исследования сознания и искусство. Авторский журнал Льва Леймана.',canonical:`${origin}/`,cover:`${origin}${asset(featured.cover)}`,bodyData:' data-page="home"',schema:{'@context':'https://schema.org','@type':'WebSite',name:'Leiman Lab',url:origin+'/','inLanguage':'ru'}});
+  return page({content:html,title:'Leiman Lab — журнал исследований, технологий и экспериментов',description:'ИИ, технологии, бизнес, психология, исследования сознания и искусство. Авторский журнал Льва Леймана.',canonical:`${origin}/`,cover:`${origin}${socialCover(featured)}`,bodyData:' data-page="home"',schema:{'@context':'https://schema.org','@type':'WebSite',name:'Leiman Lab',url:origin+'/','inLanguage':'ru'}});
 }
 const inlineLinks = (block, i) => block.links?.length ? ' '+block.links.map((l,j)=>`<a href="${escaped(l.url)}"${/^\//.test(l.url) ? '' : ' target="_blank" rel="noopener noreferrer"'}><span data-edit="b.${i}.link.${j}">${escaped(l.label)}</span> ↗</a>`).join(' · ') : '';
 const FILES = path.join(PUBLIC, 'files');
@@ -351,19 +374,22 @@ function paperResearchView(a, origin) {
     '<script>document.getElementById("copy-link")?.addEventListener("click",async e=>{try{await navigator.clipboard.writeText(e.currentTarget.dataset.url);e.currentTarget.textContent="ССЫЛКА СКОПИРОВАНА ✓"}catch{e.currentTarget.textContent="КОПИРОВАНИЕ НЕДОСТУПНО"}})</script>'+
     footerLink+'</div></div></main>';
   return page({content,title:a.title+' — Leiman Lab',description:a.description||a.summary,
-    canonical:pageUrl,cover:origin+asset('/assets/black-october-1200x630.png'),
+    canonical:pageUrl,cover:origin+socialCover(a),
     type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,
     extraStylesheet:'/assets/paper-report.css',
     bodyData:' data-page="paper-research" data-slug="'+escaped(a.slug)+'"',
-    schema:{'@context':'https://schema.org','@type':'Article',headline:a.title,
-      description:a.description||a.summary,datePublished:a.date,inLanguage:'ru',
-      author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'}}});
+    schema:makeSocialSchema(a,origin)});
 }
 
 function articleView(a, origin) {
   const pageUrl = `${origin}/articles/${a.slug}`;
   const share = `https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(a.title)}`;
-  const related = published().filter(x=>x.slug!==a.slug).slice(0,2);
+  const related = published().filter(x=>x.slug!==a.slug).sort((x,y)=>{
+    const relevance=b=>(b.story && b.story===a.story?20:0)
+      +(b.rubric===a.rubric?3:0)
+      +(b.tags||[]).filter(t=>(a.tags||[]).some(at=>norm(t)===norm(at))).length*5;
+    return relevance(y)-relevance(x)||y.date.localeCompare(x.date);
+  }).slice(0,2);
   const stats = engagement.counts(a.slug);
   const storyParts = a.story ? published().filter(x => x.story === a.story).sort((x, y) => x.date.localeCompare(y.date)) : [];
   const storyBox = storyParts.length >= 2 && !a.draft ? `<aside class="story-box"><div class="micro muted">СЮЖЕТ</div><div class="story-title">${escaped(a.story)}</div><ol>${storyParts.map(x => x.slug === a.slug
@@ -399,7 +425,7 @@ function articleView(a, origin) {
   ${related.length?`<section class="container more-stories"><div class="section-rule"><h2>ДАЛЬШЕ <span class="accent">/</span></h2><a class="micro muted" href="/">ВЕСЬ ЖУРНАЛ ↗</a></div><div class="featured-story">${related.map(x=>card(x,'featured')).join('')}</div></section>`:''}
   </main>`;
   const description = a.description || a.summary;
-  return page({content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${asset(a.cover)}`,type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,extraStylesheet:a.slug==='ai-index-2026'?'/assets/ai-index-article.css':'',bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@type':'NewsArticle',headline:a.title,description,image:[`${origin}${asset(a.cover)}`],datePublished:a.date,...(a.updated?{dateModified:a.updated}:{}),inLanguage:'ru',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'}}});
+  return page({content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${socialCover(a)}`,type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,extraStylesheet:a.slug==='ai-index-2026'?'/assets/ai-index-article.css':'',bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:makeSocialSchema(a,origin)});
 }
 
 function write(res, code, data, mime='text/html; charset=utf-8', more={}) {
@@ -462,7 +488,7 @@ function snapshot(name, data) {
 
 // Without ADMIN_PASSWORD the editor is open to anyone (author's choice, 23.10.2026); setting it turns the password back on.
 function passwordOk(req) {
-  if (!ADMIN_PASSWORD) return true;
+  if (!ADMIN_PASSWORD) return false;
   const given = Buffer.from(String(req.headers['x-admin-password'] || ''));
   const expected = Buffer.from(ADMIN_PASSWORD);
   return given.length === expected.length && timingSafeEqual(given, expected);
@@ -577,11 +603,27 @@ const server = http.createServer((req,res)=>{
   const origin=canonicalOrigin(req);
   let url;try{url=new URL(req.url||'/',origin);}catch{return write(res,400,'Bad request','text/plain');}
   const pathname=url.pathname;
+  const host = requestHost(req);
+  const canonicalHost = new URL(PUBLIC_ORIGIN).host;
+  // Health checks remain accessible. Legacy Railway hostnames redirect to the canonical domain.
+  if (pathname !== '/health' && !isLocalHost(host) && host !== canonicalHost && (req.method === 'GET' || req.method === 'HEAD')) {
+    return write(res,308,'','text/plain; charset=utf-8',{Location:PUBLIC_ORIGIN+pathname+url.search,'Cache-Control':'public,max-age=3600'});
+  }
   if(pathname==='/health')return write(res,200,'OK','text/plain; charset=utf-8',{'Cache-Control':'no-store'});
   if(pathname==='/robots.txt')return write(res,200,`User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n`,'text/plain; charset=utf-8');
   if(pathname==='/sitemap.xml'){
-    const paths=['/','/about','/ai-index',...rubrics.map(r=>'/rubrics/'+r.slug),...published().map(a=>'/articles/'+a.slug)];
-    return write(res,200,`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${paths.map(p=>`<url><loc>${xmlSafe(origin+p)}</loc></url>`).join('')}</urlset>`,'application/xml; charset=utf-8');
+    const pub=published();
+    const lastArticleDate=pub.map(a=>a.updated||a.date).sort().at(-1)||'2026-10-01';
+    const entries=[
+      {path:'/',lastmod:lastArticleDate},
+      {path:'/about'},
+      {path:'/ai-index',lastmod:articleBySlug.get('ai-index-2026')?.updated||'2026-11-04'},
+      ...rubrics.map(r=>({path:'/rubrics/'+r.slug,items:pub.filter(a=>a.rubric===r.slug)}))
+        .filter(r=>r.items.length).map(r=>({path:r.path,lastmod:r.items.map(a=>a.updated||a.date).sort().at(-1)})),
+      ...pub.map(a=>({path:'/articles/'+a.slug,lastmod:a.updated||a.date}))
+    ];
+    const entriesXml=entries.map(e=>`<url><loc>${xmlSafe(origin+e.path)}</loc>${e.lastmod?`<lastmod>${xmlSafe(e.lastmod)}</lastmod>`:''}</url>`).join('');
+    return write(res,200,`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${entriesXml}</urlset>`,'application/xml; charset=utf-8');
   }
   if(pathname==='/rss.xml'){
     const items=published().map(a=>`<item><title>${xmlSafe(a.title)}</title><link>${origin}/articles/${a.slug}</link><guid>${origin}/articles/${a.slug}</guid><pubDate>${new Date(a.date+'T12:00:00Z').toUTCString()}</pubDate><description>${xmlSafe(a.summary)}</description></item>`).join('');
@@ -590,8 +632,18 @@ const server = http.createServer((req,res)=>{
   if(pathname==='/')return write(res,200,home(origin));
    if(pathname==='/ai-index'||pathname==='/ai-index/'){
      const content=readFileSync(path.join(PUBLIC,'assets','ai-index.html'),'utf8');
-     return write(res,200,page({content,title:'AI Index: какую нейросеть для чего использовать — Leiman Lab',description:'Независимый путеводитель по моделям ИИ: 20 систем, 14 сценариев, сравнение, калькулятор затрат, первоисточники и протокол испытаний. 4 ноября 2026.',canonical:origin+'/ai-index',cover:origin+asset('/assets/ai-index-cover.svg'),extraStylesheet:'/assets/ai-index.css',bodyData:' data-page="ai-index"',schema:{'@context':'https://schema.org','@type':'TechArticle',headline:'Какую нейросеть для чего использовать',datePublished:'2026-11-04',dateModified:'2026-11-04',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'},inLanguage:'ru'}}));
+     return write(res,200,page({content,title:'AI Index: какую нейросеть для чего использовать — Leiman Lab',description:'Независимый путеводитель по моделям ИИ: 20 систем, 14 сценариев, сравнение, калькулятор затрат, первоисточники и протокол испытаний. 4 ноября 2026.',canonical:origin+'/ai-index',cover:origin+socialCover(articleBySlug.get('ai-index-2026')),extraStylesheet:'/assets/ai-index.css',bodyData:' data-page="ai-index"',schema:{'@context':'https://schema.org','@type':'TechArticle',headline:'Какую нейросеть для чего использовать',datePublished:'2026-11-04',dateModified:'2026-11-04',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'},inLanguage:'ru'}}));
    }
+  // Generate proper PNG Open Graph previews for articles with SVG editorial covers.
+  const rasterOg=pathname.match(/^\/og\/(ai-index-2026|after-black-october)\.png$/);
+  if(rasterOg&&articleBySlug.has(rasterOg[1])){
+    const a=articleBySlug.get(rasterOg[1]);
+    const src=a.slug==='ai-index-2026'?'/assets/ai-index-dark-og.svg':a.cover;
+    if(!ogPngCache.has(src))ogPngCache.set(src,sharp(readFileSync(path.join(PUBLIC,src))).resize(1200,630).png({compressionLevel:9}).toBuffer());
+    ogPngCache.get(src).then(data=>write(res,200,req.method==='HEAD'?'':data,'image/png',{'Content-Length':data.length,'Cache-Control':'public,max-age=86400'}))
+      .catch(err=>{console.error('OG preview:',err);write(res,500,'Preview unavailable','text/plain');});
+    return;
+  }
   // Legacy URLs of the first Railway Function version: Telegram previews already point here.
   const legacyOg=pathname.match(/^\/og\/([a-z0-9-]+)\.png$/);
   if(legacyOg && articleBySlug.has(legacyOg[1])){const data=readFileSync(path.join(PUBLIC,articleBySlug.get(legacyOg[1]).cover));return write(res,200,data,'image/png',{'Cache-Control':'public,max-age=600','Content-Length':data.length});}
@@ -632,7 +684,7 @@ const server = http.createServer((req,res)=>{
     catch{return write(res,404,'Not found','text/plain');}
   }
   const missing=`<main class="container not-found"><div class="eyebrow">404 / NOT FOUND</div><h1>СТРАНИЦА НЕ НАЙДЕНА.</h1><p>Такого материала в журнале нет.</p><a class="button button-primary" href="/">ВЕРНУТЬСЯ В ЖУРНАЛ ↗</a></main>`;
-  return write(res,404,page({content:missing,title:'404 — Leiman Lab',description:'Страница не найдена',canonical:origin+pathname,cover:origin+asset('/assets/black-october-1200x630.png')}));
+  return write(res,404,page({content:missing,title:'404 — Leiman Lab',description:'Страница не найдена',canonical:origin+pathname,cover:origin+asset('/assets/black-october-1200x630.png'),noindex:true}));
 });
 for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => { engagement.flush(); process.exit(0); });
 server.listen(PORT,'0.0.0.0',()=>console.log(`LEIMAN LAB listening on :${PORT} (${articles.length} articles)`));
