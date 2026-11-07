@@ -1,0 +1,44 @@
+/* LEIMAN LAB — editorial analytics, read-only and unauthenticated */
+body[data-page="analytics"]{background:#0b0b0d;color:#e8e6e1}
+.analytics-page{padding-block:clamp(42px,7vw,100px) 110px}
+.analytics-head{max-width:940px}
+.analytics-head h1{font-family:var(--sans,Arial,sans-serif);font-weight:900;font-size:clamp(52px,8vw,116px);letter-spacing:-.065em;line-height:1;margin:26px 0}
+.analytics-head p{font-size:clamp(18px,2vw,25px);max-width:740px;line-height:1.5;color:#bcb9b3}
+.analytics-actions{display:flex;flex-wrap:wrap;gap:12px;margin:32px 0 50px}
+.analytics-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid #414044;border-bottom:1px solid #414044}
+.analytics-kpis>div{min-width:0;padding:24px 18px 28px;border-right:1px solid #414044}
+.analytics-kpis>div:first-child{padding-left:0}
+.analytics-kpis>div:last-child{border-right:0}
+.analytics-kpis span{font-family:var(--mono,monospace);font-size:10px;letter-spacing:.11em;color:#aba7a2;display:block;min-height:2.8em}
+.analytics-kpis strong{font:800 clamp(32px,4.4vw,66px)/1 var(--sans,Arial,sans-serif);letter-spacing:-.05em;display:block;margin-top:17px}
+.analytics-kpis>div:nth-child(2) strong,.analytics-kpis>div:nth-child(4) strong{color:#e83c44}
+.analytics-report{padding-top:56px}
+.analytics-label{display:flex;justify-content:space-between;gap:16px;align-items:baseline;border-bottom:1px solid #414044;padding-bottom:18px}
+.analytics-label h2{font-size:clamp(22px,3vw,34px);font-weight:800;letter-spacing:-.03em;margin:0}
+.analytics-label span{font:12px var(--mono,monospace);color:#a8a49c;letter-spacing:.06em}
+.analytics-table-wrap{overflow:auto}
+.analytics-page table{width:100%;border-collapse:collapse;min-width:780px}
+.analytics-page th,.analytics-page td{font-family:var(--mono,monospace);font-size:13px;border-bottom:1px solid #323135;padding:18px 13px;text-align:right;font-variant-numeric:tabular-nums}
+.analytics-page thead th{font-size:11px;text-transform:uppercase;color:#b3aea7;letter-spacing:.03em;font-weight:500}
+.analytics-page th:first-child{text-align:left;padding-left:0}
+.analytics-page tbody th{max-width:360px;min-width:220px;font-weight:500;line-height:1.4}
+.analytics-page tbody th a{color:#e8e6e1;text-decoration:none}
+.analytics-page tbody th a:hover{text-decoration:underline;text-decoration-color:#ea3947}
+.analytics-page td{color:#d9d5d0}
+.analytics-note{max-width:850px;font-size:14px;line-height:1.8;color:#a9a69f;margin-top:34px}
+.analytics-note a{color:#e5e1db;text-decoration:underline;text-decoration-color:#e83c44}
+@media(max-width:840px){
+.analytics-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+.analytics-kpis>div{border-bottom:1px solid #414044}
+.analytics-kpis>div:nth-child(2){border-right:0}
+.analytics-kpis>div:nth-child(3),.analytics-kpis>div:nth-child(4){border-bottom:0}
+.analytics-kpis>div:nth-child(3){padding-left:0}
+.analytics-kpis strong{font-size:clamp(30px,8vw,58px)}
+}
+@media(max-width:500px){
+.analytics-head h1{font-size:clamp(42px,13vw,68px)}
+.analytics-kpis>div{padding:20px 10px}
+.analytics-kpis span{font-size:9px}
+.analytics-label{align-items:flex-start;flex-direction:column}
+.analytics-page th,.analytics-page td{font-size:12px}
+}
