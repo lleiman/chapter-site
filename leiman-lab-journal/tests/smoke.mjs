@@ -58,6 +58,7 @@ async function main() {
   assert.equal((await gsc.text()).trim(),'google-site-verification: google6203997034e41be1.html','Google verification file content');
   assert.ok(gsc.headers.get('content-type').startsWith('text/html'),'Google verification content-type');
   await seoTests();
+  await passwordlessAnalyticsTests();
   await aiIndexTests();
   await rubricTests();
   await featureTests();
@@ -71,6 +72,30 @@ const editArticle = async (slug, edits) => {
   const r = await api('POST', `/api/admin/article/${slug}`, { version: json.version, edits });
   assert.equal(r.status, 200, JSON.stringify(r.json));
 };
+
+async function passwordlessAnalyticsTests() {
+  const response = await get('/analytics');
+  assert.equal(response.status, 200, 'password-free statistics page');
+  assert.equal(response.headers.get('x-robots-tag'),'noindex', 'analytics must not be indexed');
+  const page = await response.text();
+  assert.ok(page.includes('АНАЛИТИКА') && page.includes('ПРОСМОТРЫ') && page.includes('ДОЧИТЫВАНИЯ'), 'analytics page totals');
+  assert.ok(page.includes('analytics.css') && page.includes('name="robots" content="noindex"'), 'dashboard design and privacy metadata');
+  assert.ok(page.includes('href="/articles/ai-index-2026"'), 'published article appears');
+  assert.ok(!(await html('/sitemap.xml')).includes('/analytics'), 'analytics excluded from search sitemap');
+  const apiResponse = await get('/api/public/analytics');
+  assert.equal(apiResponse.status, 200, 'read-only stats accessible without password');
+  const data = await apiResponse.json();
+  assert.equal(data.period, 'all-time');
+  assert.ok(data.articles.some(a => a.slug === 'ai-index-2026'));
+  assert.ok(data.articles.every(a => ['slug','title','date','views','reads','likes','comments','telegramViews','telegramReads','downloads'].every(k => k in a)), 'safe public aggregate fields');
+  assert.ok(!JSON.stringify(data).includes('visitor'), 'no visitor identifiers in public stats');
+  assert.ok(!JSON.stringify(data).includes('utm /'), 'no raw campaign data');
+  const writeAttempt = await fetch(origin+'/api/public/analytics', {method:'POST'});
+  assert.equal(writeAttempt.status,405,'dashboard cannot be used to edit');
+  assert.equal((await api('GET','/api/admin/stats',null,'wrong')).status, 401, 'editor/admin analytics remain protected');
+  assert.ok((await html('/')).includes('href="/analytics"'), 'direct password-free stats navigation');
+  console.log('✓ analytics: no-password readonly dashboard; publishing stays protected');
+}
 
 async function seoTests() {
   const homepage=await html('/');
