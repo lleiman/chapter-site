@@ -147,7 +147,7 @@ ${date ? `<meta property="article:published_time" content="${escaped(date)}">` :
 ${content}
 <footer class="site-footer"><div class="container footer-inner">
 <div><span class="footer-brand">LEIMAN LAB<span class="red-dot">.</span></span><div class="micro muted">RESEARCH · TECHNOLOGY · CREATIVE PRACTICE</div></div>
-<div class="micro muted right">© 2026 ЛЕВ ЛЕЙМАН<br><a href="https://t.me/leimanleo" rel="noopener">COMMERCIAL INQUIRIES ↗</a></div>
+<div class="micro muted right">© 2026 ЛЕВ ЛЕЙМАН<br><a href="/analytics">СТАТИСТИКА</a> · <a href="https://t.me/leimanleo" rel="noopener">COMMERCIAL INQUIRIES ↗</a></div>
 </div></footer>
 ${editorLoader}
 </body></html>`;
@@ -509,6 +509,62 @@ function readBody(req, limit = 512 * 1024) {
 const sendJson = (res, code, data) => write(res, code, JSON.stringify(data), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
 
 const articleFiles = a => a.paragraphs.filter(b => b.type === 'resource' && b.file).map(b => { const file = String(b.file).replace(/^\/files\//, ''); return { file, title: b.label || file, downloads: engagement.downloads(file) }; });
+// Read-only, password-free editorial analytics. No drafts, identities, individual
+// visitor data, private admin APIs or raw campaign tags are exposed.
+function publicAnalyticsSnapshot() {
+  const items = published().map(a => {
+    const stats = engagement.stats(a.slug);
+    const telegram = (stats.utm || []).filter(x => x.tag.startsWith('telegram')).reduce(
+      (sum, x) => ({ views: sum.views + x.views, reads: sum.reads + x.reads }), { views:0, reads:0 });
+    return {
+      slug: a.slug, title:a.title, date:a.date,
+      views:stats.views, reads:stats.reads, likes:stats.likes, comments:stats.comments,
+      telegramViews:telegram.views, telegramReads:telegram.reads,
+      downloads:articleFiles(a).reduce((total,x)=>total+x.downloads,0)
+    };
+  });
+  const fields=['views','reads','likes','comments','telegramViews','telegramReads','downloads'];
+  const totals=Object.fromEntries(fields.map(k=>[k,items.reduce((n,x)=>n+x[k],0)]));
+  return {updatedAt:new Date().toISOString(),period:'all-time',totals,articles:items};
+}
+
+function analyticsView(origin) {
+  const stats=publicAnalyticsSnapshot(), total=stats.totals;
+  const percent=(n,d)=>d?(100*n/d).toFixed(1).replace('.',',')+'%':'—';
+  const value=(n)=>fmt(n||0);
+  const rows=stats.articles.map(a=>`<tr>
+    <th scope="row"><a href="/articles/${escaped(a.slug)}">${escaped(a.title)}</a></th>
+    <td data-label="Просмотры">${value(a.views)}</td>
+    <td data-label="Дочитывания">${value(a.reads)}</td>
+    <td data-label="Доля">${percent(a.reads,a.views)}</td>
+    <td data-label="Telegram">${value(a.telegramViews)}</td>
+    <td data-label="Реакции">${value(a.likes)}</td>
+    <td data-label="Комментарии">${value(a.comments)}</td>
+    <td data-label="Скачивания">${value(a.downloads)}</td></tr>`).join('');
+  const content=`<main class="container analytics-page">
+    <div class="analytics-head"><div class="eyebrow"><span class="red-square"></span>LEIMAN LAB / LIVE STATISTICS</div>
+      <h1>АНАЛИТИКА<span class="accent">.</span></h1>
+      <p>Чтения и взаимодействия с материалами журнала. Данные из собственной системы Leiman Lab, обновляются при каждом открытии страницы.</p>
+      <div class="analytics-actions"><a class="button button-line" href="/">← К ЖУРНАЛУ</a><a class="button button-primary" href="/analytics">ОБНОВИТЬ ↻</a></div>
+    </div>
+    <div class="analytics-kpis" aria-label="Суммарные показатели">
+      <div><span>ПРОСМОТРЫ</span><strong>${value(total.views)}</strong></div>
+      <div><span>ДОЧИТЫВАНИЯ</span><strong>${value(total.reads)}</strong></div>
+      <div><span>УСЛОВНАЯ ДОЛЯ</span><strong>${percent(total.reads,total.views)}</strong></div>
+      <div><span>ПОСЕЩЕНИЯ ПО UTM TELEGRAM</span><strong>${value(total.telegramViews)}</strong></div>
+    </div>
+    <section class="analytics-report"><div class="analytics-label"><h2>ПУБЛИКАЦИИ</h2><span>${stats.articles.length} МАТЕРИАЛОВ · ВСЁ ВРЕМЯ</span></div>
+      <div class="analytics-table-wrap"><table><thead><tr><th>Статья</th><th>Просмотры</th><th>Дочитали</th><th>Доля</th><th>Telegram</th><th>♥</th><th>Комм.</th><th>Скачали</th></tr></thead><tbody>${rows}</tbody></table></div>
+    </section>
+    <p class="analytics-note"><b>Методология.</b> Просмотр считается не чаще раза на посетителя за сутки для каждой статьи, без распознанных ботов. «Дочитали» означает не менее 30 секунд видимого текста либо прокрутку примерно 75% текста, это не гарантированное полное прочтение. Telegram учитывается по явным UTM-меткам. История до установки счётчика, данные Google Search Console, главная страница и сам AI Index сюда не входят.</p>
+    <p class="analytics-note">Только агрегированная статистика опубликованных статей. Эта страница доступна без пароля, но закрыта от индексации. Для поисковых показов, запросов и кликов: <a href="https://search.google.com/search-console/" rel="noopener noreferrer" target="_blank">Google Search Console ↗</a>.</p>
+  </main>`;
+  return page({content,title:'Аналитика публикаций — Leiman Lab',
+    description:'Агрегированные просмотры, дочитывания и реакции читателей Leiman Lab.',
+    canonical:origin+'/analytics',cover:origin+socialCover(published()[0]||articles[0]),
+    noindex:true,extraStylesheet:'/assets/analytics.css',bodyData:' data-page="analytics"'});
+}
+
 
 async function adminApi(req, res, pathname) {
   if (!passwordOk(req)) { await new Promise(r => setTimeout(r, 800)); return sendJson(res, 401, { error: 'Неверный пароль' }); }
@@ -638,6 +694,8 @@ const server = http.createServer((req,res)=>{
     const items=published().map(a=>`<item><title>${xmlSafe(a.title)}</title><link>${origin}/articles/${a.slug}</link><guid>${origin}/articles/${a.slug}</guid><pubDate>${new Date(a.date+'T12:00:00Z').toUTCString()}</pubDate><description>${xmlSafe(a.summary)}</description></item>`).join('');
     return write(res,200,`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Leiman Lab</title><link>${origin}/</link><description>Исследования, технологии и искусство</description><language>ru</language>${items}</channel></rss>`,'application/rss+xml; charset=utf-8');
   }
+  if(pathname==='/analytics'||pathname==='/analytics/')return write(res,200,analyticsView(origin),'text/html; charset=utf-8',{'Cache-Control':'no-store','X-Robots-Tag':'noindex'});
+  if(pathname==='/api/public/analytics')return sendJson(res,200,publicAnalyticsSnapshot());
   if(pathname==='/')return write(res,200,home(origin));
    if(pathname==='/ai-index'||pathname==='/ai-index/'){
      const content=readFileSync(path.join(PUBLIC,'assets','ai-index.html'),'utf8');
