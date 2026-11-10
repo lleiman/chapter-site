@@ -1,39 +1,39 @@
 /* RESEARCH 007 / current warm-paper editorial system. Scoped article styles. */
 /* Paper edition for AI Index article 005; preserve all earlier journal articles. */
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]){--ink:#f2f0e9;--panel:#e8e5de;--paper:#181817;--soft:#55514a;--quiet:#746d65;--line:#cac6bd;background:#f2f0e9;color:#181817}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .site-header{background:#f2f0e9;border-color:#cac6bd}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .site-header nav a{color:#373530}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .site-header nav a:hover{color:#ad1f2e}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .site-header .ll-sign .tile.light{background:#181817}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .site-header .wordmark{color:#181817}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .article-head{padding-top:50px}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .article-head h1{max-width:1040px}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .article-deck{font-family:Georgia,serif;color:#46413d;line-height:1.5}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .feature-image img{border-color:#cac6bd}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .article-prose{max-width:830px}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .article-prose>p{font:19px/1.82 Georgia,"Times New Roman",serif;color:#34312d;letter-spacing:0}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .article-prose>p.body-lead{font-size:clamp(23px,2.5vw,29px);line-height:1.51;color:#141413}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .article-prose h2{font:730 clamp(33px,4vw,49px)/1.12 Inter,Arial,sans-serif;letter-spacing:-.065em;color:#181817;max-width:790px}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .article-prose p a{color:#a82331}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .article-prose p a:hover{color:#66151e}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .article-prose ul{color:#34312d;font-family:Georgia,serif;font-size:19px}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .callout{border-color:#b32434;background:#e4dfd7;color:#181817}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .callout p{color:#24211e}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .sources li{border-color:#d5d0c7;color:#3e3934}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .sources li a{color:#2b2927}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .sources li a:hover{color:#a82331}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .tg-follow{background:#e4dfd7}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .tg-follow p{color:#2c2823}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .button-line{border-color:#aaa49b;color:#282420}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .button-line:hover{color:#fff;background:#ad1f2e}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .story-info p{color:#55504b}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .story-card h3{color:#171717}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .story-image{border-color:#bdb8ae}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .story-foot .read-link{color:#191817}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .site-footer{background:#e5e1d8}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .site-footer a,:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .site-footer .micro{color:#6e6963}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .ll-comments{color:#24211e}
-:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .ll-comment p.ll-text{color:#34312d}
-@media(max-width:760px){:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .article-prose>p{font-size:18px;line-height:1.72}:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"]) .article-prose>p.body-lead{font-size:22px}}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]){--ink:#f2f0e9;--panel:#e8e5de;--paper:#181817;--soft:#55514a;--quiet:#746d65;--line:#cac6bd;background:#f2f0e9;color:#181817}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .site-header{background:#f2f0e9;border-color:#cac6bd}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .site-header nav a{color:#373530}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .site-header nav a:hover{color:#ad1f2e}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .site-header .ll-sign .tile.light{background:#181817}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .site-header .wordmark{color:#181817}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .article-head{padding-top:50px}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .article-head h1{max-width:1040px}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .article-deck{font-family:Georgia,serif;color:#46413d;line-height:1.5}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .feature-image img{border-color:#cac6bd}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .article-prose{max-width:830px}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .article-prose>p{font:19px/1.82 Georgia,"Times New Roman",serif;color:#34312d;letter-spacing:0}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .article-prose>p.body-lead{font-size:clamp(23px,2.5vw,29px);line-height:1.51;color:#141413}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .article-prose h2{font:730 clamp(33px,4vw,49px)/1.12 Inter,Arial,sans-serif;letter-spacing:-.065em;color:#181817;max-width:790px}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .article-prose p a{color:#a82331}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .article-prose p a:hover{color:#66151e}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .article-prose ul{color:#34312d;font-family:Georgia,serif;font-size:19px}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .callout{border-color:#b32434;background:#e4dfd7;color:#181817}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .callout p{color:#24211e}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .sources li{border-color:#d5d0c7;color:#3e3934}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .sources li a{color:#2b2927}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .sources li a:hover{color:#a82331}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .tg-follow{background:#e4dfd7}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .tg-follow p{color:#2c2823}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .button-line{border-color:#aaa49b;color:#282420}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .button-line:hover{color:#fff;background:#ad1f2e}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .story-info p{color:#55504b}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .story-card h3{color:#171717}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .story-image{border-color:#bdb8ae}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .story-foot .read-link{color:#191817}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .site-footer{background:#e5e1d8}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .site-footer a,:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .site-footer .micro{color:#6e6963}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .ll-comments{color:#24211e}
+:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .ll-comment p.ll-text{color:#34312d}
+@media(max-width:760px){:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .article-prose>p{font-size:18px;line-height:1.72}:is(body[data-slug="period-poluraspada-novogo"],body[data-slug="attention-economy-ai-2026"],body[data-slug="ai-film-competitions-2026"]) .article-prose>p.body-lead{font-size:22px}}
 
 body[data-slug="period-poluraspada-novogo"]{color-scheme:light}
