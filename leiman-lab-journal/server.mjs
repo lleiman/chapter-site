@@ -142,7 +142,7 @@ ${date ? `<meta property="article:published_time" content="${escaped(date)}">` :
 </head><body${bodyData}>
 <header class="site-header"><div class="container header-inner">
 <a class="identity" href="/" aria-label="Leiman Lab — главная">${logo}<span class="wordmark">LEIMAN <b>LAB</b></span></a>
-<nav aria-label="Основная навигация"><a href="/#journal">Журнал</a><a href="/ai-index">AI INDEX</a><a href="/about">Об авторе</a><a href="/search">Поиск</a><a href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer"><span class="nav-long">Telegram</span><span class="nav-short">TG</span> ↗</a></nav>
+<nav aria-label="Основная навигация"><a href="/#journal">Журнал</a><a href="/ai-index">AI INDEX</a><a href="/ai-film-awards">AI FILM AWARDS</a><a href="/about">Об авторе</a><a href="/search">Поиск</a><a href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer"><span class="nav-long">Telegram</span><span class="nav-short">TG</span> ↗</a></nav>
 </div></header>
 ${content}
 <footer class="site-footer"><div class="container footer-inner">
@@ -430,7 +430,7 @@ function articleView(a, origin) {
   ${related.length?`<section class="container more-stories"><div class="section-rule"><h2>ДАЛЬШЕ <span class="accent">/</span></h2><a class="micro muted" href="/">ВЕСЬ ЖУРНАЛ ↗</a></div><div class="featured-story">${related.map(x=>card(x,'featured')).join('')}</div></section>`:''}
   </main>`;
   const description = a.description || a.summary;
-  return page({content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${socialCover(a)}`,type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,extraStylesheet:a.slug==='period-poluraspada-novogo'?'/assets/period-poluraspada-light.css':['ai-index-2026','attention-economy-ai-2026'].includes(a.slug)?'/assets/ai-index-article.css':'',bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:makeSocialSchema(a,origin)});
+  return page({content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${socialCover(a)}`,type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,extraStylesheet:['period-poluraspada-novogo','ai-film-competitions-2026'].includes(a.slug)?'/assets/period-poluraspada-light.css':['ai-index-2026','attention-economy-ai-2026'].includes(a.slug)?'/assets/ai-index-article.css':'',bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@graph':[makeSocialSchema(a,origin),{'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Журнал',item:origin+'/'},{'@type':'ListItem',position:2,name:a.title,item:pageUrl}]}]}});
 }
 
 function write(res, code, data, mime='text/html; charset=utf-8', more={}) {
@@ -683,6 +683,7 @@ const server = http.createServer((req,res)=>{
       {path:'/',lastmod:lastArticleDate},
       {path:'/about'},
       {path:'/ai-index',lastmod:articleBySlug.get('ai-index-2026')?.updated||'2026-11-04'},
+      {path:'/ai-film-awards',lastmod:'2026-11-10'},
       ...rubrics.map(r=>({path:'/rubrics/'+r.slug,items:pub.filter(a=>a.rubric===r.slug)}))
         .filter(r=>r.items.length).map(r=>({path:r.path,lastmod:r.items.map(a=>a.updated||a.date).sort().at(-1)})),
       ...pub.map(a=>({path:'/articles/'+a.slug,lastmod:a.updated||a.date}))
@@ -697,6 +698,18 @@ const server = http.createServer((req,res)=>{
   if(pathname==='/analytics'||pathname==='/analytics/')return write(res,200,analyticsView(origin),'text/html; charset=utf-8',{'Cache-Control':'no-store','X-Robots-Tag':'noindex'});
   if(pathname==='/api/public/analytics')return sendJson(res,200,publicAnalyticsSnapshot());
   if(pathname==='/')return write(res,200,home(origin));
+  if(pathname==='/ai-film-awards'||pathname==='/ai-film-awards/'){
+    const content=readFileSync(path.join(PUBLIC,'assets','ai-film-awards.html'),'utf8');
+    const originUrl=origin+'/ai-film-awards';
+    const cover=origin+'/assets/ai-film-awards-cover.svg';
+    return write(res,200,page({content,title:'Конкурсы ИИ-кино 2026–2027: дедлайны, призы и калькулятор — Leiman Lab',
+      description:'Актуальные конкурсы ИИ-кино 2026–2027: AI Film Award $1 млн, Artefact, AKOOL, WAIFF, Runway. Сроки, официальные ссылки, календарь и калькулятор участия.',
+      canonical:originUrl,cover,extraStylesheet:'/assets/ai-film-awards.css',bodyData:' data-page="ai-film-awards"',
+      schema:{'@context':'https://schema.org','@graph':[
+        {'@type':'WebPage',name:'AI Film Awards Index',url:originUrl,dateModified:'2026-11-10',inLanguage:'ru-RU'},
+        {'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Журнал',item:origin+'/'},{'@type':'ListItem',position:2,name:'AI Film Awards',item:originUrl}]}
+      ]}}));
+  }
    if(pathname==='/ai-index'||pathname==='/ai-index/'){
      const content=readFileSync(path.join(PUBLIC,'assets','ai-index.html'),'utf8');
      return write(res,200,page({content,title:'AI Index: какую нейросеть для чего использовать — Leiman Lab',description:'Независимый путеводитель по моделям ИИ: 20 систем, 14 сценариев, сравнение, калькулятор затрат, первоисточники и протокол испытаний. 4 ноября 2026.',canonical:origin+'/ai-index',cover:origin+socialCover(articleBySlug.get('ai-index-2026')),extraStylesheet:'/assets/ai-index.css',bodyData:' data-page="ai-index"',schema:{'@context':'https://schema.org','@type':'TechArticle',headline:'Какую нейросеть для чего использовать',datePublished:'2026-11-04',dateModified:'2026-11-04',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'},inLanguage:'ru'}}));
