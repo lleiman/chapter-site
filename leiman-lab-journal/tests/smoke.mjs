@@ -122,6 +122,12 @@ async function seoTests() {
 }
 
 async function aiIndexTests() {
+  const pred = await get('/predictions');
+  assert.equal(pred.status, 200, '/predictions should return 200');
+  const predHtml = await pred.text();
+  assert.ok(predHtml.includes('data-page="predictions"') && predHtml.includes('/assets/predictions.css') && predHtml.includes('pr-stats'), 'predictions page renders');
+  assert.equal((await get('/assets/predictions.css')).status, 200);
+  console.log('✓ /predictions');
   const route = await get('/ai-index');
   assert.equal(route.status, 200, 'AI Index route');
   const index = await route.text();

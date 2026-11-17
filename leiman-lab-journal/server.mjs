@@ -142,7 +142,7 @@ ${date ? `<meta property="article:published_time" content="${escaped(date)}">` :
 </head><body${bodyData}>
 <header class="site-header"><div class="container header-inner">
 <a class="identity" href="/" aria-label="Leiman Lab — главная">${logo}<span class="wordmark">LEIMAN <b>LAB</b></span></a>
-<nav aria-label="Основная навигация"><a href="/#journal">Журнал</a><a href="/ai-index">AI INDEX</a><a href="/ai-film-awards">AI FILM AWARDS</a><a href="/about">Об авторе</a><a href="/search">Поиск</a><a href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer"><span class="nav-long">Telegram</span><span class="nav-short">TG</span> ↗</a></nav>
+<nav aria-label="Основная навигация"><a href="/#journal">Журнал</a><a href="/ai-index">AI INDEX</a><a href="/ai-film-awards">AI FILM AWARDS</a><a href="/predictions">PREDICTION OS</a><a href="/about">Об авторе</a><a href="/search">Поиск</a><a href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer"><span class="nav-long">Telegram</span><span class="nav-short">TG</span> ↗</a></nav>
 </div></header>
 ${content}
 <footer class="site-footer"><div class="container footer-inner">
@@ -684,6 +684,7 @@ const server = http.createServer((req,res)=>{
       {path:'/about'},
       {path:'/ai-index',lastmod:articleBySlug.get('ai-index-2026')?.updated||'2026-11-04'},
       {path:'/ai-film-awards',lastmod:'2026-11-10'},
+      {path:'/predictions',lastmod:'2026-11-17'},
       ...rubrics.map(r=>({path:'/rubrics/'+r.slug,items:pub.filter(a=>a.rubric===r.slug)}))
         .filter(r=>r.items.length).map(r=>({path:r.path,lastmod:r.items.map(a=>a.updated||a.date).sort().at(-1)})),
       ...pub.map(a=>({path:'/articles/'+a.slug,lastmod:a.updated||a.date}))
@@ -708,6 +709,17 @@ const server = http.createServer((req,res)=>{
       schema:{'@context':'https://schema.org','@graph':[
         {'@type':'WebPage',name:'AI Film Awards Index',url:originUrl,dateModified:'2026-11-10',inLanguage:'ru-RU'},
         {'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Журнал',item:origin+'/'},{'@type':'ListItem',position:2,name:'AI Film Awards',item:originUrl}]}
+      ]}}));
+  }
+  if(pathname==='/predictions'||pathname==='/predictions/'){
+    const content=readFileSync(path.join(PUBLIC,'assets','predictions.html'),'utf8');
+    const originUrl=origin+'/predictions';
+    return write(res,200,page({content,title:'Что в жизни можно предсказать — Prediction OS · Leiman Lab',
+      description:'Исследование Льва Леймана: почти 900 тысяч биографий, 88 гипотез о жизни, смерти и успехе. Что подтвердилось на новых людях и как мы это проверяем.',
+      canonical:originUrl,cover:origin+'/assets/predictions-1200x630.png',extraStylesheet:'/assets/predictions.css',bodyData:' data-page="predictions"',
+      schema:{'@context':'https://schema.org','@graph':[
+        {'@type':'WebPage',name:'Prediction OS',url:originUrl,dateModified:'2026-11-17',inLanguage:'ru-RU'},
+        {'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Журнал',item:origin+'/'},{'@type':'ListItem',position:2,name:'Prediction OS',item:originUrl}]}
       ]}}));
   }
    if(pathname==='/ai-index'||pathname==='/ai-index/'){
