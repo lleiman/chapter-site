@@ -11,6 +11,7 @@ import { readFileSync, readdirSync, statSync, writeFileSync, renameSync, mkdirSy
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { createEngagement, EngagementError } from './engagement.mjs';
+import { createCommons, CommonsError } from './commons.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(ROOT, 'public');
@@ -26,6 +27,7 @@ const GOOGLE_SITE_VERIFICATION = String(process.env.GOOGLE_SITE_VERIFICATION || 
 const PUBLIC_ORIGIN = (process.env.PUBLIC_URL || 'https://leimanlab.com').replace(/\/$/, '');
 const ogPngCache = new Map();
 const engagement = createEngagement(DATA_DIR);
+const commons = createCommons(DATA_DIR);
 const plural = (n, [one, few, many]) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many; };
 const fmt = n => n.toLocaleString('ru-RU');
 // Person key for de-duplication and rate limits: first X-Forwarded-For hop (Railway edge) + User-Agent. Only hashes are stored.
@@ -142,12 +144,12 @@ ${date ? `<meta property="article:published_time" content="${escaped(date)}">` :
 </head><body${bodyData}>
 <header class="site-header"><div class="container header-inner">
 <a class="identity" href="/" aria-label="Leiman Lab — главная">${logo}<span class="wordmark">LEIMAN <b>LAB</b></span></a>
-<nav aria-label="Основная навигация"><a href="/#journal">Журнал</a><a href="/ai-index">AI INDEX</a><a href="/ai-film-awards">AI FILM AWARDS</a><a href="/predictions">PREDICTION OS</a><a href="/about">Об авторе</a><a href="/search">Поиск</a><a href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer"><span class="nav-long">Telegram</span><span class="nav-short">TG</span> ↗</a></nav>
+<nav aria-label="Основная навигация"><a href="/#journal">Журнал</a><a href="/ai-index">AI INDEX</a><a href="/ai-film-awards">AI FILM AWARDS</a><a href="/predictions">PREDICTION OS</a><a href="/commons">COMMONS</a><a href="/about">Об авторе</a><a href="/search">Поиск</a><a href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer"><span class="nav-long">Telegram</span><span class="nav-short">TG</span> ↗</a></nav>
 </div></header>
 ${content}
 <footer class="site-footer"><div class="container footer-inner">
 <div><span class="footer-brand">LEIMAN LAB<span class="red-dot">.</span></span><div class="micro muted">RESEARCH · TECHNOLOGY · CREATIVE PRACTICE</div></div>
-<div class="micro muted right">© 2026 ЛЕВ ЛЕЙМАН<br><a href="/analytics">СТАТИСТИКА</a> · <a href="https://t.me/leimanleo" rel="noopener">COMMERCIAL INQUIRIES ↗</a></div>
+<div class="micro muted right">© 2026 ЛЕВ ЛЕЙМАН<br><a href="/commons">COMMONS</a> · <a href="/analytics">СТАТИСТИКА</a> · <a href="https://t.me/leimanleo" rel="noopener">COMMERCIAL INQUIRIES ↗</a></div>
 </div></footer>
 ${editorLoader}
 </body></html>`;
@@ -654,6 +656,21 @@ const server = http.createServer((req,res)=>{
       sendJson(res, err.code && err.code < 500 ? err.code : 500, { error: err.code && err.code < 500 ? err.message : 'Ошибка сервера' });
     });
   }
+  if (apiPath === '/api/commons' || apiPath.startsWith('/api/commons/') || apiPath === '/api/admin/commons' || apiPath.startsWith('/api/admin/commons/')) {
+    return (async () => {
+      if (!['GET','POST'].includes(req.method)) throw new CommonsError('Метод не разрешён',405);
+      if (req.method === 'POST' && !String(req.headers['content-type']||'').startsWith('application/json')) throw new CommonsError('Требуется application/json',415);
+      const providedOrigin = req.headers.origin;
+      if (providedOrigin && new URL(providedOrigin).host !== requestHost(req)) throw new CommonsError('Запрос с другого сайта отклонён',403);
+      if (req.headers['sec-fetch-site'] === 'cross-site') throw new CommonsError('Межсайтовый запрос запрещён',403);
+      const body=req.method==='GET' ? {} : await readBody(req,16*1024);
+      const result=commons.handle(req,apiPath,body,passwordOk(req));
+      return sendJson(res,result.code,result.data);
+    })().catch(err => {
+      if (!(err instanceof CommonsError || err instanceof EditError)) console.error('commons:',err);
+      return sendJson(res,err.code && err.code<500?err.code:500,{error:err.code && err.code<500?err.message:'Ошибка Commons'});
+    });
+  }
   if (apiPath.startsWith('/api/admin/')) {
     return adminApi(req, res, apiPath).catch(err => {
       if (!(err instanceof EditError)) console.error('editor:', err);
@@ -685,6 +702,7 @@ const server = http.createServer((req,res)=>{
       {path:'/ai-index',lastmod:articleBySlug.get('ai-index-2026')?.updated||'2026-11-04'},
       {path:'/ai-film-awards',lastmod:'2026-11-10'},
       {path:'/predictions',lastmod:'2026-11-18'},
+      {path:'/commons',lastmod:'2026-11-18'},
       ...rubrics.map(r=>({path:'/rubrics/'+r.slug,items:pub.filter(a=>a.rubric===r.slug)}))
         .filter(r=>r.items.length).map(r=>({path:r.path,lastmod:r.items.map(a=>a.updated||a.date).sort().at(-1)})),
       ...pub.map(a=>({path:'/articles/'+a.slug,lastmod:a.updated||a.date}))
@@ -695,6 +713,10 @@ const server = http.createServer((req,res)=>{
   if(pathname==='/rss.xml'){
     const items=published().map(a=>`<item><title>${xmlSafe(a.title)}</title><link>${origin}/articles/${a.slug}</link><guid>${origin}/articles/${a.slug}</guid><pubDate>${new Date(a.date+'T12:00:00Z').toUTCString()}</pubDate><description>${xmlSafe(a.summary)}</description></item>`).join('');
     return write(res,200,`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Leiman Lab</title><link>${origin}/</link><description>Исследования, технологии и искусство</description><language>ru</language>${items}</channel></rss>`,'application/rss+xml; charset=utf-8');
+  }
+  if(pathname==='/commons'||pathname==='/commons/'){
+    const content=readFileSync(path.join(PUBLIC,'assets','commons.html'),'utf8');
+    return write(res,200,page({content,title:'Leiman Lab Commons — открытые исследования и управление',description:'Пилот открытой исследовательской лаборатории: конституция, программы, участники, предложения, решения, прозрачная система вклада и дорожная карта DAO.',canonical:origin+'/commons',cover:origin+'/assets/leiman-lab-monogram.png',extraStylesheet:'/assets/commons.css',bodyData:' data-page="commons"'}),'text/html; charset=utf-8',{'Cache-Control':'no-store'});
   }
   if(pathname==='/analytics'||pathname==='/analytics/')return write(res,200,analyticsView(origin),'text/html; charset=utf-8',{'Cache-Control':'no-store','X-Robots-Tag':'noindex'});
   if(pathname==='/api/public/analytics')return sendJson(res,200,publicAnalyticsSnapshot());
