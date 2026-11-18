@@ -62,6 +62,8 @@ function loadArticles() {
 loadArticles();
 // Drafts ("draft": true) open only by direct link: no lists, search, sitemap or RSS.
 const published = () => articles.filter(a => !a.draft);
+const hasEnglish = a => !!(a?.translations?.en && Array.isArray(a.translations.en.paragraphs) && a.translations.en.paragraphs.length);
+const localiseArticle = (a, lang = 'ru') => lang === 'en' && hasEnglish(a) ? { ...a, ...a.translations.en, lang: 'en' } : a;
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 const dateLabel = iso => { const [y, m, d] = String(iso).split('-').map(Number); return `${d} ${MONTHS[m - 1]} ${y}`; };
 const today = () => new Date().toISOString().slice(0, 10);
@@ -95,17 +97,17 @@ const socialCover = a => {
   const version = asset(src).split('?v=')[1] || '1';
   return `/og/${a.slug}.png?v=${version}`;
 };
-const makeSocialSchema = (a, origin) => ({
+const makeSocialSchema = (a, origin, lang = 'ru') => ({
   '@context': 'https://schema.org',
   '@type': 'Article',
   headline: a.title,
   description: a.description || a.summary,
-  url: `${origin}/articles/${a.slug}`,
-  mainEntityOfPage: {'@type':'WebPage', '@id': `${origin}/articles/${a.slug}`},
+  url: `${origin}${lang === 'en' ? '/en' : ''}/articles/${a.slug}`,
+  mainEntityOfPage: {'@type':'WebPage', '@id': `${origin}${lang === 'en' ? '/en' : ''}/articles/${a.slug}`},
   image: [origin + socialCover(a)],
   datePublished: a.date,
   ...(a.updated ? {dateModified: a.updated} : {}),
-  inLanguage: 'ru-RU',
+  inLanguage: lang === 'en' ? 'en-US' : 'ru-RU',
   ...(a.tags?.length ? {keywords: a.tags.join(', ')} : {}),
   author: {'@type':'Person', name:'Лев Лейман', url:origin+'/about'},
   publisher: {'@type':'Organization', name:'Leiman Lab', url:origin+'/', logo:{'@type':'ImageObject',url:origin+'/assets/leiman-lab-monogram.png'}}
@@ -122,17 +124,17 @@ const editorLoader = `<script>(()=>{const load=()=>import('/assets/admin.js');le
 addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.shiftKey&&e.code==='KeyE'){e.preventDefault();window.llAdmin?window.llAdmin.toggle():load()}});
 if(on||/[?&]edit(=|&|$)/.test(location.search))load()})()</script>`;
 
-function page({ content, title, description, canonical, cover, type = 'website', date, modified, schema, bodyData = '', noindex = false, extraStylesheet = '' }) {
+function page({ content, title, description, canonical, cover, type = 'website', date, modified, schema, bodyData = '', noindex = false, extraStylesheet = '', lang = 'ru', alternates = [] }) {
   const structured = schema ? `<script type="application/ld+json">${jsonSafe(schema)}</script>` : '';
   return `<!doctype html>
-<html lang="ru"><head>
+<html lang="${lang}"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0B0B0D"><meta name="color-scheme" content="dark">
 <meta name="description" content="${escaped(description)}">
 ${GOOGLE_SITE_VERIFICATION ? `<meta name="google-site-verification" content="${escaped(GOOGLE_SITE_VERIFICATION)}">` : ''}
 <title>${escaped(title)}</title>
-<link rel="canonical" href="${escaped(canonical)}"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<meta property="og:type" content="${escaped(type)}"><meta property="og:locale" content="ru_RU">
+<link rel="canonical" href="${escaped(canonical)}">${alternates.map(x => `<link rel="alternate" hreflang="${escaped(x.lang)}" href="${escaped(x.href)}">`).join('')}<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="${escaped(type)}"><meta property="og:locale" content="${lang === 'en' ? 'en_US' : 'ru_RU'}">
 <meta property="og:site_name" content="LEIMAN LAB">
 <meta property="og:title" content="${escaped(title)}">
 <meta property="og:description" content="${escaped(description)}">
@@ -143,15 +145,15 @@ ${date ? `<meta property="article:published_time" content="${escaped(date)}">` :
 <link rel="stylesheet" href="${asset('/assets/site.css')}">${extraStylesheet ? `<link rel="stylesheet" href="${escaped(asset(extraStylesheet))}">` : ''}${structured}
 </head><body${bodyData}>
 <header class="site-header"><div class="container header-inner">
-<a class="identity" href="/" aria-label="Leiman Lab — главная">${logo}<span class="wordmark">LEIMAN <b>LAB</b></span></a>
-<nav aria-label="Основная навигация"><a href="/#journal">Журнал</a><a href="/ai-index">AI INDEX</a><a href="/ai-film-awards">AI FILM AWARDS</a><a href="/predictions">PREDICTION OS</a><a href="/commons">COMMONS</a><a href="/about">Об авторе</a><a href="/search">Поиск</a><a href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer"><span class="nav-long">Telegram</span><span class="nav-short">TG</span> ↗</a></nav>
+<a class="identity" href="${lang === 'en' ? '/en/' : '/'}" aria-label="Leiman Lab — home">${logo}<span class="wordmark">LEIMAN <b>LAB</b></span></a>
+<nav aria-label="${lang === 'en' ? 'Main navigation' : 'Основная навигация'}"><a href="${lang === 'en' ? '/en/#journal' : '/#journal'}">${lang === 'en' ? 'Journal' : 'Журнал'}</a><a href="/opportunities">INCOME INTELLIGENCE</a><a href="/ai-index">AI INDEX</a><a href="/ai-film-awards">AI FILM AWARDS</a><a href="/predictions">PREDICTION OS</a><a href="/commons">COMMONS</a><a href="/about">${lang === 'en' ? 'Author' : 'Об авторе'}</a><a href="/search">${lang === 'en' ? 'Search (RU)' : 'Поиск'}</a><a class="locale-switch" href="${escaped(alternates.find(x => x.lang !== lang)?.href || (lang === 'en' ? '/' : '/en/'))}" lang="${lang === 'en' ? 'ru' : 'en'}">${lang === 'en' ? 'RU' : 'EN'}</a><a href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer"><span class="nav-long">Telegram</span><span class="nav-short">TG</span> ↗</a></nav>
 </div></header>
 ${content}
 <footer class="site-footer"><div class="container footer-inner">
 <div><span class="footer-brand">LEIMAN LAB<span class="red-dot">.</span></span><div class="micro muted">RESEARCH · TECHNOLOGY · CREATIVE PRACTICE</div></div>
-<div class="micro muted right">© 2026 ЛЕВ ЛЕЙМАН<br><a href="/commons">COMMONS</a> · <a href="/analytics">СТАТИСТИКА</a> · <a href="https://t.me/leimanleo" rel="noopener">COMMERCIAL INQUIRIES ↗</a></div>
+<div class="micro muted right">© 2026 ${lang === 'en' ? 'LEV LEIMAN' : 'ЛЕВ ЛЕЙМАН'}<br><a href="/commons">COMMONS</a> · <a href="/analytics">СТАТИСТИКА</a> · <a href="https://t.me/leimanleo" rel="noopener">COMMERCIAL INQUIRIES ↗</a></div>
 </div></footer>
-${editorLoader}
+${lang === 'en' ? '' : editorLoader}
 </body></html>`;
 }
 
@@ -159,11 +161,11 @@ function cardStats(slug) {
   const c = engagement.counts(slug);
   return ` · ${fmt(c.views)} ПРОСМ. · ♥ ${fmt(c.likes)} · ${fmt(c.comments)} КОММ.`;
 }
-function card(a, size = '') {
-  return `<a class="story-card ${size}" href="/articles/${escaped(a.slug)}">
-  <div class="story-image"><img src="${escaped(asset(a.cover))}" alt="Обложка ${escaped(a.cardTitle)}" loading="lazy" width="1200" height="630"><span class="image-index mono">${escaped(a.issue)} ↗</span></div>
+function card(a, size = '', lang = 'ru') {
+  return `<a class="story-card ${size}" href="${lang === 'en' ? '/en' : ''}/articles/${escaped(a.slug)}">
+  <div class="story-image"><img src="${escaped(asset(a.cover))}" alt="${lang === 'en' ? 'Cover: ' : 'Обложка '}${escaped(a.cardTitle)}" loading="lazy" width="1200" height="630"><span class="image-index mono">${escaped(a.issue)} ↗</span></div>
   <div class="story-info"><div class="micro story-meta">${rubricBySlug.has(a.rubric) ? `${escaped(rubricBySlug.get(a.rubric).title.toUpperCase())} <span class="line"></span> ` : ''}${escaped(a.section)} <span class="line"></span> ${escaped(a.dateLabel)}</div>
-  <h3>${escaped(a.title)}</h3><p>${escaped(a.summary)}</p><div class="story-foot"><span class="micro muted">${escaped(a.readingMinutes)} МИН ЧТЕНИЯ${cardStats(a.slug)}</span><span class="read-link micro">ЧИТАТЬ ↗</span></div></div>
+  <h3>${escaped(a.title)}</h3><p>${escaped(a.summary)}</p><div class="story-foot"><span class="micro muted">${escaped(a.readingMinutes)} ${lang === 'en' ? 'MIN READ' : 'МИН ЧТЕНИЯ'}${lang === 'en' ? '' : cardStats(a.slug)}</span><span class="read-link micro">${lang === 'en' ? 'READ' : 'ЧИТАТЬ'} ↗</span></div></div>
   </a>`;
 }
 
@@ -272,8 +274,22 @@ function home(origin) {
   <div class="about-services"><span>AI-ПРОДАКШЕН</span><span>AI-ПРОДУКТЫ</span><span>R&D</span><span>СПЕЦПРОЕКТЫ</span></div>
   <div class="about-links"><a class="button button-line" href="/about">ПОДРОБНЕЕ ОБ АВТОРЕ ↗</a><a class="button button-line" href="https://t.me/leimanleo">СВЯЗАТЬСЯ ПО ПРОЕКТУ ↗</a></div></div></section>
   </main>`;
-  return page({content:html,title:'Leiman Lab — журнал исследований, технологий и экспериментов',description:'ИИ, технологии, бизнес, психология, исследования сознания и искусство. Авторский журнал Льва Леймана.',canonical:`${origin}/`,cover:`${origin}${socialCover(featured)}`,bodyData:' data-page="home"',schema:{'@context':'https://schema.org','@type':'WebSite',name:'Leiman Lab',url:origin+'/','inLanguage':'ru'}});
+  return page({lang:'ru',alternates:[{lang:'ru',href:origin+'/'},{lang:'en',href:origin+'/en/'}],content:html,title:'Leiman Lab — журнал исследований, технологий и экспериментов',description:'ИИ, технологии, бизнес, психология, исследования сознания и искусство. Авторский журнал Льва Леймана.',canonical:`${origin}/`,cover:`${origin}${socialCover(featured)}`,bodyData:' data-page="home"',schema:{'@context':'https://schema.org','@type':'WebSite',name:'Leiman Lab',url:origin+'/','inLanguage':'ru'}});
 }
+function englishHome(origin) {
+  const list = published().filter(hasEnglish).map(a => localiseArticle(a, 'en'));
+  const featured = list[0] || articles[0];
+  const body = `<main><section class="container intro" aria-labelledby="hero-title">
+    <div class="intro-text"><div class="eyebrow"><span class="red-square"></span> INDEPENDENT RESEARCH JOURNAL <span class="muted">/ 2026</span></div>
+    <h1 id="hero-title" class="hero-title">LEIMAN<br><em>LAB<span class="dot">.</span></em></h1>
+    <p class="intro-lead">Independent research on artificial intelligence, technology, the economics of work, consciousness and creative practice.</p>
+    <div class="intro-actions"><a class="button button-primary" href="#journal">EXPLORE RESEARCH ↘</a><span class="micro muted">OBSERVATIONS · EXPERIMENTS · EVIDENCE</span></div>
+    </div><div class="intro-visual" aria-hidden="true"><div class="visual-index mono">FIG. 001 / LL MONOGRAM</div><div class="large-mark">${logo}</div><span class="visual-code mono">[ 01 / OPEN SYSTEM ]</span></div></section>
+    <section id="journal" class="container journal-section"><div class="section-rule"><h2>JOURNAL <span class="accent">/</span> <small>01</small></h2><span class="micro muted">${list.length} ENGLISH PUBLICATIONS</span></div><div class="featured-story">${list.map(a => card(a, 'featured', 'en')).join('')}</div></section>
+    <section class="container about-section"><div class="about-heading"><div class="eyebrow">02 / RESEARCH PRACTICE</div><h2>Questions.<br>Methods.<br><span class="accent">Results.</span></h2></div><div class="about-copy"><p>Leiman Lab is an independent research and creative technology journal.</p><p>Each research note separates sourced findings, interpretation and proposals. Full English editions appear here once editorially reviewed; the Russian archive remains available in the language selector.</p><div class="about-services"><span>AI RESEARCH</span><span>PRODUCTION</span><span>ECONOMICS</span><span>BEHAVIOUR</span></div><div class="about-links"><a class="button button-line" href="/about">ABOUT THE AUTHOR (RU) ↗</a></div></div></section></main>`;
+  return page({content:body,title:'Leiman Lab — Independent Research Journal',description:'Independent research on AI, jobs and grants, technology, economics, psychology and creative practice.',canonical:origin+'/en/',cover:origin+socialCover(featured),bodyData:' data-page="home-en"',lang:'en',alternates:[{lang:'en',href:origin+'/en/'},{lang:'ru',href:origin+'/'}],schema:{'@context':'https://schema.org','@type':'WebSite',name:'Leiman Lab',url:origin+'/en/',inLanguage:'en-US'}});
+}
+
 const inlineLinks = (block, i) => block.links?.length ? ' '+block.links.map((l,j)=>`<a href="${escaped(l.url)}"${/^\//.test(l.url) ? '' : ' target="_blank" rel="noopener noreferrer"'}><span data-edit="b.${i}.link.${j}">${escaped(l.label)}</span> ↗</a>`).join(' · ') : '';
 const FILES = path.join(PUBLIC, 'files');
 const fileSize = name => { try { const b = statSync(path.join(FILES, name)).size; return b < 1024 * 1024 ? `${Math.max(1, Math.round(b / 1024))} КБ` : `${(b / 1024 / 1024).toFixed(1).replace('.', ',')} МБ`; } catch { return ''; } };
@@ -388,22 +404,23 @@ function paperResearchView(a, origin) {
     schema:makeSocialSchema(a,origin)});
 }
 
-function articleView(a, origin) {
-  const pageUrl = `${origin}/articles/${a.slug}`;
+function articleView(a, origin, lang = 'ru') {
+  const english = lang === 'en';
+  const pageUrl = `${origin}${english ? '/en' : ''}/articles/${a.slug}`;
   const share = `https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(a.title)}`;
-  const related = published().filter(x=>x.slug!==a.slug).sort((x,y)=>{
+  const related = published().filter(x=>x.slug!==a.slug && (!english || hasEnglish(x))).map(x => localiseArticle(x,lang)).sort((x,y)=>{
     const relevance=b=>(b.story && b.story===a.story?20:0)
       +(b.rubric===a.rubric?3:0)
       +(b.tags||[]).filter(t=>(a.tags||[]).some(at=>norm(t)===norm(at))).length*5;
     return relevance(y)-relevance(x)||y.date.localeCompare(x.date);
   }).slice(0,2);
   const stats = engagement.counts(a.slug);
-  const storyParts = a.story ? published().filter(x => x.story === a.story).sort((x, y) => x.date.localeCompare(y.date)) : [];
+  const storyParts = a.story ? published().filter(x => x.story === a.story && (!english || hasEnglish(x))).map(x => localiseArticle(x, lang)).sort((x, y) => x.date.localeCompare(y.date)) : [];
   const storyBox = storyParts.length >= 2 && !a.draft ? `<aside class="story-box"><div class="micro muted">СЮЖЕТ</div><div class="story-title">${escaped(a.story)}</div><ol>${storyParts.map(x => x.slug === a.slug
     ? `<li aria-current="page"><span class="micro muted">${escaped(x.dateLabel)}</span> ${escaped(x.title)}</li>`
     : `<li><span class="micro muted">${escaped(x.dateLabel)}</span> <a href="/articles/${escaped(x.slug)}">${escaped(x.title)}</a></li>`).join('')}</ol></aside>` : '';
   const changes = (a.changes || []).slice().reverse();
-  const body = `<main>
+  let body = `<main>
   <article itemscope itemtype="https://schema.org/Article">
     ${a.draft ? '<div class="draft-banner micro"><div class="container">ЧЕРНОВИК · ВИДЕН ТОЛЬКО ПО ПРЯМОЙ ССЫЛКЕ · ОПУБЛИКОВАТЬ: ⌘⇧E → «ОПУБЛИКОВАТЬ»</div></div>' : ''}
     <header class="container article-head"><a class="back mono" href="/">← JOURNAL / LEIMAN LAB</a>
@@ -431,8 +448,36 @@ function articleView(a, origin) {
   </article>
   ${related.length?`<section class="container more-stories"><div class="section-rule"><h2>ДАЛЬШЕ <span class="accent">/</span></h2><a class="micro muted" href="/">ВЕСЬ ЖУРНАЛ ↗</a></div><div class="featured-story">${related.map(x=>card(x,'featured')).join('')}</div></section>`:''}
   </main>`;
+  if (english) body = translateArticleChrome(body);
   const description = a.description || a.summary;
-  return page({content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${socialCover(a)}`,type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,extraStylesheet:['period-poluraspada-novogo','ai-film-competitions-2026'].includes(a.slug)?'/assets/period-poluraspada-light.css':['ai-index-2026','attention-economy-ai-2026'].includes(a.slug)?'/assets/ai-index-article.css':'',bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@graph':[makeSocialSchema(a,origin),{'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Журнал',item:origin+'/'},{'@type':'ListItem',position:2,name:a.title,item:pageUrl}]}]}});
+  const alternates = hasEnglish(a) ? [{lang:'ru',href:origin+'/articles/'+a.slug},{lang:'en',href:origin+'/en/articles/'+a.slug}] : [];
+  return page({lang,alternates,content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${socialCover(a)}`,type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,extraStylesheet:['period-poluraspada-novogo','ai-film-competitions-2026'].includes(a.slug)?'/assets/period-poluraspada-light.css':['ai-index-2026','attention-economy-ai-2026'].includes(a.slug)?'/assets/ai-index-article.css':'',bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@graph':[makeSocialSchema(a,origin,lang),{'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Журнал',item:origin+(english?'/en/':'/')},{'@type':'ListItem',position:2,name:a.title,item:pageUrl}]}]}});
+}
+
+function translateArticleChrome(html) {
+  const replacements = [
+    ['← JOURNAL / LEIMAN LAB', '← JOURNAL / LEIMAN LAB'],
+    ['ЛЕВ ЛЕЙМАН', 'LEV LEIMAN'],
+    ['ОБНОВЛЕНО', 'UPDATED'],
+    ['МИН</span>', 'MIN</span>'],
+    ['ПРОСМОТРОВ', 'VIEWS'], ['ПРОСМОТРА', 'VIEWS'], ['ПРОСМОТР', 'VIEW'],
+    ['КОММ.', 'COMMENTS'],
+    ['Редакционная иллюстрация к статье', 'Editorial illustration for'],
+    ['ИСТОЧНИКИ / SOURCES', 'SOURCES'],
+    ['Факты относятся к дате публикации.', 'Information reflects the publication date.'],
+    ['ИСТОРИЯ ПРАВОК', 'REVISION HISTORY'],
+    ['НРАВИТСЯ', 'LIKE'], ['ПОДЕЛИТЬСЯ В TELEGRAM', 'SHARE ON TELEGRAM'],
+    ['КОПИРОВАТЬ ССЫЛКУ', 'COPY LINK'], ['ССЫЛКА СКОПИРОВАНА', 'LINK COPIED'],
+    ['КОПИРОВАНИЕ НЕДОСТУПНО', 'COPY NOT AVAILABLE'],
+    ['ЧИТАТЬ В TELEGRAM', 'READ ON TELEGRAM'],
+    ['КОММЕНТАРИИ', 'COMMENTS'], ['ВЫДЕЛИТЕ ТЕКСТ, ЧТОБЫ ОБСУДИТЬ ФРАГМЕНТ', 'SELECT TEXT TO DISCUSS A PASSAGE'],
+    ['Комментарии работают с включённым JavaScript.', 'Comments require JavaScript.'],
+    ['ДАЛЬШЕ', 'READ NEXT'], ['ВЕСЬ ЖУРНАЛ', 'FULL JOURNAL'],
+    ['ЧЕРНОВИК · ВИДЕН ТОЛЬКО ПО ПРЯМОЙ ССЫЛКЕ', 'DRAFT · DIRECT LINK ONLY']
+  ];
+  let result = html;
+  for (const [from,to] of replacements) result = result.replaceAll(from,to);
+  return result;
 }
 
 function write(res, code, data, mime='text/html; charset=utf-8', more={}) {
@@ -697,7 +742,7 @@ const server = http.createServer((req,res)=>{
     const pub=published();
     const lastArticleDate=pub.map(a=>a.updated||a.date).sort().at(-1)||'2026-10-01';
     const entries=[
-      {path:'/',lastmod:lastArticleDate},
+      {path:'/',lastmod:lastArticleDate,alts:[{lang:'ru',path:'/'},{lang:'en',path:'/en/'}]},
       {path:'/about'},
       {path:'/ai-index',lastmod:articleBySlug.get('ai-index-2026')?.updated||'2026-11-04'},
       {path:'/ai-film-awards',lastmod:'2026-11-10'},
@@ -705,10 +750,12 @@ const server = http.createServer((req,res)=>{
       {path:'/commons',lastmod:'2026-11-18'},
       ...rubrics.map(r=>({path:'/rubrics/'+r.slug,items:pub.filter(a=>a.rubric===r.slug)}))
         .filter(r=>r.items.length).map(r=>({path:r.path,lastmod:r.items.map(a=>a.updated||a.date).sort().at(-1)})),
-      ...pub.map(a=>({path:'/articles/'+a.slug,lastmod:a.updated||a.date}))
+      ...pub.map(a=>({path:'/articles/'+a.slug,lastmod:a.updated||a.date,alts:hasEnglish(a)?[{lang:'ru',path:'/articles/'+a.slug},{lang:'en',path:'/en/articles/'+a.slug}]:[]})),
+      {path:'/en/',lastmod:lastArticleDate,alts:[{lang:'ru',path:'/'},{lang:'en',path:'/en/'}]},
+      ...pub.filter(hasEnglish).map(a=>({path:'/en/articles/'+a.slug,lastmod:a.updated||a.date,alts:[{lang:'ru',path:'/articles/'+a.slug},{lang:'en',path:'/en/articles/'+a.slug}]}))
     ];
-    const entriesXml=entries.map(e=>`<url><loc>${xmlSafe(origin+e.path)}</loc>${e.lastmod?`<lastmod>${xmlSafe(e.lastmod)}</lastmod>`:''}</url>`).join('');
-    return write(res,200,`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${entriesXml}</urlset>`,'application/xml; charset=utf-8');
+    const entriesXml=entries.map(e=>`<url><loc>${xmlSafe(origin+e.path)}</loc>${e.lastmod?`<lastmod>${xmlSafe(e.lastmod)}</lastmod>`:''}${(e.alts||[]).map(a=>`<xhtml:link rel="alternate" hreflang="${a.lang}" href="${xmlSafe(origin+a.path)}"/>`).join('')}</url>`).join('');
+    return write(res,200,`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${entriesXml}</urlset>`,'application/xml; charset=utf-8');
   }
   if(pathname==='/rss.xml'){
     const items=published().map(a=>`<item><title>${xmlSafe(a.title)}</title><link>${origin}/articles/${a.slug}</link><guid>${origin}/articles/${a.slug}</guid><pubDate>${new Date(a.date+'T12:00:00Z').toUTCString()}</pubDate><description>${xmlSafe(a.summary)}</description></item>`).join('');
@@ -721,6 +768,13 @@ const server = http.createServer((req,res)=>{
   if(pathname==='/analytics'||pathname==='/analytics/')return write(res,200,analyticsView(origin),'text/html; charset=utf-8',{'Cache-Control':'no-store','X-Robots-Tag':'noindex'});
   if(pathname==='/api/public/analytics')return sendJson(res,200,publicAnalyticsSnapshot());
   if(pathname==='/')return write(res,200,home(origin));
+  if(pathname==='/en')return write(res,308,'','text/plain; charset=utf-8',{Location:'/en/'});
+  if(pathname==='/en/')return write(res,200,englishHome(origin));
+  const englishArticle=pathname.match(/^\/en\/articles\/([a-z0-9-]+)\/?$/);
+  if(englishArticle && articleBySlug.has(englishArticle[1]) && hasEnglish(articleBySlug.get(englishArticle[1]))) {
+    const a=localiseArticle(articleBySlug.get(englishArticle[1]), 'en');
+    return write(res,200,articleView(a,origin,'en'),'text/html; charset=utf-8',a.draft?{'Cache-Control':'no-store'}:{});
+  }
   if(pathname==='/ai-film-awards'||pathname==='/ai-film-awards/'){
     const content=readFileSync(path.join(PUBLIC,'assets','ai-film-awards.html'),'utf8');
     const originUrl=origin+'/ai-film-awards';
@@ -749,8 +803,8 @@ const server = http.createServer((req,res)=>{
      return write(res,200,page({content,title:'AI Index: какую нейросеть для чего использовать — Leiman Lab',description:'Независимый путеводитель по моделям ИИ: 20 систем, 14 сценариев, сравнение, калькулятор затрат, первоисточники и протокол испытаний. 4 ноября 2026.',canonical:origin+'/ai-index',cover:origin+socialCover(articleBySlug.get('ai-index-2026')),extraStylesheet:'/assets/ai-index.css',bodyData:' data-page="ai-index"',schema:{'@context':'https://schema.org','@type':'TechArticle',headline:'Какую нейросеть для чего использовать',datePublished:'2026-11-04',dateModified:'2026-11-04',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'},inLanguage:'ru'}}));
    }
   // Generate proper PNG Open Graph previews for articles with SVG editorial covers.
-  const rasterOg=pathname.match(/^\/og\/(ai-index-2026|after-black-october)\.png$/);
-  if(rasterOg&&articleBySlug.has(rasterOg[1])){
+  const rasterOg=pathname.match(/^\/og\/([a-z0-9-]+)\.png$/);
+  if(rasterOg&&articleBySlug.has(rasterOg[1])&&/\.svg$/i.test(articleBySlug.get(rasterOg[1]).cover||'')){
     const a=articleBySlug.get(rasterOg[1]);
     const src=a.slug==='ai-index-2026'?'/assets/ai-index-dark-og.svg':a.cover;
     if(!ogPngCache.has(src))ogPngCache.set(src,sharp(readFileSync(path.join(PUBLIC,src))).resize(1200,630).png({compressionLevel:9}).toBuffer());
