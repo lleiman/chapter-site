@@ -206,3 +206,14 @@ body{font-size:17px;line-height:1.7}
   .rubric-nav a{font-size:10px}
   .story-foot .micro{font-size:10px}
 }
+
+/* Commons navigation stays accessible without overloading mobile headers. */
+@media(max-width:1250px){
+  .site-header nav a[href="/ai-index"],.site-header nav a[href="/ai-film-awards"]{display:none}
+  .site-header nav{gap:19px}
+}
+@media(max-width:760px){
+  .site-header nav a[href="/predictions"],.site-header nav a[href="/about"],.site-header nav a[href="/search"]{display:none}
+  .site-header nav{gap:13px}
+}
+@media(max-width:420px){.site-header nav a[href^="https://t.me/"]{display:none}}
