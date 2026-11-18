@@ -303,5 +303,303 @@
       "date": "2026-11-04",
       "text": "Уточнён авторский голос: текст приведён к первому лицу единственного числа, убраны обезличенные редакционные формулы и повторения. Цифры, даты, ссылки и названия моделей сохранены."
     }
-  ]
+  ],
+  "translations": {
+    "en": {
+      "title": "Which AI Model Should You Use for Which Task? A Practical AI Index",
+      "headline": "Which AI Model Should You Use for Which Task?",
+      "cardTitle": "AI Index: Models by Task",
+      "summary": "A task-based map of AI models for research, writing, images, video, music and development, with a hands-on cost calculator.",
+      "deck": "A model can top a benchmark and still be the wrong tool for your workflow. Here is how to assess availability, quality, export rules, control and the real cost of results.",
+      "description": "Compare AI models for research, writing, images, video and music. A research-based AI Index with practical tool recommendations and cost-per-result calculator.",
+      "section": "RESEARCH / AI TOOLS",
+      "tags": [
+        "AI models",
+        "AI Index",
+        "Model benchmarks",
+        "Generative video",
+        "AI image editing",
+        "AI research",
+        "Production economics"
+      ],
+      "readingMinutes": 13,
+      "paragraphs": [
+        {
+          "type": "lead",
+          "text": "On 28 October, Google introduced Gemini 4 Carbon. It took the top position in the independent Artificial Analysis intelligence ranking. But it could not immediately become part of an ordinary working process: initial access was restricted to cybersecurity specialists. This is a useful illustration of why a model's position on a leaderboard is not enough to choose a tool."
+        },
+        {
+          "type": "p",
+          "text": "I built AI Index: a model directory, task-based recommendations, a feature comparison and a calculator for the real cost of a usable output. The first version was published on 4 November 2026. Its purpose is straightforward: choose an appropriate tool for a particular job and understand the compromises involved.",
+          "links": [
+            {
+              "label": "Open the interactive AI Index",
+              "url": "/ai-index"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "The research has an important limitation. I have not yet conducted my own blind tests of every model included. I therefore distinguish independent evaluations, developers' claims and my editorial recommendations. There are no numerical Leiman Lab performance scores at this stage."
+        },
+        {
+          "type": "h2",
+          "text": "Why general-purpose leaderboards can mislead"
+        },
+        {
+          "type": "p",
+          "text": "In October 2026, Artificial Analysis updated its Intelligence Index. Version five combines nine evaluations in four areas: professional knowledge work, coding, scientific work and general capabilities. Most of the aggregate score now comes from private tasks or hidden answers. This is intended to reduce the effects of models being trained specifically for widely known benchmark questions."
+        },
+        {
+          "type": "p",
+          "text": "At the time of the review, Gemini 4 Carbon in High mode scored 59, Claude Opus 5.5 in Max scored 58, and GPT-6 Astra in Max scored 57. Only one or two points separated them on a composite index. The index measures performance on a particular benchmark mix; it does not tell you which system to choose for editing an essay, working with a code repository or making a precise change to a frame.",
+          "links": [
+            {
+              "label": "Artificial Analysis: index methodology",
+              "url": "https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Google introduced Carbon on 28 October and highlighted its reasoning and cybersecurity results. Access was initially limited to a small group of specialists. I therefore marked the model as having restricted availability in the directory, despite its leaderboard position.",
+          "links": [
+            {
+              "label": "Google: announcement and access",
+              "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-carbon/"
+            }
+          ]
+        },
+        {
+          "type": "aside",
+          "label": "RULE 01",
+          "text": "Before comparing output quality, establish whether you can actually access a model, which configuration is available, and what limitations apply. The commercial product name and the underlying model name do not always match."
+        },
+        {
+          "type": "h2",
+          "text": "Text, research and long documents"
+        },
+        {
+          "type": "p",
+          "text": "I separate research into three operations: locating publications, studying the materials already gathered and developing a conclusion. A single general-purpose chat can assist in each phase. Specialist tools, however, can make source verification and revisiting particular passages substantially easier."
+        },
+        {
+          "type": "p",
+          "text": "Perplexity is useful for initial reconnaissance: assembling links and deciding which papers deserve closer inspection. NotebookLM helps interrogate a curated set of PDFs and notes. I would compare ChatGPT and Claude for synthesis, reasoning and editing. Every citation supplied by any of these systems still needs to be opened and checked against the original source."
+        },
+        {
+          "type": "p",
+          "text": "Writing presents a distinct problem. A strong model can organise someone else's argument while quietly erasing its voice. Avoiding this requires first-hand observations, examples of the author's language and clear genre requirements. I explored the problem in an earlier essay about writing alongside AI.",
+          "links": [
+            {
+              "label": "Leiman Lab: Writing with AI",
+              "url": "/articles/human-voice"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "Images: concept exploration versus precise editing"
+        },
+        {
+          "type": "p",
+          "text": "For images I distinguish discovering a creative direction from editing an approved shot. Midjourney V8.2 may be worth considering for style and multiple concept directions; GPT Image 2.5 Sunburst for iterative edits; Ideogram 4.5 offers a Precise Edit feature for changes to a defined region. These tools must be compared on equivalent tasks. A compelling initial concept does not guarantee reliable editing."
+        },
+        {
+          "type": "p",
+          "text": "If a client requires an editable vector source, a comparison of ordinary raster generators becomes less useful. Recraft V4.1 Vector exports SVG. I would still open the result in a vector editor and inspect paths, typography and production readiness.",
+          "links": [
+            {
+              "label": "Recraft: vector generation",
+              "url": "https://www.recraft.ai/ai-vector-generator"
+            },
+            {
+              "label": "OpenAI: image editing",
+              "url": "https://developers.openai.com/api/docs/guides/tools-image-generation"
+            }
+          ]
+        },
+        {
+          "type": "aside",
+          "label": "RULE 02",
+          "text": "For professional design, measure not only the beauty of the first generation but also how many attempts it takes to make a precise change without damaging elements that have already been approved."
+        },
+        {
+          "type": "h2",
+          "text": "Video: different tools for different stages"
+        },
+        {
+          "type": "p",
+          "text": "Video production involves at least three distinct operations: generating a scene from text, animating an existing still and modifying footage that already exists. Artificial Analysis evaluates these categories separately. A result in one cannot automatically be applied to another."
+        },
+        {
+          "type": "p",
+          "text": "On 4 November, Wan 3.0 was among the leaders in text-to-video with audio. Seedance 2.5 is notable for multimodal references: according to ByteDance, a single request can include images, video and sound, with generated clips up to 30 seconds. Runway Gen-4.5 targets short shots with complex movement. For production, I would prioritise testing how consistently each service handles the same prompt and the same source frames.",
+          "links": [
+            {
+              "label": "Artificial Analysis: video benchmark",
+              "url": "https://artificialanalysis.ai/video/leaderboard/text-to-video"
+            },
+            {
+              "label": "ByteDance: Seedance 2.5",
+              "url": "https://seed.bytedance.com/en/blog/one-take-creation-flexible-referencing-introducing-seedance-2-5"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Comparison guides expire. Sora, for example, still appears in some lists of video generators even though its web version and app closed on 26 April 2026 and its API on 24 September. Before comparing tools, verify that the service is available and that the required output can actually be exported.",
+          "links": [
+            {
+              "label": "OpenAI: Sora discontinuation",
+              "url": "https://help.openai.com/en/articles/20001152-what-to-know-about-the-sora-discontinuation"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "Audio and music: rights matter as much as generation"
+        },
+        {
+          "type": "p",
+          "text": "Suno introduced V6 in September 2026. Its main model is designed for controllable creation; Wild is intended for less predictable results and Mini for rapid drafts. Models support generation up to eight minutes. ElevenLabs v4 emphasises expressive, multi-speaker synthesis.",
+          "links": [
+            {
+              "label": "Suno: V6 release",
+              "url": "https://suno.com/release-notes/introducing-v6"
+            },
+            {
+              "label": "ElevenLabs: V4",
+              "url": "https://elevenlabs.io/blog/eleven-v4"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "For audio, generation quality is only part of the decision. As of 4 November, Suno imposed download limits on certain plans, while Udio had announced the removal of audio, video and stem export. For a commercial commission, this is decisive: you need to create a track and be able to deliver it to the client lawfully.",
+          "links": [
+            {
+              "label": "Suno: download limits",
+              "url": "https://help.suno.com/en/articles/13876865"
+            },
+            {
+              "label": "Udio: export policy changes",
+              "url": "https://help.udio.com/en/articles/12683565-changes-associated-with-the-universal-music-group-umg-partnership"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "The price of one generation is not the cost of one usable result"
+        },
+        {
+          "type": "p",
+          "text": "Suppose a generation costs $1.50 and only one output in four is usable. On average, you need four attempts. If reviewing and adjusting each attempt takes five minutes at a labour rate of $25 an hour, the expected full cost per usable result is approximately $14.33. That is very different from the price shown next to the Generate button."
+        },
+        {
+          "type": "p",
+          "text": "I added a calculator to AI Index that lets you adjust cost per attempt, success rate, time spent and hourly labour cost. It estimates the number of attempts needed and the probability of obtaining usable material within ten tries. I did not prefill service subscription rates: plans change, and labour costs differ.",
+          "links": [
+            {
+              "label": "Open the cost calculator",
+              "url": "/ai-index#calculator"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "How I intend to test these systems"
+        },
+        {
+          "type": "p",
+          "text": "For the next phase, I prepared four testing protocols: research and source verification, image editing, short-scene animation and music generation. Each should use identical input materials, repeated trials and predefined measures of usable output. Where possible, results should be evaluated blind, without revealing the model name."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Accuracy of completing the task and the number of critical errors.",
+            "Consistency across repeated runs.",
+            "Control over revisions and preservation of previously approved details.",
+            "Human time, retries and full economic cost.",
+            "Export formats, licences and production restrictions."
+          ],
+          "text": ""
+        },
+        {
+          "type": "p",
+          "text": "Until these tests have been conducted, the directory remains a market map with editorial recommendations. I would consider an original ranking justified only after a series of comparable evaluations with published conditions. For now, readers can use the navigator as a starting point and test the candidates on their own work.",
+          "links": [
+            {
+              "label": "Open AI Index and test protocols",
+              "url": "/ai-index#tests"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "Artificial Analysis. Intelligence Index v5.0",
+          "url": "https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index",
+          "type": "INDEPENDENT BENCHMARK"
+        },
+        {
+          "title": "Google. Introducing Gemini 4 Carbon (28.10.2026)",
+          "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-carbon/",
+          "type": "PRIMARY SOURCE"
+        },
+        {
+          "title": "Anthropic. Introducing Claude Opus 5.5 (22.09.2026)",
+          "url": "https://www.anthropic.com/claude-opus-5-5",
+          "type": "PRIMARY SOURCE"
+        },
+        {
+          "title": "OpenAI. GPT-6 Astra",
+          "url": "https://openai.com/index/gpt-6-astra/",
+          "type": "PRIMARY SOURCE"
+        },
+        {
+          "title": "Midjourney. Version V8.2",
+          "url": "https://docs.midjourney.com/hc/en-us/articles/32199405667853-Version",
+          "type": "DOCUMENTATION"
+        },
+        {
+          "title": "OpenAI. Image generation API guide",
+          "url": "https://developers.openai.com/api/docs/guides/tools-image-generation",
+          "type": "DOCUMENTATION"
+        },
+        {
+          "title": "Recraft. V4.1 Vector",
+          "url": "https://www.recraft.ai/ai-vector-generator",
+          "type": "PRIMARY SOURCE"
+        },
+        {
+          "title": "Artificial Analysis. Video Arena",
+          "url": "https://artificialanalysis.ai/video/leaderboard/text-to-video",
+          "type": "INDEPENDENT BENCHMARK"
+        },
+        {
+          "title": "ByteDance. Seedance 2.5",
+          "url": "https://seed.bytedance.com/en/blog/one-take-creation-flexible-referencing-introducing-seedance-2-5",
+          "type": "PRIMARY SOURCE"
+        },
+        {
+          "title": "OpenAI. Sora discontinuation",
+          "url": "https://help.openai.com/en/articles/20001152-what-to-know-about-the-sora-discontinuation",
+          "type": "DOCUMENTATION"
+        },
+        {
+          "title": "Suno. V6 release notes and download rules",
+          "url": "https://help.suno.com/en/articles/13924801",
+          "type": "DOCUMENTATION"
+        },
+        {
+          "title": "Udio. UMG partnership: download limitations",
+          "url": "https://help.udio.com/en/articles/12683565-changes-associated-with-the-universal-music-group-umg-partnership",
+          "type": "DOCUMENTATION"
+        }
+      ],
+      "sourcesLabel": "SOURCES / METHODS",
+      "sourceNote": "Research snapshot: 4 November 2026. Leaderboard positions, service access and commercial terms may have changed. Leiman Lab has not yet published original blind-test scores."
+    }
+  }
 }
