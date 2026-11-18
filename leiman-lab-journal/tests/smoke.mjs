@@ -130,6 +130,16 @@ async function commonsTests() {
   assert.equal(record.decisions[0].quorumMet,false);
   assert.equal(record.legalStatus,'not-incorporated');
   assert.equal(record.daoStatus,'not-activated');
+
+  assert.equal(record.pilotMetrics.activeMembers,1);
+  assert.equal(record.pilotMetrics.independentReplications,0);
+  const evidence=await fetch(origin+'/api/admin/commons/evidence',{method:'POST',headers:{'X-Admin-Password':PASSWORD,'Content-Type':'application/json'},body:JSON.stringify({programId:'prediction-replication',kind:'replication',title:'Тестовая репликация',url:'https://example.org/protocol'})});
+  assert.equal(evidence.status,201,'steward records a linked research output');
+  const evidencePublic=await (await get('/api/commons')).json();
+  assert.equal(evidencePublic.pilotMetrics.documentedOutputs,1);
+  assert.equal(evidencePublic.pilotMetrics.independentReplications,1);
+  assert.equal(evidencePublic.evidence[0].url,'https://example.org/protocol');
+
   assert.ok(!JSON.stringify(record).includes(issued.token));
   const after=await fetch(origin+'/api/commons/votes',{method:'POST',headers:auth,body:JSON.stringify({proposalId,choice:'yes'})});
   assert.equal(after.status,409,'closed ballots are immutable');
