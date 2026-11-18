@@ -1,0 +1,179 @@
+/* Prediction OS quiz: answers stay in the browser; every number comes from a Prediction OS result. */
+(() => {
+  const root = document.getElementById('pr-quiz');
+  if (!root) return;
+
+  const SRC = {
+    wd: 'известные люди, Викиданные 1870–1900-х',
+    cent: 'Laouenan, 1500–1849',
+    nlsy: 'NLSY97, США, 8 984 человека с 1997 года',
+    cong: 'Конгресс США',
+    oly: 'олимпийцы 1896–2024',
+    imdb: 'IMDb, люди кино',
+    nobel: 'Нобелевская премия',
+  };
+
+  const Q = [
+    { id: 'age', q: 'Сколько вам лет?', opts: [['u25', 'до 25'], ['25_34', '25–34'], ['35_49', '35–49'], ['50_64', '50–64'], ['65p', '65 и старше']] },
+    { id: 'work', q: 'Чем вы в основном занимаетесь?', opts: [
+      ['acad', 'наука или преподавание в вузе'], ['mil', 'военная или силовая служба'], ['sport', 'профессиональный спорт'],
+      ['risk', 'работа с риском травм: каскадёры, высота, шахта'], ['poet', 'поэзия, литература'], ['dipl', 'дипломатия, госслужба'], ['other', 'другое']] },
+    { id: 'father', q: 'Вы работаете в той же сфере, что ваш отец?', opts: [['yes', 'да'], ['no', 'нет'], ['unk', 'не знаю']] },
+    { id: 'award', q: 'Была ли у вас заметная награда или премия?', opts: [
+      ['none', 'нет'], ['u40', 'да, до 40 лет'], ['o40', 'да, после 40 лет'], ['medal', 'спортивная медаль до 23 лет']] },
+    { id: 'sib', q: 'Если брат или сестра уже умерли — в каком возрасте?', opts: [['none', 'никто не умер / нет братьев и сестёр'], ['u50', 'до 50'], ['50_64', '50–64'], ['65_79', '65–79'], ['80p', '80 и старше']] },
+    { id: 'exit', q: 'Вы окончательно ушли с работы или должности за последние три года?', opts: [['yes', 'да'], ['no', 'нет']] },
+    { id: 'marr', q: 'Семейное положение?', opts: [['none', 'не в браке'], ['f12', 'первый брак, 1–2 года'], ['f36', 'первый брак, 3–6 лет'], ['f7', 'первый брак, 7 лет и больше'], ['second', 'второй или следующий брак']] },
+    { id: 'stress', multi: true, q: 'Что из этого случилось с вами за последние два года?', hint: 'Можно выбрать несколько.', opts: [
+      ['100', 'смерть супруга или партнёра'], ['73', 'развод'], ['65', 'раздельное проживание с партнёром'], ['63', 'заключение'],
+      ['63b', 'смерть близкого родственника'], ['53', 'серьёзная травма или болезнь'], ['50', 'свадьба'], ['47', 'увольнение'],
+      ['45', 'выход на пенсию'], ['40', 'беременность'], ['38', 'резкая перемена в деньгах'], ['36', 'смена работы'], ['20', 'переезд']] },
+    { id: 'mood', q: 'Было ли у вас в 16–20 лет долгое, на недели, подавленное состояние?', opts: [['yes', 'да'], ['no', 'нет'], ['unk', 'не помню']] },
+    { id: 'self', q: 'Сколько лет до 30 вы работали на себя?', opts: [['0', 'ни года'], ['1', 'около года'], ['2', '2–3 года'], ['4', '4 года и больше']] },
+  ];
+
+  const WORK = {
+    acad: { d: 3.0, r: '+0,7…+6,5 года', t: 'Учёные и преподаватели вузов живут дольше остальных — в каждом проверенном поколении и в XVI–XIX веках.', s: SRC.wd + '; ' + SRC.cent },
+    mil: { d: -2.0, r: '−1,3…−3,1 года', t: 'Военные живут меньше — и у известных людей XX века, и в XVI–XIX веках.', s: SRC.wd + '; ' + SRC.cent },
+    sport: { d: -2.5, r: '−1,6…−4,6 года', t: 'Профессиональные футболисты живут меньше остальных известных людей того же поколения.', s: SRC.wd },
+    risk: { d: -2.4, r: '−2,4 года', t: 'Каскадёры живут меньше остальных людей кино. Это то же, что у военных: опасная работа.', s: SRC.imdb },
+    poet: { d: -1.5, r: '−0,4…−2,6 года', t: 'Поэты живут меньше; разрыв растёт от XVI века к XIX и слабеет в XX.', s: SRC.cent + '; ' + SRC.wd },
+    dipl: { d: 1.8, r: '+0,8…+2,9 года', t: 'Дипломаты живут дольше остальных — у известных людей XX века и в XVI–XIX веках.', s: SRC.wd + '; ' + SRC.cent },
+  };
+  const SIB = { u50: 40, '50_64': 57, '65_79': 72, '80p': 86 };
+
+  let step = 0;
+  const ans = {};
+  const fmt = (x, d = 1) => (x > 0 ? '+' : x < 0 ? '−' : '') + Math.abs(x).toLocaleString('ru-RU', { maximumFractionDigits: d, minimumFractionDigits: d });
+  const pct = x => x.toLocaleString('ru-RU', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + ' %';
+
+  function renderQuestion() {
+    const item = Q[step];
+    const chosen = ans[item.id] || (item.multi ? [] : null);
+    root.innerHTML = `
+      <div class="pq-top"><span>Вопрос ${step + 1} из ${Q.length}</span><div class="pq-bar"><i style="width:${(step / Q.length) * 100}%"></i></div></div>
+      <h3 class="pq-q">${item.q}</h3>${item.hint ? `<p class="pq-hint">${item.hint}</p>` : ''}
+      <div class="pq-opts" role="${item.multi ? 'group' : 'radiogroup'}" aria-label="${item.q}">
+        ${item.opts.map(([v, l]) => {
+          const on = item.multi ? chosen.includes(v) : chosen === v;
+          return `<button type="button" class="pq-opt${on ? ' on' : ''}" data-v="${v}" role="${item.multi ? 'checkbox' : 'radio'}" aria-checked="${on}">${l}</button>`;
+        }).join('')}
+      </div>
+      <div class="pq-nav">
+        <button type="button" class="pq-back" ${step ? '' : 'disabled'}>← Назад</button>
+        ${item.multi ? `<button type="button" class="pr-button pq-next">${chosen.length ? 'Дальше' : 'Ничего из этого'}</button>` : ''}
+      </div>`;
+    root.querySelectorAll('.pq-opt').forEach(b => b.addEventListener('click', () => {
+      const v = b.dataset.v;
+      if (item.multi) {
+        const set = new Set(ans[item.id] || []);
+        set.has(v) ? set.delete(v) : set.add(v);
+        ans[item.id] = [...set];
+        renderQuestion();
+      } else {
+        ans[item.id] = v;
+        next();
+      }
+    }));
+    root.querySelector('.pq-back').addEventListener('click', () => { if (step) { step--; renderQuestion(); } });
+    const nx = root.querySelector('.pq-next');
+    if (nx) nx.addEventListener('click', () => { ans[item.id] = ans[item.id] || []; next(); });
+  }
+
+  function next() {
+    step++;
+    if (step < Q.length) renderQuestion();
+    else renderResult();
+  }
+
+  function card(big, title, text, src) {
+    return `<article class="pq-card"><b>${big}</b><div><h4>${title}</h4><p>${text}</p><small>${src}</small></div></article>`;
+  }
+
+  function renderResult() {
+    const cards = [];
+    let shift = 0;
+    const parts = [];
+
+    const w = WORK[ans.work];
+    if (w) {
+      shift += w.d; parts.push('профессия');
+      cards.push(card(w.r, 'Срок жизни: ваша работа', w.t, w.s));
+    }
+    if (ans.sib && SIB[ans.sib]) {
+      const s = 0.16 * (SIB[ans.sib] - 72);
+      shift += s; parts.push('брат или сестра');
+      cards.push(card(fmt(s) + ' года', 'Срок жизни: судьба брата или сестры',
+        'Возраст смерти брата или сестры предсказывает ваш сверх возраста смерти отца: на каждый год их жизни — примерно 0,12–0,20 года вашей. Сравнение — с теми, чьи братья и сёстры умерли около 72 лет.', SRC.wd));
+    }
+    if (ans.award === 'medal') {
+      shift -= 1.3; parts.push('ранняя медаль');
+      cards.push(card('−1,3 года', 'Срок жизни: ранняя медаль',
+        'Олимпийцы, впервые взявшие медаль до 23 лет, живут меньше тех, кто взял первую после 28. Скорее всего, дело в здоровье: поздняя медаль требует долго оставаться в форме.', SRC.oly));
+    }
+    if (ans.award === 'u40') {
+      cards.push(card('27 %', 'Следующее признание за 10 лет',
+        'У известных людей с наградой до 40 лет следующая награда за 10 лет случается в 27 % случаев, без наград — в 2 %. Одинаково в трёх поколениях.', SRC.wd));
+    }
+    if (ans.award === 'o40') {
+      cards.push(card('+1,6 года', 'Позднее признание',
+        'Нобелевские лауреаты живут после премии дольше номинантов-ровесников. Для обычных наград после 40 у известных людей такой прибавки нет — в сумму это не входит.', SRC.nobel + '; ' + SRC.wd));
+    }
+    if (ans.father === 'yes') {
+      cards.push(card('×3', 'Вы в сфере отца',
+        'Так делают около 38–40 % известных людей — втрое чаще, чем было бы при случайном совпадении профессий.', SRC.wd));
+    }
+    if (ans.exit === 'yes') {
+      cards.push(card('+2–6 п. п.', 'Первые три года после ухода',
+        'После окончательного ухода с должности известные люди и члены Конгресса умирают в ближайшие три года чаще ровесников, которые ещё работают. Часть уходов — из-за болезни; но и сам уход совпадает с ростом риска.', SRC.wd + '; ' + SRC.cong));
+    }
+    const m = ans.marr;
+    if (m === 'second') cards.push(card('32 %', 'Брак: ближайшие 5 лет', 'Вторые браки распадаются за пять лет в 32 % случаев, первые — в 20 %.', SRC.nlsy));
+    if (m === 'f12') cards.push(card('5,8 %', 'Брак: пик впереди', 'Риск распада выше всего на третьем году брака — 5,8 % в год, дальше снижается. «Кризиса седьмого года» в данных нет.', SRC.nlsy));
+    if (m === 'f36') cards.push(card('≈5 %', 'Брак: риск в этом году', 'Вы проходите самые рискованные годы: 5,8 % в год на третьем году, 5,0 % на седьмом. Дальше риск снижается.', SRC.nlsy));
+    if (m === 'f7') cards.push(card('≤5 %', 'Брак: риск снижается', 'После седьмого года риск распада падает: 5,0 % в год на седьмом году, 3,8 % на десятом. Пика на седьмом году нет.', SRC.nlsy));
+
+    const st = (ans.stress || []).map(v => parseInt(v, 10)).reduce((a, b) => a + b, 0);
+    const risk = 6 + 0.9 * st / 100;
+    cards.push(card(pct(risk), 'Здоровье: ближайшие два года',
+      st ? `Ваши события за два года дают ${st} баллов по шкале Холмса–Рахе. Каждые 100 баллов добавляют около 0,9 п. п. к риску заметного ухудшения здоровья (у всех — около 6 %). Сильнее всего связаны раздельное проживание, заключение, потеря работы — свадьба и рождение ребёнка почти нет.`
+        : 'Без больших событий за два года риск заметного ухудшения здоровья — около 6 %. Каждые 100 баллов по шкале Холмса–Рахе добавляют к нему около 0,9 п. п.', SRC.nlsy));
+
+    if (ans.mood === 'yes') cards.push(card('×3', 'Настроение через 15 лет',
+      'Подавленные в 16–20 лет в 31–35 лет подавлены втрое чаще остальных: 9,7 % против 3,0 %. Это прошлое предсказывает будущее, но не приговаривает — 90 % не подавлены. Если сейчас тяжело, поговорите со специалистом.', SRC.nlsy));
+
+    const se = parseInt(ans.self || '0', 10);
+    if (se > 0) cards.push(card(fmt(2.6 * Math.min(se, 4), 0) + ' перц.', 'Имущество к 40 годам',
+      'Каждый год работы на себя в 20–29 лет — примерно +2,6 перцентиля по имуществу в 40 лет сверх образования и способностей. Связь на пределе значимости; после четырёх лет мы её не проверяли.', SRC.nlsy));
+
+    const young = ans.age === 'u25';
+    root.innerHTML = `
+      <div class="pq-result">
+        <p class="pr-eyebrow">Предсказатель</p>
+        <div class="pq-head">
+          <div><span class="pq-big">${parts.length ? fmt(shift) : '0'}</span><span class="pq-unit">${parts.length ? 'года' : ''}</span></div>
+          <p>${parts.length ? `Сдвиг срока жизни относительно ровесников: ${parts.join(', ')}. Это грубая сумма средних по известным людям; у каждой части свой разброс, и вместе они складываются не строго.`
+            : 'Ваши ответы не сдвигают срок жизни относительно ровесников: ни профессия, ни судьба братьев и сестёр, ни ранняя медаль здесь не дают поправки.'}</p>
+        </div>
+        <div class="pq-cards">${cards.join('')}</div>
+        <div class="pq-honest">
+          <h4>Насколько этому верить</h4>
+          <p>Это средние по сотням тысяч людей, а не ваша судьба. На год вперёд мы предсказываем неплохо — например, безработицу по прошлой работе (AUC 0,95). На 10–20 лет вперёд точность всего на 2–4 % лучше, чем просто взять среднюю частоту.${young ? ' Большая часть данных — о взрослых и пожилых людях, для вашего возраста выводы ещё грубее.' : ''}</p>
+        </div>
+        <div class="pq-nav"><button type="button" class="pr-button pq-again">Пройти заново</button><a class="pr-link" href="#findings">Откуда эти цифры ↓</a></div>
+      </div>`;
+    root.querySelector('.pq-again').addEventListener('click', () => { for (const k in ans) delete ans[k]; step = 0; renderQuestion(); root.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    root.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function renderIntro() {
+    root.innerHTML = `
+      <div class="pq-intro">
+        <div class="pq-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+        <p>Около двух минут. Можно вернуться к любому вопросу.</p>
+        <button type="button" class="pr-button pq-start">Начать</button>
+      </div>`;
+    root.querySelector('.pq-start').addEventListener('click', renderQuestion);
+  }
+  renderIntro();
+})();
