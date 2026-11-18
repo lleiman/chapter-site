@@ -80,7 +80,7 @@ async function commonsTests() {
     assert.equal((await get(route)).status,200,route+' must be available');
   }
   const htmlCommons=await html('/commons');
-  assert.ok(htmlCommons.includes('COMMONS.') && htmlCommons.includes('90-дневная') && htmlCommons.includes('конституции'));
+  assert.ok(htmlCommons.includes('id="cm-title"') && htmlCommons.includes('90-дневная') && htmlCommons.includes('конституции'), 'Commons public page sections');
   assert.ok((await html('/')).includes('href="/commons"'), 'Commons in journal navigation');
   assert.ok((await html('/sitemap.xml')).includes('/commons'), 'Commons in sitemap');
   const initial=await (await get('/api/commons')).json();
