@@ -25,6 +25,10 @@
     $('cm-counter-members').textContent=String(data.members.length).padStart(2,'0');
     $('cm-counter-decisions').textContent=String(data.decisions.length).padStart(2,'0');
     $('cm-proposal-program').innerHTML=progLabels();
+    $('cm-evidence-program').innerHTML=progLabels();
+    const metrics=data.pilotMetrics;
+    $('cm-metrics').innerHTML=[['АКТИВНЫЕ УЧАСТНИКИ',metrics.activeMembers],['ПУБЛИЧНЫЕ ИНИЦИАТИВЫ',metrics.publicProposals],['РЕШЕНИЯ',metrics.decisions],['ЗАРЕГИСТРИРОВАННЫЕ РЕЗУЛЬТАТЫ',metrics.documentedOutputs],['НЕЗАВИСИМЫЕ РЕПЛИКАЦИИ',metrics.independentReplications]].map(([label,count])=>'<div><b>'+count+'</b><span>'+label+'</span></div>').join('');
+    $('cm-evidence').innerHTML=data.evidence.length?data.evidence.map(x=>'<article><span>'+escapeHtml(x.recorded.slice(0,10))+' / '+escapeHtml(x.kind)+'</span><a href="'+escapeHtml(x.url)+'" target="_blank" rel="noopener noreferrer">'+escapeHtml(x.title)+' ↗</a><small>'+escapeHtml(x.programId)+'</small></article>').join(''):'<p class="cm-empty">Проверяемых публичных результатов пока не зарегистрировано.</p>';
     $('cm-programs').innerHTML=data.programs.map((p,i)=>'<article class="cm-program"><div class="cm-program-top"><span>0'+(i+1)+' / '+escapeHtml(p.id.toUpperCase())+'</span><b>'+escapeHtml(statuses[p.status]||p.status)+'</b></div><h3>'+escapeHtml(p.title)+'</h3><p>'+escapeHtml(p.purpose)+'</p><ol>'+p.milestones.map(m=>'<li>'+escapeHtml(m)+'</li>').join('')+'</ol></article>').join('');
     $('cm-members').innerHTML=data.members.length?data.members.map(m=>'<div class="cm-member"><span>'+escapeHtml(m.name.charAt(0).toUpperCase())+'</span><div><strong>'+escapeHtml(m.name)+'</strong><small>'+escapeHtml(m.role.toUpperCase())+(m.bio?' / '+escapeHtml(m.bio):'')+'</small></div></div>').join(''):'<p class="cm-empty">Подтверждённые участники пока не зарегистрированы. Пилот находится на стадии подготовки.</p>';
     $('cm-proposals').innerHTML=data.proposals.length?data.proposals.map(p=>{
@@ -91,6 +95,14 @@
       const r=await request('/api/admin/commons/members','POST',{name:f.get('name'),role:f.get('role'),displayPublic:f.has('displayPublic')},admin);
       $('cm-issued').textContent='Ключ (показывается один раз): '+r.token+'. Передайте участнику безопасным каналом. Не публикуйте.';
       e.target.reset();await refreshAdmin();notice('Участник добавлен');
+    }catch(err){notice(err.message);}
+  });
+  $('cm-evidence-form').addEventListener('submit',async e=>{
+    e.preventDefault();
+    const f=new FormData(e.target);
+    try {
+      await request('/api/admin/commons/evidence','POST',{programId:f.get('programId'),kind:f.get('kind'),title:f.get('title'),url:f.get('url')},admin);
+      e.target.reset();await refreshAdmin();notice('Результат зарегистрирован с публичной ссылкой');
     }catch(err){notice(err.message);}
   });
   $('cm-pending').addEventListener('click',async e=>{
