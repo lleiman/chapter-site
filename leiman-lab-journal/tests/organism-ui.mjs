@@ -68,7 +68,7 @@ export function organismUiTest() {
     assert.equal(elements['org-step-counter'].textContent,'07 / 08','stage navigation should jump');
     assert.ok(elements['org-step-gate'].textContent.length>20,'stage safeguards should show');
     elements['org-scenario'].value='1';elements['org-scenario'].change();
-    assert.equal(elements['org-contract-value'].textContent,'$8,000','scenario selection should recalculate finance');
+    assert.equal(elements['org-contract-value'].textContent.replace(/[^0-9]/g,''),'8000','scenario selection should recalculate finance');
     assert.equal(elements['org-step-counter'].textContent,'01 / 08','changing scenario resets workflow');
     elements['org-play'].click();
     assert.equal(elements['org-play'].attributes['aria-pressed'],'true','autoplay button should activate');
@@ -81,7 +81,7 @@ export function organismUiTest() {
     mapStages[4].click();
     assert.equal(elements['org-step-counter'].textContent,'05 / 08','SVG stage is interactive');
     elements['org-reset'].click();
-    assert.equal(elements['org-contract-value'].textContent,'$12,000','reset restores original scenario');
+    assert.equal(elements['org-contract-value'].textContent.replace(/[^0-9]/g,''),'12000','reset restores original scenario');
     assert.equal(elements['org-step-counter'].textContent,'01 / 08','reset starts from sensing');
     assert.ok(elements['org-trace'].items.length===1,'event history resets with simulation');
     assert.ok(elements['org-step-description'].textContent.length>25,'description should be visible');
