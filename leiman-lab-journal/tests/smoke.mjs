@@ -58,6 +58,7 @@ async function main() {
   assert.equal((await gsc.text()).trim(),'google-site-verification: google6203997034e41be1.html','Google verification file content');
   assert.ok(gsc.headers.get('content-type').startsWith('text/html'),'Google verification content-type');
   await seoTests();
+  await incomeBilingualTests();
   await passwordlessAnalyticsTests();
   await commonsTests();
   await aiIndexTests();
@@ -74,6 +75,54 @@ const editArticle = async (slug, edits) => {
   assert.equal(r.status, 200, JSON.stringify(r.json));
 };
 
+
+async function incomeBilingualTests() {
+  for(const route of ['/en/','/articles/ai-income-opportunities','/en/articles/ai-income-opportunities','/opportunities','/en/opportunities','/privacy','/en/privacy']) {
+    const r=await get(route);
+    assert.equal(r.status,200,route+' must be available');
+  }
+  const ru=await html('/articles/ai-income-opportunities');
+  const en=await html('/en/articles/ai-income-opportunities');
+  assert.ok(ru.includes('<html lang="ru">'));
+  assert.ok(en.includes('<html lang="en">'));
+  assert.ok(en.includes('The New Economics of Finding Work'));
+  assert.ok(en.includes('<link rel="canonical" href="'+origin+'/en/articles/ai-income-opportunities">'));
+  assert.ok(ru.includes('hreflang="en" href="'+origin+'/en/articles/ai-income-opportunities"'));
+  assert.ok(en.includes('hreflang="ru" href="'+origin+'/articles/ai-income-opportunities"'));
+  assert.ok(en.includes('"inLanguage":"en-US"'));
+  assert.ok(!en.includes('Конкурсы ИИ-кино'));
+  const index=await html('/en/');
+  assert.ok(index.includes('The New Economics of Finding Work'));
+  assert.ok(!index.includes('Чёрный октябрь'), 'untranslated articles must not appear in English index');
+  const sitemap=await html('/sitemap.xml');
+  assert.ok(sitemap.includes('xmlns:xhtml='));
+  assert.ok(sitemap.includes('/en/articles/ai-income-opportunities'));
+  assert.ok(sitemap.includes('hreflang="en"'));
+  assert.ok(!sitemap.includes('/en/articles/warhound'), 'no fake untranslated alternates');
+  const png=await get('/og/ai-income-opportunities.png');
+  assert.equal(png.status,200);
+  assert.equal(png.headers.get('content-type'),'image/png');
+  assert.deepEqual([...new Uint8Array(await png.arrayBuffer()).slice(0,8)],[137,80,78,71,13,10,26,10]);
+  const cv={name:'Test Editor',email:'editor@example.test',cv:'Research and creative technology specialist with experience in writing, project analysis and production. This is test-only data.',profession:'research',workMode:'remote',location:'Testland',goals:'Improve eligibility analysis',locale:'en',consent:true,contactOptIn:false};
+  const incomplete=await fetch(origin+'/api/opportunities/cv',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...cv,consent:false})});
+  assert.equal(incomplete.status,400,'explicit consent required');
+  const created=await fetch(origin+'/api/opportunities/cv',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cv)});
+  assert.equal(created.status,201,'CV submissions should be accepted with consent');
+  const {id,deletionToken}=await created.json();
+  assert.match(id,/^[a-f0-9]{32}$/);
+  assert.match(deletionToken,/^[a-f0-9]{48}$/);
+  const publicCheck=await get('/api/admin/opportunities/submissions');
+  assert.equal(publicCheck.status,401,'CV admin must require editor credentials');
+  const privateCheck=await fetch(origin+'/api/admin/opportunities/submissions',{headers:{'x-admin-password':PASSWORD}});
+  assert.equal(privateCheck.status,200);
+  const listing=await privateCheck.json();
+  assert.ok(listing.submissions.some(x=>x.id===id&&x.email===cv.email));
+  const wrongDelete=await fetch(origin+'/api/opportunities/cv/'+id,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({deletionToken:'a'.repeat(48)})});
+  assert.equal(wrongDelete.status,403);
+  const deleted=await fetch(origin+'/api/opportunities/cv/'+id,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({deletionToken})});
+  assert.equal(deleted.status,200);
+  console.log('✓ bilingual income research, source atlas, SEO, encrypted CV intake and deletion');
+}
 
 async function commonsTests() {
   for (const route of ['/commons','/assets/commons.css','/assets/commons.html','/assets/commons.js','/assets/commons-charter.md']) {
