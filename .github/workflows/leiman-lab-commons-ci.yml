@@ -1,0 +1,24 @@
+name: Leiman Lab Commons CI
+on:
+  pull_request:
+    branches: [leiman-lab-journal]
+    paths:
+      - 'leiman-lab-journal/**'
+      - '.github/workflows/leiman-lab-commons-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: leiman-lab-journal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --no-audit --no-fund
+      - run: npm run check
+      - run: npm test

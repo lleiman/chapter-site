@@ -59,6 +59,7 @@ async function main() {
   assert.ok(gsc.headers.get('content-type').startsWith('text/html'),'Google verification content-type');
   await seoTests();
   await passwordlessAnalyticsTests();
+  await commonsTests();
   await aiIndexTests();
   await rubricTests();
   await featureTests();
@@ -72,6 +73,78 @@ const editArticle = async (slug, edits) => {
   const r = await api('POST', `/api/admin/article/${slug}`, { version: json.version, edits });
   assert.equal(r.status, 200, JSON.stringify(r.json));
 };
+
+
+async function commonsTests() {
+  for (const route of ['/commons','/assets/commons.css','/assets/commons.html','/assets/commons.js','/assets/commons-charter.md']) {
+    assert.equal((await get(route)).status,200,route+' must be available');
+  }
+  const htmlCommons=await html('/commons');
+  assert.ok(htmlCommons.includes('id="cm-title"') && htmlCommons.includes('90-дневная') && htmlCommons.includes('конституции'), 'Commons public page sections');
+  assert.ok((await html('/')).includes('href="/commons"'), 'Commons in journal navigation');
+  assert.ok((await html('/sitemap.xml')).includes('/commons'), 'Commons in sitemap');
+  const initial=await (await get('/api/commons')).json();
+  assert.equal(initial.legalStatus,'not-incorporated');
+  assert.equal(initial.daoStatus,'not-activated');
+  assert.equal(initial.members.length,0);
+  assert.equal(initial.decisions.length,0);
+  assert.equal((await get('/api/admin/commons')).status,401,'private steward API');
+  const anon=await fetch(origin+'/api/commons/proposals',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({program:'prediction-replication',title:'Hidden',summary:'Unregistered'})});
+  assert.equal(anon.status,401,'anonymous proposal rejected');
+  assert.equal((await fetch(origin+'/api/commons/proposals',{method:'POST',body:'{}'})).status,415,'only JSON writes');
+  const otherOrigin=await fetch(origin+'/api/commons/proposals',{method:'POST',headers:{'Origin':'https://malicious.example','Content-Type':'application/json'},body:'{}'});
+  assert.equal(otherOrigin.status,403,'cross origin requests rejected');
+  const invite=await fetch(origin+'/api/admin/commons/members',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Password':PASSWORD},body:JSON.stringify({name:'Тестовый участник',role:'researcher',displayPublic:false})});
+  assert.equal(invite.status,201,'steward creates a member');
+  const issued=await invite.json();
+  assert.match(issued.token,/^[a-f0-9]{64}$/);
+  const auth={'Authorization':'Bearer '+issued.token,'Content-Type':'application/json'};
+  const me=await fetch(origin+'/api/commons/me',{headers:auth});
+  assert.equal(me.status,200);
+  assert.equal((await me.json()).member.role,'researcher');
+  const p=await fetch(origin+'/api/commons/proposals',{method:'POST',headers:auth,body:JSON.stringify({program:'prediction-replication',title:'Независимая репликация',summary:'Слепой анализ с заранее зафиксированным протоколом'})});
+  assert.equal(p.status,201,'members propose');
+  const proposalId=(await p.json()).id;
+  const before=await (await get('/api/commons')).json();
+  assert.equal(before.proposals.length,0,'pending proposal not published');
+  assert.ok(!JSON.stringify(before).includes(issued.token),'no member tokens in public API');
+  const open=await fetch(origin+'/api/admin/commons/proposals',{method:'POST',headers:{...auth,'X-Admin-Password':PASSWORD},body:JSON.stringify({proposalId,status:'open'})});
+  assert.equal(open.status,200,'steward publishes after moderation');
+  const vote=await fetch(origin+'/api/commons/votes',{method:'POST',headers:auth,body:JSON.stringify({proposalId,choice:'yes'})});
+  assert.equal(vote.status,200);
+  const voteAgain=await fetch(origin+'/api/commons/votes',{method:'POST',headers:auth,body:JSON.stringify({proposalId,choice:'no'})});
+  assert.equal(voteAgain.status,200,'one member may change a vote');
+  const comment=await fetch(origin+'/api/commons/comments',{method:'POST',headers:auth,body:JSON.stringify({proposalId,text:'Проверить выборку и чувствительность оценки'})});
+  assert.equal(comment.status,201);
+  const cmId=(await comment.json()).id;
+  assert.equal((await (await get('/api/commons')).json()).proposals[0].comments.length,0,'comment requires moderation');
+  const approve=await fetch(origin+'/api/admin/commons/comments',{method:'POST',headers:{...auth,'X-Admin-Password':PASSWORD},body:JSON.stringify({commentId:cmId,status:'approved'})});
+  assert.equal(approve.status,200);
+  const closing=await fetch(origin+'/api/admin/commons/proposals',{method:'POST',headers:{...auth,'X-Admin-Password':PASSWORD},body:JSON.stringify({proposalId,status:'closed',rationale:'Пилот завершён для проверки механизма'})});
+  assert.equal(closing.status,200);
+  const record=await (await get('/api/commons')).json();
+  assert.equal(record.proposals[0].votes.no,1);
+  assert.equal(record.proposals[0].votes.yes,0);
+  assert.equal(record.proposals[0].comments.length,1);
+  assert.equal(record.decisions.length,1);
+  assert.equal(record.decisions[0].quorumMet,false);
+  assert.equal(record.legalStatus,'not-incorporated');
+  assert.equal(record.daoStatus,'not-activated');
+
+  assert.equal(record.pilotMetrics.activeMembers,1);
+  assert.equal(record.pilotMetrics.independentReplications,0);
+  const evidence=await fetch(origin+'/api/admin/commons/evidence',{method:'POST',headers:{'X-Admin-Password':PASSWORD,'Content-Type':'application/json'},body:JSON.stringify({programId:'prediction-replication',kind:'replication',title:'Тестовая репликация',url:'https://example.org/protocol'})});
+  assert.equal(evidence.status,201,'steward records a linked research output');
+  const evidencePublic=await (await get('/api/commons')).json();
+  assert.equal(evidencePublic.pilotMetrics.documentedOutputs,1);
+  assert.equal(evidencePublic.pilotMetrics.independentReplications,1);
+  assert.equal(evidencePublic.evidence[0].url,'https://example.org/protocol');
+
+  assert.ok(!JSON.stringify(record).includes(issued.token));
+  const after=await fetch(origin+'/api/commons/votes',{method:'POST',headers:auth,body:JSON.stringify({proposalId,choice:'yes'})});
+  assert.equal(after.status,409,'closed ballots are immutable');
+  console.log('✓ Commons: page, persistence, member auth, moderation, votes and public decisions');
+}
 
 async function passwordlessAnalyticsTests() {
   const response = await get('/analytics');
@@ -100,7 +173,7 @@ async function passwordlessAnalyticsTests() {
 async function seoTests() {
   const homepage=await html('/');
   assert.ok(homepage.includes('rel="canonical" href="'+origin+'/"'), 'local canonical should use testing origin');
-  assert.ok(homepage.includes('property="og:image" content="'+origin+'/og/ai-index-2026.png?v='), 'home OG should be raster PNG');
+  assert.ok(homepage.includes('property="og:image" content="'+origin+'/'), 'home OG should have a canonical local image');
   const article=await html('/articles/ai-index-2026');
   assert.ok(article.includes('"@type":"Article"') && article.includes('"mainEntityOfPage"'), 'article metadata');
   assert.ok(article.includes('/og/ai-index-2026.png?v='), 'AI Index OG PNG');
