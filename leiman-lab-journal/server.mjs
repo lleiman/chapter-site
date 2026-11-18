@@ -80,6 +80,8 @@ function localiseArticle(a, lang = 'ru') {
   };
   return {
     ...a,...en,lang:'en',
+    date:en.translationPublished || a.date,
+    dateLabel:en.translationPublished ? new Date(en.translationPublished+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).toUpperCase() : a.dateLabel,
     paragraphs:en.paragraphs.map(b => ({
       ...b,
       ...(b.links ? { links:b.links.map(link => ({...link,url:englishInternalUrl(link.url)})) } : {}),
@@ -803,7 +805,7 @@ const server = http.createServer((req,res)=>{
         .filter(r=>r.items.length).map(r=>({path:r.path,lastmod:r.items.map(a=>a.updated||a.date).sort().at(-1)})),
       ...pub.map(a=>({path:'/articles/'+a.slug,lastmod:a.updated||a.date,alts:hasEnglish(a)?[{lang:'ru',path:'/articles/'+a.slug},{lang:'en',path:'/en/articles/'+a.slug}]:[]})),
       {path:'/en/',lastmod:lastArticleDate,alts:[{lang:'ru',path:'/'},{lang:'en',path:'/en/'}]},
-      ...pub.filter(hasEnglish).map(a=>({path:'/en/articles/'+a.slug,lastmod:a.updated||a.date,alts:[{lang:'ru',path:'/articles/'+a.slug},{lang:'en',path:'/en/articles/'+a.slug}]}))
+      ...pub.filter(hasEnglish).map(a=>({path:'/en/articles/'+a.slug,lastmod:a.translations.en.translationPublished||a.translations.en.updated||a.updated||a.date,alts:[{lang:'ru',path:'/articles/'+a.slug},{lang:'en',path:'/en/articles/'+a.slug}]}))
     ];
     const entriesXml=entries.map(e=>`<url><loc>${xmlSafe(origin+e.path)}</loc>${e.lastmod?`<lastmod>${xmlSafe(e.lastmod)}</lastmod>`:''}${(e.alts||[]).map(a=>`<xhtml:link rel="alternate" hreflang="${a.lang}" href="${xmlSafe(origin+a.path)}"/>`).join('')}</url>`).join('');
     return write(res,200,`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${entriesXml}</urlset>`,'application/xml; charset=utf-8');
