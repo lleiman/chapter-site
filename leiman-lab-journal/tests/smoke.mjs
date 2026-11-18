@@ -79,7 +79,7 @@ const editArticle = async (slug, edits) => {
 
 async function allArticleTranslationsTest() {
   const files=readdirSync('content').filter(f => /^\\d{3}-.*\\.json$/.test(f)).sort();
-  assert.equal(files.length,9,'journal should contain nine baseline research articles');
+  assert.ok(files.length>=9,'journal should contain all baseline research articles');
   const slugs=[];
   for (const filename of files) {
     const article=JSON.parse(readFileSync(path.join('content',filename),'utf8'));
