@@ -72,8 +72,8 @@ function localiseArticle(a, lang = 'ru') {
   // the language they selected when an article cites another journal issue.
   const englishInternalUrl = url => {
     const value = String(url || '');
-    if (/^\\/articles\\/[a-z0-9-]+(?:[#?].*)?$/.test(value)) return '/en' + value;
-    if (/^https:\\/\\/leimanlab\\.com\\/articles\\/[a-z0-9-]+(?:[#?].*)?$/.test(value)) {
+    if (/^\/articles\/[a-z0-9-]+(?:[#?].*)?$/.test(value)) return '/en' + value;
+    if (/^https:\/\/leimanlab\.com\/articles\/[a-z0-9-]+(?:[#?].*)?$/.test(value)) {
       return value.replace('https://leimanlab.com/articles/', 'https://leimanlab.com/en/articles/');
     }
     return value;
