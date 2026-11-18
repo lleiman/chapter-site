@@ -59,6 +59,7 @@ async function main() {
   assert.ok(gsc.headers.get('content-type').startsWith('text/html'),'Google verification content-type');
   await seoTests();
   await incomeBilingualTests();
+  await organismTests();
   await allArticleTranslationsTest();
   await passwordlessAnalyticsTests();
   await commonsTests();
@@ -108,6 +109,45 @@ async function allArticleTranslationsTest() {
     assert.ok(sitemap.includes(route),'XML sitemap must list '+slug);
   }
   console.log('✓ all '+slugs.length+' Russian journal articles have indexable, content-complete English editions');
+}
+
+
+async function organismTests() {
+  for (const [url,lang,alternate,marker] of [
+    ['/organism','ru','/en/organism','data-lang="ru"'],
+    ['/en/organism','en','/organism','data-lang="en"']
+  ]) {
+    const response=await get(url);
+    assert.equal(response.status,200,url+' should be published');
+    const html=await response.text();
+    assert.ok(html.includes('<html lang="'+lang+'">'),url+' must have localized html language');
+    assert.ok(html.includes('<link rel="canonical" href="'+origin+url+'">'),url+' must self-canonicalize');
+    assert.ok(html.includes('hreflang="'+(lang==='en'?'ru':'en')+'" href="'+origin+alternate+'"'),url+' must have counterpart hreflang');
+    assert.ok(html.includes('id="organism-map"'),url+' must have an accessible SVG');
+    assert.ok(html.includes('id="org-scenario"'),url+' must have a scenario selector');
+    assert.ok(html.includes('id="org-play"')&&html.includes('id="org-next"')&&html.includes('id="org-reset"'),url+' must have live controls');
+    assert.ok(html.includes(marker),url+' language-specific content missing');
+    assert.ok(html.includes('/assets/organism.js'),url+' must load simulator code');
+    assert.ok(html.includes('/assets/organism.css'),url+' must load responsive stylesheet');
+    assert.ok(/fictional|вымышлены/i.test(html),url+' should disclose simulation status');
+  }
+  for (const [url,expected] of [
+    ['/assets/organism.js','text/javascript'],
+    ['/assets/organism.css','text/css']
+  ]) {
+    const response=await get(url);
+    assert.equal(response.status,200,url+' must load');
+    assert.ok(String(response.headers.get('content-type')).includes(expected),url+' correct content type');
+    const body=await response.text();
+    assert.ok(body.length>2000,url+' should not be blank');
+  }
+  const sitemap=await html('/sitemap.xml');
+  assert.ok(sitemap.includes(origin+'/organism')&&sitemap.includes(origin+'/en/organism'),'both organism languages belong in sitemap');
+  for (const url of ['/opportunities','/en/opportunities']) {
+    const html=await (await get(url)).text();
+    assert.ok(html.includes(url.startsWith('/en')?'/en/organism':'/organism'),url+' should link to interactive map');
+  }
+  console.log('✓ bilingual organism map, responsive assets, discoverability and SEO');
 }
 
 async function incomeBilingualTests() {
