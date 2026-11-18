@@ -111,7 +111,7 @@ const makeSocialSchema = (a, origin, lang = 'ru') => ({
   ...(a.updated ? {dateModified: a.updated} : {}),
   inLanguage: lang === 'en' ? 'en-US' : 'ru-RU',
   ...(a.tags?.length ? {keywords: a.tags.join(', ')} : {}),
-  author: {'@type':'Person', name:'Лев Лейман', url:origin+'/about'},
+  author: {'@type':'Person', name: lang === 'en' ? 'Lev Leiman' : 'Лев Лейман', url:origin+'/about'},
   publisher: {'@type':'Organization', name:'Leiman Lab', url:origin+'/', logo:{'@type':'ImageObject',url:origin+'/assets/leiman-lab-monogram.png'}}
 });
 
@@ -425,8 +425,8 @@ function articleView(a, origin, lang = 'ru') {
   let body = `<main>
   <article itemscope itemtype="https://schema.org/Article">
     ${a.draft ? '<div class="draft-banner micro"><div class="container">ЧЕРНОВИК · ВИДЕН ТОЛЬКО ПО ПРЯМОЙ ССЫЛКЕ · ОПУБЛИКОВАТЬ: ⌘⇧E → «ОПУБЛИКОВАТЬ»</div></div>' : ''}
-    <header class="container article-head"><a class="back mono" href="/">← JOURNAL / LEIMAN LAB</a>
-      <div class="article-overline"><span class="pill micro">FIELD NOTE ${escaped(a.issue)}</span>${rubricBySlug.has(a.rubric) ? `<a class="micro rubric-link" href="/rubrics/${escaped(a.rubric)}">${escaped(rubricBySlug.get(a.rubric).title.toUpperCase())}</a>` : ''}<span class="micro muted">${escaped(a.section)}</span></div>
+    <header class="container article-head"><a class="back mono" href="${english ? '/en/' : '/'}">← JOURNAL / LEIMAN LAB</a>
+      <div class="article-overline"><span class="pill micro">FIELD NOTE ${escaped(a.issue)}</span>${rubricBySlug.has(a.rubric) ? `<a class="micro rubric-link" href="/rubrics/${escaped(a.rubric)}">${escaped(english ? ({ai:'AI & TECHNOLOGY',mind:'MIND & PSYCHOLOGY',business:'BUSINESS & PRODUCTION',art:'ART & EXPERIMENTS'}[a.rubric] || 'RESEARCH') : rubricBySlug.get(a.rubric).title.toUpperCase())}</a>` : ''}<span class="micro muted">${escaped(a.section)}</span></div>
       <h1 itemprop="headline" data-edit="headline">${escaped(a.headline || a.title)}</h1>
       <p class="article-deck" itemprop="description" data-edit="deck">${escaped(a.deck || a.summary)}</p>
       <div class="article-byline micro"><span>ЛЕВ ЛЕЙМАН</span><span class="thin-sep"></span><time datetime="${escaped(a.date)}">${escaped(a.dateLabel)}</time>${a.updated ? `<span class="thin-sep"></span><a href="#changes">ОБНОВЛЕНО <time datetime="${escaped(a.updated)}">${escaped(dateLabel(a.updated))}</time></a>` : ''}<span class="thin-sep"></span><span>${escaped(a.readingMinutes)} МИН</span><span class="thin-sep"></span><span><b data-stat="views">${fmt(stats.views)}</b> <span data-plural="views">${plural(stats.views, ['ПРОСМОТР', 'ПРОСМОТРА', 'ПРОСМОТРОВ'])}</span></span><span class="thin-sep"></span><a href="#comments">♥ <b data-stat="likes">${fmt(stats.likes)}</b> · <b data-stat="comments">${fmt(stats.comments)}</b> КОММ.</a></div>
@@ -442,18 +442,18 @@ function articleView(a, origin, lang = 'ru') {
       ${changes.length ? `<section class="changes" id="changes"><div class="sources-head"><span class="eyebrow">ИСТОРИЯ ПРАВОК</span><span class="micro muted">${changes.length}</span></div><ul>${changes.map(c => `<li><time class="micro muted" datetime="${escaped(c.date)}">${escaped(dateLabel(c.date))}</time><span>${escaped(c.text)}</span></li>`).join('')}</ul></section>` : ''}
       <div class="share-row"><button class="button button-line ll-like" type="button" aria-pressed="false"><span class="ll-heart">♡</span> НРАВИТСЯ <b data-stat="likes">${fmt(stats.likes)}</b></button><a class="button button-primary" href="${escaped(share)}" target="_blank" rel="noopener noreferrer">ПОДЕЛИТЬСЯ В TELEGRAM ↗</a><button id="copy-link" class="button button-line" type="button" data-url="${escaped(pageUrl)}">КОПИРОВАТЬ ССЫЛКУ</button></div>
       <script>document.getElementById('copy-link')?.addEventListener('click',async e=>{try{await navigator.clipboard.writeText(e.currentTarget.dataset.url);e.currentTarget.textContent='ССЫЛКА СКОПИРОВАНА ✓'}catch(e){e.currentTarget.textContent='КОПИРОВАНИЕ НЕДОСТУПНО'}})</script>
-      <aside class="tg-follow"><p>${siteText('follow.text')}</p><a class="button button-primary" href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer">ЧИТАТЬ В TELEGRAM ↗</a></aside>
+      <aside class="tg-follow"><p>${english ? 'Short research notes and announcements appear in the Leiman Lab Telegram channel.' : siteText('follow.text')}</p><a class="button button-primary" href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer">ЧИТАТЬ В TELEGRAM ↗</a></aside>
       <section class="ll-comments" id="comments" aria-labelledby="comments-title"><div class="sources-head"><h2 id="comments-title" class="eyebrow">КОММЕНТАРИИ / <span data-stat="comments">${fmt(stats.comments)}</span></h2><span class="micro muted">ВЫДЕЛИТЕ ТЕКСТ, ЧТОБЫ ОБСУДИТЬ ФРАГМЕНТ</span></div>
       <div class="ll-comment-list"></div><noscript><p class="micro muted">Комментарии работают с включённым JavaScript.</p></noscript></section>
     </div></div>
   <script type="module" src="${asset('/assets/engage.js')}"></script>
   </article>
-  ${related.length?`<section class="container more-stories"><div class="section-rule"><h2>ДАЛЬШЕ <span class="accent">/</span></h2><a class="micro muted" href="/">ВЕСЬ ЖУРНАЛ ↗</a></div><div class="featured-story">${related.map(x=>card(x,'featured')).join('')}</div></section>`:''}
+  ${related.length?`<section class="container more-stories"><div class="section-rule"><h2>ДАЛЬШЕ <span class="accent">/</span></h2><a class="micro muted" href="${english ? '/en/' : '/'}">ВЕСЬ ЖУРНАЛ ↗</a></div><div class="featured-story">${related.map(x=>card(x,'featured',lang)).join('')}</div></section>`:''}
   </main>`;
   if (english) body = translateArticleChrome(body);
   const description = a.description || a.summary;
   const alternates = hasEnglish(a) ? [{lang:'ru',href:origin+'/articles/'+a.slug},{lang:'en',href:origin+'/en/articles/'+a.slug}] : [];
-  return page({lang,alternates,content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${socialCover(a)}`,type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,extraStylesheet:['period-poluraspada-novogo','ai-film-competitions-2026'].includes(a.slug)?'/assets/period-poluraspada-light.css':['ai-index-2026','attention-economy-ai-2026'].includes(a.slug)?'/assets/ai-index-article.css':'',bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@graph':[makeSocialSchema(a,origin,lang),{'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Журнал',item:origin+(english?'/en/':'/')},{'@type':'ListItem',position:2,name:a.title,item:pageUrl}]}]}});
+  return page({lang,alternates,content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${socialCover(a)}`,type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,extraStylesheet:['period-poluraspada-novogo','ai-film-competitions-2026'].includes(a.slug)?'/assets/period-poluraspada-light.css':['ai-index-2026','attention-economy-ai-2026'].includes(a.slug)?'/assets/ai-index-article.css':'',bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@graph':[makeSocialSchema(a,origin,lang),{'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:english?'Journal':'Журнал',item:origin+(english?'/en/':'/')},{'@type':'ListItem',position:2,name:a.title,item:pageUrl}]}]}});
 }
 
 function translateArticleChrome(html) {
@@ -465,7 +465,7 @@ function translateArticleChrome(html) {
     ['ПРОСМОТРОВ', 'VIEWS'], ['ПРОСМОТРА', 'VIEWS'], ['ПРОСМОТР', 'VIEW'],
     ['КОММ.', 'COMMENTS'],
     ['Редакционная иллюстрация к статье', 'Editorial illustration for'],
-    ['ИСТОЧНИКИ / SOURCES', 'SOURCES'],
+    ['ИСТОЧНИКИ / SOURCES', 'SOURCES'], ['aria-label="Теги"', 'aria-label="Tags"'],
     ['Факты относятся к дате публикации.', 'Information reflects the publication date.'],
     ['ИСТОРИЯ ПРАВОК', 'REVISION HISTORY'],
     ['НРАВИТСЯ', 'LIKE'], ['ПОДЕЛИТЬСЯ В TELEGRAM', 'SHARE ON TELEGRAM'],
