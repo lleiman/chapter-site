@@ -148,7 +148,7 @@ ${date ? `<meta property="article:published_time" content="${escaped(date)}">` :
 </head><body${bodyData}>
 <header class="site-header"><div class="container header-inner">
 <a class="identity" href="${lang === 'en' ? '/en/' : '/'}" aria-label="Leiman Lab — home">${logo}<span class="wordmark">LEIMAN <b>LAB</b></span></a>
-<nav aria-label="${lang === 'en' ? 'Main navigation' : 'Основная навигация'}"><a href="${lang === 'en' ? '/en/#journal' : '/#journal'}">${lang === 'en' ? 'Journal' : 'Журнал'}</a><a href="/opportunities">INCOME INTELLIGENCE</a><a href="/ai-index">AI INDEX</a><a href="/ai-film-awards">AI FILM AWARDS</a><a href="/predictions">PREDICTION OS</a><a href="/commons">COMMONS</a><a href="/about">${lang === 'en' ? 'Author' : 'Об авторе'}</a><a href="/search">${lang === 'en' ? 'Search (RU)' : 'Поиск'}</a><a class="locale-switch" href="${escaped(alternates.find(x => x.lang !== lang)?.href || (lang === 'en' ? '/' : '/en/'))}" lang="${lang === 'en' ? 'ru' : 'en'}">${lang === 'en' ? 'RU' : 'EN'}</a><a href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer"><span class="nav-long">Telegram</span><span class="nav-short">TG</span> ↗</a></nav>
+<nav aria-label="${lang === 'en' ? 'Main navigation' : 'Основная навигация'}"><a href="${lang === 'en' ? '/en/#journal' : '/#journal'}">${lang === 'en' ? 'Journal' : 'Журнал'}</a><a href="/opportunities">INCOME</a><a href="/ai-index">AI INDEX</a><a href="/ai-film-awards">AI FILM AWARDS</a><a href="/predictions">PREDICTION OS</a><a href="/commons">COMMONS</a><a href="/about">${lang === 'en' ? 'Author' : 'Об авторе'}</a><a href="/search">${lang === 'en' ? 'Search (RU)' : 'Поиск'}</a><a class="locale-switch" href="${escaped(alternates.find(x => x.lang !== lang)?.href || (lang === 'en' ? '/' : '/en/'))}" lang="${lang === 'en' ? 'ru' : 'en'}">${lang === 'en' ? 'RU' : 'EN'}</a><a href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer"><span class="nav-long">Telegram</span><span class="nav-short">TG</span> ↗</a></nav>
 </div></header>
 ${content}
 <footer class="site-footer"><div class="container footer-inner">
@@ -708,7 +708,7 @@ const server = http.createServer((req,res)=>{
         if(sourceHost!==requestHost(req))return sendJson(res,403,{error:'Cross-origin submission blocked'});
       }
       if(req.headers['sec-fetch-site']==='cross-site')return sendJson(res,403,{error:'Cross-site submission blocked'});
-      const body=await readBody(req,16000);
+      const body=await readBody(req,48000);
       if(req.method==='POST' && apiPath==='/api/opportunities/cv'){
         const out=intake.submit(body,clientKey(req));return sendJson(res,out.status,out.body);
       }
