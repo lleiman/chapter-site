@@ -1,7 +1,7 @@
 /** Run: npm test. Zero dependencies. */
 import { spawn } from 'node:child_process';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, readdirSync } from 'node:fs';
+import { mkdtempSync, rmSync, readdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -59,6 +59,7 @@ async function main() {
   assert.ok(gsc.headers.get('content-type').startsWith('text/html'),'Google verification content-type');
   await seoTests();
   await incomeBilingualTests();
+  await allArticleTranslationsTest();
   await passwordlessAnalyticsTests();
   await commonsTests();
   await aiIndexTests();
@@ -75,6 +76,39 @@ const editArticle = async (slug, edits) => {
   assert.equal(r.status, 200, JSON.stringify(r.json));
 };
 
+
+async function allArticleTranslationsTest() {
+  const files=readdirSync('content').filter(f => /^\\d{3}-.*\\.json$/.test(f)).sort();
+  assert.equal(files.length,9,'journal should contain nine baseline research articles');
+  const slugs=[];
+  for (const filename of files) {
+    const article=JSON.parse(readFileSync(path.join('content',filename),'utf8'));
+    if (article.draft) continue;
+    const en=article.translations?.en;
+    assert.ok(en,'Published article is missing English edition: '+article.slug);
+    for(const field of ['title','summary','description','section','sourceNote']) {
+      assert.ok(typeof en[field]==='string'&&en[field].length>15,article.slug+' missing English '+field);
+    }
+    assert.ok(Array.isArray(en.paragraphs) && en.paragraphs.length===article.paragraphs.length,article.slug+' incomplete paragraph translation');
+    const text=en.paragraphs.map(b=>[b.text,...(b.items||[])].filter(Boolean).join(' ')).join(' ');
+    assert.ok(text.length>500 && !/[А-Яа-яЁё]/.test(text),'English prose is incomplete or contains Russian-only sections: '+article.slug);
+    slugs.push(article.slug);
+  }
+  const homepage=await html('/en/');
+  const sitemap=await html('/sitemap.xml');
+  for (const slug of slugs) {
+    const route='/en/articles/'+slug;
+    const res=await get(route);
+    assert.equal(res.status,200,'EN article route: '+slug);
+    const page=await res.text();
+    assert.ok(page.includes('<html lang="en">'),slug+' language attribute');
+    assert.ok(page.includes('<link rel="canonical" href="'+origin+route+'">'),slug+' canonical');
+    assert.ok(page.includes('hreflang="ru" href="'+origin+'/articles/'+slug+'"'),slug+' reciprocal hreflang');
+    assert.ok(homepage.includes(route),'English homepage must list '+slug);
+    assert.ok(sitemap.includes(route),'XML sitemap must list '+slug);
+  }
+  console.log('✓ all '+slugs.length+' Russian journal articles have indexable, content-complete English editions');
+}
 
 async function incomeBilingualTests() {
   for(const route of ['/en/','/articles/ai-income-opportunities','/en/articles/ai-income-opportunities','/opportunities','/en/opportunities','/privacy','/en/privacy']) {
