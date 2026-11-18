@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<rect width="1200" height="630" fill="#f4f1eb"/>
+<path d="M0 130H1200M0 507H1200" stroke="#171717" stroke-width="2"/>
+<path d="M740 130V507" stroke="#171717" stroke-width="2"/>
+<text x="65" y="88" font-size="24" font-family="Arial,Helvetica,sans-serif" font-weight="700" letter-spacing="6" fill="#171717">LEIMAN LAB / RESEARCH 009</text>
+<text x="66" y="230" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="700" letter-spacing="4" fill="#bd3e32">AI / ECONOMY / WORK</text>
+<text x="62" y="318" font-family="Arial,Helvetica,sans-serif" font-size="69" font-weight="800" letter-spacing="-3" fill="#111111">INCOME</text>
+<text x="62" y="392" font-family="Arial,Helvetica,sans-serif" font-size="69" font-weight="800" letter-spacing="-3" fill="#111111">INTELLIGENCE.</text>
+<text x="65" y="463" font-family="Arial,Helvetica,sans-serif" font-size="22" fill="#444444" letter-spacing="3">JOBS · GRANTS · CONTRACTS · SKILLS</text>
+<g transform="translate(777 169)">
+<circle cx="148" cy="155" r="112" fill="none" stroke="#171717" stroke-width="3"/><circle cx="148" cy="155" r="64" fill="none" stroke="#171717" stroke-width="3"/><circle cx="148" cy="155" r="12" fill="#bd3e32"/>
+<path d="M148 22V288M15 155H281M54 61L242 249M242 61L54 249" stroke="#171717" stroke-width="1.8"/>
+<circle cx="148" cy="43" r="10" fill="#bd3e32"/><circle cx="244" cy="213" r="10" fill="#bd3e32"/><circle cx="49" cy="203" r="10" fill="#bd3e32"/>
+<text x="15" y="14" font-size="16" letter-spacing="3" font-family="monospace">OPPORTUNITY MAP</text>
+</g>
+<text x="65" y="570" font-size="21" font-family="monospace" fill="#111111">18 NOVEMBER 2026</text>
+<text x="1074" y="570" font-size="27" font-family="monospace" fill="#bd3e32">009</text>
+</svg>
