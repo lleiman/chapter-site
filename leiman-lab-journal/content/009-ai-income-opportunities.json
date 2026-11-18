@@ -1,0 +1,606 @@
+{
+  "slug": "ai-income-opportunities",
+  "issue": "009",
+  "date": "2026-11-18",
+  "dateLabel": "18 NOV 2026",
+  "section": "RESEARCH / ECONOMICS OF WORK",
+  "rubric": "business",
+  "tags": [
+    "ИИ и работа",
+    "Вакансии",
+    "Гранты",
+    "Фриланс",
+    "Монетизация навыков",
+    "Рейтинг возможностей",
+    "Career AI"
+  ],
+  "title": "Новая экономика поиска заработка: может ли ИИ находить возможности раньше человека?",
+  "cardTitle": "Income Intelligence — экономика возможностей",
+  "summary": "Вакансии, гранты, контракты и конкурсы в одном исследовании. Открытые источники, рейтинг возможностей, CV и модель подписки Pro.",
+  "deck": "Как объединить вакансии, гранты и платные проекты в персональный радар возможностей. Проверил источники и спроектировал прозрачный рейтинг, безопасную работу с CV и модель подписки.",
+  "description": "Может ли ИИ помочь найти заработок? Исследование рынка труда, грантов и вакансий, методика рейтинга Income Intelligence, работа с CV и подписка Pro.",
+  "readingMinutes": 15,
+  "featured": true,
+  "cover": "/assets/income-intelligence-cover.svg",
+  "paragraphs": [
+    {
+      "type": "lead",
+      "text": "Я всё чаще вижу, как люди ищут работу по названию своей профессии, хотя заработок возникает на пересечении навыков, запросов рынка и доступа к конкретным возможностям. Режиссёр может получить грант, исследователь — оплачиваемую консультацию, дизайнер — международный контракт. Поиск по одному слову этого не покажет."
+    },
+    {
+      "type": "p",
+      "text": "Я изучил данные о занятости и навыках, официальные каталоги вакансий и грантов, открытые API и исследования алгоритмического найма. На их основе предлагаю Income Intelligence — направление Leiman Lab, которое будет искать и сравнивать способы заработка по профилю человека. Это проектная модель, а не утверждение, что готовый сервис уже предсказывает доход."
+    },
+    {
+      "type": "h2",
+      "text": "01 / Рынок меняется, но обещать заработок с помощью ИИ преждевременно"
+    },
+    {
+      "type": "p",
+      "text": "В отчёте World Economic Forum Future of Jobs 2025 опрошены более тысячи крупных работодателей. Авторы прогнозируют к 2030 году значительные изменения структуры занятости и спроса на навыки; ИИ, большие данные, кибербезопасность и способность адаптироваться входят в число быстро растущих компетенций. Это прогноз на основе ответов работодателей, а не доказательство того, что отдельному кандидату станет проще найти работу.",
+      "links": [
+        {
+          "label": "WEF, Future of Jobs 2025",
+          "url": "https://www.weforum.org/publications/the-future-of-jobs-report-2025/"
+        }
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Исследование IMF 2026 года связывает распространение новых навыков в объявлениях о работе с ростом занятости и оплаты на отдельных американских локальных рынках. Но связь не равна причинному эффекту для каждого человека. Анализ Upwork за 2026 год также показывает высокий спрос на специалистов, сочетающих предметную квалификацию с ИИ-инструментами. Его выборка относится к собственной платформе и не описывает весь мировой рынок труда.",
+      "links": [
+        {
+          "label": "IMF, Bridging Skill Gaps (2026)",
+          "url": "https://www.elibrary.imf.org/view/journals/006/2026/001/article-A001-en.xml"
+        },
+        {
+          "label": "Upwork, In-Demand Skills 2026",
+          "url": "https://www.upwork.com/press/releases/upworks-in-demand-skills-2026-demand-for-top-ai-skills-more-than-doubles-as-ai-is-embedded-into-everyday-work"
+        }
+      ]
+    },
+    {
+      "type": "aside",
+      "text": "Преимущество ИИ может заключаться в расширении поля поиска и снижении времени на проверку условий. Увеличение реального дохода предстоит проверять экспериментально.",
+      "label": "ГИПОТЕЗА"
+    },
+    {
+      "type": "h2",
+      "text": "02 / Карьера — только один из каналов дохода"
+    },
+    {
+      "type": "p",
+      "text": "Обычный агрегатор отвечает на вопрос «кто ищет сотрудника?». Для человека с несколькими компетенциями полезнее другой вопрос: «кто сейчас готов платить за результат, который я могу создать, и на каких условиях?» Ответ выходит далеко за границы классической вакансии."
+    },
+    {
+      "type": "list",
+      "text": "",
+      "items": [
+        "Штатная работа: местные, международные и полностью удалённые вакансии с проверенными условиями найма.",
+        "Контракты и фриланс: оплачиваемые задачи, тендеры, проектные роли и короткие консультации.",
+        "Гранты и исследовательское финансирование: деньги на проект с требованиями к заявителю, организации и месту проживания.",
+        "Конкурсы, премии и резиденции: выплаты, производственные бюджеты, оплачиваемые программы, иногда только неденежная поддержка.",
+        "Коммерческие возможности: запросы бизнеса, лицензирование, партнёрства, обучение и продуктовые ниши. Для них требуется отдельное подтверждение спроса."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Грант нельзя автоматически считать личным доходом. Иногда средства разрешено тратить только через организацию, исключительно на допустимые расходы проекта. Денежный приз тоже может облагаться налогом или сопровождаться передачей прав. Инструмент обязан показывать это рядом с суммой, а не прятать в ссылке «условия»."
+    },
+    {
+      "type": "h2",
+      "text": "03 / Где взять данные: сначала официальные источники"
+    },
+    {
+      "type": "p",
+      "text": "У нас уже есть технические отправные точки. Greenhouse публикует открытые GET-методы для вакансий компаний, а Lever поддерживает публичный Postings API. Это даёт возможность получать данные со страниц работодателей, но не предоставляет универсального права копировать любые базы и не гарантирует полноту мирового рынка.",
+      "links": [
+        {
+          "label": "Greenhouse Job Board API",
+          "url": "https://docs.greenhouse.io/job-board"
+        },
+        {
+          "label": "Lever Postings API",
+          "url": "https://github.com/lever/postings-api"
+        }
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Для грантов доступны API Grants.gov и API европейского Funding & Tenders Portal. EURAXESS объединяет исследовательские вакансии, гранты и предложения принимающих организаций; USAJOBS публикует условия доступа к федеральным вакансиям США. Каждый источник требует отдельной проверки лицензий, частоты обновления, допустимых заявителей и правил повторной публикации.",
+      "links": [
+        {
+          "label": "Grants.gov API",
+          "url": "https://www.grants.gov/api/"
+        },
+        {
+          "label": "EU Funding & Tenders APIs",
+          "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/support/apis"
+        },
+        {
+          "label": "EURAXESS",
+          "url": "https://euraxess.ec.europa.eu/jobs/search"
+        },
+        {
+          "label": "USAJOBS API terms",
+          "url": "https://developer.usajobs.gov/apirequest/"
+        }
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Первый рабочий конвейер: загрузка разрешённых записей, приведение полей к единой схеме, удаление дублей, проверка актуальности, извлечение требований, затем персональное ранжирование. Для каждого результата сохраняются источник, исходная ссылка, дата получения и дата последней проверки. Если объявление исчезло, система не должна продолжать показывать его как открытое."
+    },
+    {
+      "type": "h2",
+      "text": "04 / Рейтинг возможностей: измеряем соответствие, а не судьбу"
+    },
+    {
+      "type": "p",
+      "text": "Вместо мистического «шанса успеха 93%» предлагаю открытый Opportunity Fit Score от 0 до 100. Он отражает соответствие условиям и приоритетам пользователя. Весовые коэффициенты — первоначальная продуктовая гипотеза, которая может быть изменена после проверок."
+    },
+    {
+      "type": "list",
+      "text": "",
+      "items": [
+        "25 баллов — совпадение профессиональных навыков и фактических требований.",
+        "20 баллов — формальная доступность: страна, право на работу, квалификация, язык, юридические ограничения.",
+        "15 баллов — экономика: ожидаемый чистый доход или размер финансирования относительно времени и расходов.",
+        "15 баллов — надёжность источника и подтверждение актуальности предложения.",
+        "10 баллов — срок подачи и реалистичность подготовки заявки.",
+        "10 баллов — соответствие формату работы, интересам и карьерным целям.",
+        "5 баллов — доказательства конкуренции или дополнительных преимуществ, если они действительно доступны."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Формальные запреты работают как отдельный фильтр: если человек не соответствует обязательным условиям, высокий суммарный балл не спасает. Рядом с оценкой нужны метки «подтверждено», «неизвестно», «требует ручной проверки». Отсутствующие данные нельзя незаметно заменять нулями или фантазией модели."
+    },
+    {
+      "type": "p",
+      "text": "Прогноз вероятности победы в конкурсе или найма допустим только при наличии калиброванной модели, достоверной истории заявок, учёта селекции и валидации на новых данных. В первой версии таких данных нет. Следовательно, публикуем рейтинг релевантности, не имитируя предсказательную статистику."
+    },
+    {
+      "type": "h2",
+      "text": "05 / Три условных сценария"
+    },
+    {
+      "type": "p",
+      "text": "Представим режиссёра с опытом генеративного видео. Поиск профессии «AI filmmaker» найдёт несколько вакансий. Более широкий поиск проверит конкурсы ИИ-кино, оплачиваемые резиденции, продакшен-тендеры, брендовые видео, короткие контракты арт-директора и программы поддержки авторов. Часть возможностей отпадёт по географии или требованию использовать конкретную модель."
+    },
+    {
+      "type": "p",
+      "text": "Психолог и исследователь могут быть релевантны не только клиническим и академическим вакансиям, но и грантам на исследования поведения, контрактам UX research, образовательным проектам, консультациям в рамках законной профессиональной квалификации. Алгоритм обязан различать исследовательскую работу и регулируемую клиническую практику."
+    },
+    {
+      "type": "p",
+      "text": "Дизайнер с опытом разработки интерфейсов способен выбирать между штатной позицией, пакетным проектом для агентства, обучением команд и контрактом по дизайн-системе. Система сравнивает не только опубликованные деньги, но и объём работы, оплату по этапам, юрисдикцию, авторские права и вероятность просрочки по проверяемым сигналам. В этих примерах нет реальных открытых заявок и искусственных сумм."
+    },
+    {
+      "type": "h2",
+      "text": "06 / CV как отправная точка, а не товар"
+    },
+    {
+      "type": "p",
+      "text": "Анкета должна принимать CV в виде текста на первом этапе, профиль навыков, страну проживания, языки, разрешённые юрисдикции, желаемую занятость, бюджет времени и минимальные финансовые ожидания. На следующих этапах можно добавить загрузку PDF/DOCX, портфолио и подтверждённые кейсы. ИИ извлечёт навыки и предложит уточнить спорные места, но человек сможет исправить каждый пункт."
+    },
+    {
+      "type": "list",
+      "text": "",
+      "items": [
+        "Раздельное согласие на анализ CV и на будущую связь по предложениям.",
+        "Прозрачный срок хранения, возможность выгрузки, исправления и удаления данных.",
+        "Никакой публичной индексации резюме и перепродажи профилей работодателям без отдельного выбора пользователя.",
+        "Никакого автоматического отклика на вакансии, отправки CV или передачи третьим сторонам без подтверждения человека.",
+        "Не собирать возраст, пол, здоровье и другие чувствительные сведения для ранжирования, если нет доказанной законной необходимости."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Исследования алгоритмического найма фиксируют риск систематических смещений и непрозрачных решений. Европейский AI Act отдельно относит многие системы подбора персонала к высокой группе риска; GDPR требует законного основания обработки и прав для субъектов данных. Поэтому для нашего продукта разумнее начать с помощника кандидату и понятного рейтинга предложений, а не с автоматического решения за работодателя.",
+      "links": [
+        {
+          "label": "Survey: Fairness and Bias in Algorithmic Hiring",
+          "url": "https://doi.org/10.1145/3696457"
+        },
+        {
+          "label": "European Commission, AI Act employment",
+          "url": "https://ai-act-service-desk.ec.europa.eu/en/employment-0"
+        },
+        {
+          "label": "European Commission, GDPR rights",
+          "url": "https://commission.europa.eu/law/law-topic/data-protection/information-individuals_en"
+        }
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "07 / Бесплатный продукт и подписка Pro"
+    },
+    {
+      "type": "p",
+      "text": "Бесплатная версия должна давать немедленную пользу: анкету навыков, анализ профиля, ограниченный набор проверенных возможностей, объяснимый рейтинг и ссылки на организаторов. Иначе требование заплатить за «секретный шанс заработать» превращает сервис в ещё одну воронку обещаний."
+    },
+    {
+      "type": "list",
+      "text": "",
+      "items": [
+        "Free: профиль, первичный разбор CV, 10 релевантных записей в неделю, история сохранённых возможностей.",
+        "Pro, ориентир $12–19 в месяц: персональный мониторинг, расширенные источники, оповещения о сроках, сравнение чистого дохода, версии CV и материалов заявки.",
+        "Professional, ориентир $39–59 в месяц: несколько профессиональных профилей, портфель грантов и тендеров, совместная работа, аналитика заявок и отчёты.",
+        "Платные планы не должны повышать редакционный рейтинг спонсируемых возможностей. Реклама и партнёрские рекомендации маркируются отдельно."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Цены здесь — гипотезы для A/B-тестирования, не исследованные тарифы конкурентов. Проверять нужно конверсию в качественную заявку, долю актуальных предложений, стоимость получения данных, стоимость ИИ-обработки, удержание и реальный финансовый результат спустя 30–90 дней. Подписка без измеримого эффекта быстро превращается в ещё один ежемесячный расход."
+    },
+    {
+      "type": "h2",
+      "text": "08 / Как проверить, что платформа действительно помогает"
+    },
+    {
+      "type": "p",
+      "text": "Минимальный эксперимент: сравнить ручной поиск и поиск с Leiman Lab на одинаковом горизонте 30 дней. Участников распределять по нескольким профессиям и уровням опыта; фиксировать уже имеющиеся связи, географию и количество затраченных часов. Тестировать важно не красивые карточки, а пригодные для действия находки."
+    },
+    {
+      "type": "list",
+      "text": "",
+      "items": [
+        "Первичный результат: число проверенных, доступных конкретному человеку возможностей на час поиска.",
+        "Дополнительные: доля ответов, приглашений и финансируемых заявок; затраты на подготовку; качество и актуальность источника.",
+        "Долгосрочный: реально полученный доход или финансирование после вычета обязательных расходов, отдельно от обещанной суммы.",
+        "Контроль качества: ошибки извлечения требований, пропущенные ограничения, ложные дедлайны, жалобы на нежелательные сообщения и приватность."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "09 / Что строить в Leiman Lab"
+    },
+    {
+      "type": "p",
+      "text": "Я предлагаю открыть отдельный раздел Income Intelligence с публичным каталогом источников и методологией, затем персональный кабинет. Сначала — проверяемые данные и рейтинг, затем AI-помощник для CV и заявок, и только после этого платные подписки. Параллельно можно вести открытый журнал того, какие направления и источники дают реальные результаты."
+    },
+    {
+      "type": "aside",
+      "text": "ИИ не создаёт вакансии или гранты из воздуха. Его возможная экономическая ценность — раньше обнаружить релевантный шанс, отсеять неподходящий и сократить время между поиском и качественной заявкой. Это проверяемая гипотеза, на которой и стоит строить продукт.",
+      "label": "РЕДАКЦИОННЫЙ ВЫВОД"
+    },
+    {
+      "type": "p",
+      "text": "Состояние исследования: 18 ноября 2026 года. Источники отражают доступные на дату публикации данные и документацию. Условия вакансий, грантов и API меняются; перед подачей заявки нужна повторная проверка первоисточника."
+    }
+  ],
+  "sources": [
+    {
+      "title": "World Economic Forum — The Future of Jobs Report 2025",
+      "url": "https://www.weforum.org/publications/the-future-of-jobs-report-2025/",
+      "type": "RESEARCH"
+    },
+    {
+      "title": "IMF — Bridging Skill Gaps for the Future (2026)",
+      "url": "https://www.elibrary.imf.org/view/journals/006/2026/001/article-A001-en.xml",
+      "type": "RESEARCH"
+    },
+    {
+      "title": "Upwork — In-Demand Skills 2026",
+      "url": "https://www.upwork.com/press/releases/upworks-in-demand-skills-2026-demand-for-top-ai-skills-more-than-doubles-as-ai-is-embedded-into-everyday-work",
+      "type": "MARKETPLACE REPORT"
+    },
+    {
+      "title": "Greenhouse — Job Board API",
+      "url": "https://docs.greenhouse.io/job-board",
+      "type": "OFFICIAL DOCUMENTATION"
+    },
+    {
+      "title": "Lever — Postings API",
+      "url": "https://github.com/lever/postings-api",
+      "type": "OFFICIAL DOCUMENTATION"
+    },
+    {
+      "title": "Grants.gov — API Resources",
+      "url": "https://www.grants.gov/api/",
+      "type": "OFFICIAL DOCUMENTATION"
+    },
+    {
+      "title": "European Commission — Funding & Tenders APIs",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/support/apis",
+      "type": "OFFICIAL DOCUMENTATION"
+    },
+    {
+      "title": "EURAXESS — Jobs & Funding",
+      "url": "https://euraxess.ec.europa.eu/jobs/search",
+      "type": "OFFICIAL DIRECTORY"
+    },
+    {
+      "title": "USAJOBS — Developer Portal",
+      "url": "https://developer.usajobs.gov/apirequest/",
+      "type": "OFFICIAL DOCUMENTATION"
+    },
+    {
+      "title": "ACM — Fairness and Bias in Algorithmic Hiring",
+      "url": "https://doi.org/10.1145/3696457",
+      "type": "PEER-REVIEWED SURVEY"
+    },
+    {
+      "title": "EU AI Act Service Desk — Employment",
+      "url": "https://ai-act-service-desk.ec.europa.eu/en/employment-0",
+      "type": "LEGAL REFERENCE"
+    },
+    {
+      "title": "European Commission — GDPR rights",
+      "url": "https://commission.europa.eu/law/law-topic/data-protection/information-individuals_en",
+      "type": "LEGAL REFERENCE"
+    }
+  ],
+  "sourceNote": "Источники проверены в ноябре 2026 года. Весовые коэффициенты, ценовые уровни и продуктовая модель — гипотезы Leiman Lab, а не результаты испытаний.",
+  "translations": {
+    "en": {
+      "title": "The New Economics of Finding Work: Can AI Discover Income Opportunities Before We Do?",
+      "cardTitle": "Income Intelligence — Mapping Opportunity",
+      "summary": "Jobs, grants, contracts and competitions in one research framework. Primary data sources, transparent ranking, CV privacy and a Pro subscription model.",
+      "deck": "How to turn jobs, grants and paid projects into a personal opportunity radar. A source-based framework for ranking, CV analysis and subscription economics.",
+      "description": "Can AI help you find ways to earn money? Research on jobs, grants, freelance work and a transparent Income Intelligence ranking with CV analysis and Pro subscriptions.",
+      "section": "RESEARCH / ECONOMICS OF WORK",
+      "tags": [
+        "AI jobs",
+        "Grants",
+        "Freelance work",
+        "Career opportunities",
+        "Skills matching",
+        "Income Intelligence"
+      ],
+      "paragraphs": [
+        {
+          "type": "lead",
+          "text": "People usually search for work by typing the name of their profession. Yet income is often found at the intersection of skills, market demand and access to a specific opportunity. A filmmaker may qualify for a grant, a researcher for a paid advisory contract, and a designer for an international project. A single job-title search misses much of that terrain."
+        },
+        {
+          "type": "p",
+          "text": "I examined labour-market evidence, official job and grant directories, public APIs and research on algorithmic hiring. The result is a proposal for Income Intelligence, a Leiman Lab system that would discover and compare ways to earn money based on an individual profile. It is a product hypothesis, not a claim that a working service can already forecast anyone's income."
+        },
+        {
+          "type": "h2",
+          "text": "01 / The market is changing. AI income promises remain unproven"
+        },
+        {
+          "type": "p",
+          "text": "The World Economic Forum's Future of Jobs Report 2025 surveyed more than 1,000 major employers. It projects substantial restructuring of jobs and skills through 2030, with AI and big data, cybersecurity and adaptability among the areas gaining importance. Those are employers' expectations, not evidence that any individual applicant will find a job more easily.",
+          "links": [
+            {
+              "label": "WEF, Future of Jobs 2025",
+              "url": "https://www.weforum.org/publications/the-future-of-jobs-report-2025/"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "An IMF study published in 2026 associates the appearance of new skills in job postings with employment and wage growth in particular US labour markets. Association is not a causal benefit for every worker. Upwork's 2026 skills report also points to demand for people who combine specialist expertise with AI tools, but its evidence comes from its own marketplace rather than the entire global economy.",
+          "links": [
+            {
+              "label": "IMF, Bridging Skill Gaps (2026)",
+              "url": "https://www.elibrary.imf.org/view/journals/006/2026/001/article-A001-en.xml"
+            },
+            {
+              "label": "Upwork, In-Demand Skills 2026",
+              "url": "https://www.upwork.com/press/releases/upworks-in-demand-skills-2026-demand-for-top-ai-skills-more-than-doubles-as-ai-is-embedded-into-everyday-work"
+            }
+          ]
+        },
+        {
+          "type": "aside",
+          "text": "AI may expand the search space and reduce the cost of checking eligibility. Whether it increases actual earnings requires a controlled test.",
+          "label": "HYPOTHESIS"
+        },
+        {
+          "type": "h2",
+          "text": "02 / Employment is only one route to income"
+        },
+        {
+          "type": "p",
+          "text": "A conventional aggregator asks which employer needs a worker. A better question for someone with several skills is: who is prepared to pay for an outcome I can deliver, under what conditions, and how soon? That question extends well beyond a vacancy."
+        },
+        {
+          "type": "list",
+          "text": "",
+          "items": [
+            "Employment: local, international and remote positions with verified hiring conditions.",
+            "Freelance and contracts: paid assignments, tenders, project roles and short advisory engagements.",
+            "Grants and research funding: project support subject to eligibility, institutional affiliation and geographic restrictions.",
+            "Competitions, awards and residencies: cash awards, production support, funded programmes or purely non-cash benefits.",
+            "Commercial leads: business needs, licensing, partnerships, teaching and product niches, each requiring independent evidence of demand."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "A grant is not necessarily personal income. Some funds may only be spent by an eligible institution or on a narrowly defined project. Awards can carry taxes, rights transfers or exclusivity. If a platform shows the headline amount but hides those restrictions, its ranking is economically misleading."
+        },
+        {
+          "type": "h2",
+          "text": "03 / A credible data layer starts with primary sources"
+        },
+        {
+          "type": "p",
+          "text": "There are practical starting points. Greenhouse makes public GET endpoints available for company job boards, while Lever provides its Postings API. These sources can make employer-originated information easier to retrieve. They do not imply a universal right to replicate every jobs database, nor complete coverage of the global market.",
+          "links": [
+            {
+              "label": "Greenhouse Job Board API",
+              "url": "https://docs.greenhouse.io/job-board"
+            },
+            {
+              "label": "Lever Postings API",
+              "url": "https://github.com/lever/postings-api"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Grants.gov and the EU Funding & Tenders Portal document APIs for funding opportunities. EURAXESS publishes research jobs, grants and hosting positions; USAJOBS specifies conditions for using its federal jobs API. Each feed needs its own licence review, refresh strategy, eligibility extraction and rules for republication.",
+          "links": [
+            {
+              "label": "Grants.gov API",
+              "url": "https://www.grants.gov/api/"
+            },
+            {
+              "label": "EU Funding & Tenders APIs",
+              "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/support/apis"
+            },
+            {
+              "label": "EURAXESS",
+              "url": "https://euraxess.ec.europa.eu/jobs/search"
+            },
+            {
+              "label": "USAJOBS API terms",
+              "url": "https://developer.usajobs.gov/apirequest/"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "The first pipeline is deliberately boring: ingest authorised records, normalise fields, deduplicate, recheck status, extract hard requirements, then rank for a user. Every result must retain its original source, direct URL, retrieval time and most recent verification. When an announcement closes, the system must stop presenting it as an open opportunity."
+        },
+        {
+          "type": "h2",
+          "text": "04 / An opportunity score should measure fit, not destiny"
+        },
+        {
+          "type": "p",
+          "text": "Instead of a fabricated '93% chance of success', I propose a transparent Opportunity Fit Score from 0 to 100. It describes how well an opening fits a person's verified circumstances and stated goals. These initial weights are a design hypothesis and must be tested."
+        },
+        {
+          "type": "list",
+          "text": "",
+          "items": [
+            "25 points: match between demonstrated skills and explicit requirements.",
+            "20 points: eligibility, including jurisdiction, work authorisation, credentials and language.",
+            "15 points: economics, including expected net pay or usable funding relative to time and direct costs.",
+            "15 points: source credibility and evidence that the opportunity remains open.",
+            "10 points: time available and realistic preparation burden before the deadline.",
+            "10 points: alignment with preferred working arrangements and career direction.",
+            "5 points: documented information about competition or comparative advantage, when actually available."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Hard disqualifiers should be applied separately. If a candidate cannot legally apply, a high aggregate score must not conceal that fact. Every card should distinguish verified, unknown and needs-human-review fields. Missing information cannot silently become zero or a confident invention."
+        },
+        {
+          "type": "p",
+          "text": "Estimating the probability of getting hired or winning a grant would require dependable application histories, a calibrated model, selection-bias controls and prospective validation. None of that is available in version one. So we publish relevance rankings, not pseudo-scientific percentages."
+        },
+        {
+          "type": "h2",
+          "text": "05 / Three illustrative cases"
+        },
+        {
+          "type": "p",
+          "text": "Consider a filmmaker experienced in generative video. Searching 'AI filmmaker' retrieves some roles. A broader system would also check AI film competitions, funded residencies, production tenders, branded-video commissions, short art-direction contracts and creator support programmes. Geography, rights and mandatory-model requirements will disqualify some results."
+        },
+        {
+          "type": "p",
+          "text": "A psychologist who also conducts research might explore behavioural-science grants, UX research contracts, teaching engagements and research roles, alongside conventional job listings. The system must distinguish academic or advisory work from regulated clinical practice, where professional licensing is decisive."
+        },
+        {
+          "type": "p",
+          "text": "A product designer could compare full-time employment, fixed-scope agency work, design-system contracts and team training. Beyond advertised pay, the meaningful factors include workload, milestone payments, jurisdiction, copyright and substantiated payment-risk indicators. These three examples are scenarios, not a list of verified live vacancies or invented fees."
+        },
+        {
+          "type": "h2",
+          "text": "06 / The CV is an input, not a commodity"
+        },
+        {
+          "type": "p",
+          "text": "The first intake should accept a text CV, declared skills, country of residence, languages, eligible jurisdictions, working preferences, available hours and minimum financial requirements. A later release may support PDF/DOCX uploads, portfolios and evidence of completed work. AI can suggest extracted skills, but the person must be able to correct every inference."
+        },
+        {
+          "type": "list",
+          "text": "",
+          "items": [
+            "Separate, understandable permission for CV analysis and for optional opportunity notifications.",
+            "Clear retention periods and the ability to export, amend and delete personal data.",
+            "No public indexing of CVs and no resale of personal profiles without a separate, specific choice.",
+            "No sending applications, CVs or personal data to third parties without human confirmation.",
+            "Avoid collecting protected or sensitive attributes for scoring unless a specific, lawful necessity is demonstrated."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Research on algorithmic hiring documents both systematic bias and opaque decision-making. Under the EU AI Act, many recruitment and selection systems are treated as high-risk; GDPR imposes lawful-processing requirements and data-subject rights. The safer initial product is a candidate-side research assistant that explains its suggestions, not an autonomous employer-side gatekeeper.",
+          "links": [
+            {
+              "label": "Survey: Fairness and Bias in Algorithmic Hiring",
+              "url": "https://doi.org/10.1145/3696457"
+            },
+            {
+              "label": "European Commission, AI Act employment",
+              "url": "https://ai-act-service-desk.ec.europa.eu/en/employment-0"
+            },
+            {
+              "label": "European Commission, GDPR rights",
+              "url": "https://commission.europa.eu/law/law-topic/data-protection/information-individuals_en"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "07 / The free product, Pro subscription and economics"
+        },
+        {
+          "type": "p",
+          "text": "The free service should produce immediate value: a skills profile, a basic CV assessment, a small set of verified leads, explained rankings and links to primary sources. Charging people for a mysterious opportunity to get rich would merely recreate the industry's least attractive habit."
+        },
+        {
+          "type": "list",
+          "text": "",
+          "items": [
+            "Free: individual profile, initial CV review, 10 relevant records per week and a saved-opportunity list.",
+            "Pro, test price $12–19/month: personal monitoring, broader source coverage, deadline alerts, net-income comparison and tailored application materials.",
+            "Professional, test price $39–59/month: multiple professional profiles, grant and tender portfolio, collaboration and application analytics.",
+            "Paid placement must never secretly change the editorial score. Sponsored opportunities and referral links require clear disclosure."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "These prices are experiments, not measured market-clearing rates. The meaningful metrics are qualified applications, active listing accuracy, data acquisition costs, inference costs, retention and actual economic outcomes after 30–90 days. A subscription that yields no measurable benefit is simply a new monthly expense."
+        },
+        {
+          "type": "h2",
+          "text": "08 / Test the economic result, not the interface"
+        },
+        {
+          "type": "p",
+          "text": "The minimum credible experiment compares ordinary manual search with assisted search over a 30-day period. Participants should cover several occupations and experience levels. Record their existing networks, geography and hours spent. The aim is to test opportunities that can actually be acted on, not the visual appeal of a dashboard."
+        },
+        {
+          "type": "list",
+          "text": "",
+          "items": [
+            "Primary metric: verified, personally eligible opportunities discovered per hour of search.",
+            "Secondary metrics: response rates, interviews, funded applications, preparation costs, and source freshness.",
+            "Longer-term metric: money actually received, net of unavoidable costs, measured separately from headline award sizes.",
+            "Safety metrics: mistaken eligibility, stale listings, invented deadlines, unwanted contact and privacy complaints."
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "09 / The product Leiman Lab should build"
+        },
+        {
+          "type": "p",
+          "text": "I would launch an Income Intelligence section with a public source directory, methodology and clearly dated records, then add a private profile workspace. First comes verified data and explainable ranking; next, AI-assisted CV review and applications; only then, a paid monitoring tier. An open research log should report which sources and strategies produce real outcomes."
+        },
+        {
+          "type": "aside",
+          "text": "AI cannot invent genuine jobs or grants. Its plausible economic value is finding relevant opportunities earlier, filtering ineligible ones and reducing the time between discovery and a good application. That is a testable hypothesis worth building a product around.",
+          "label": "EDITORIAL CONCLUSION"
+        },
+        {
+          "type": "p",
+          "text": "Research snapshot: 18 November 2026. Labour-market reports and API documentation reflect the information available at publication. Opportunities, deadlines and data access rules may change; always verify the primary source immediately before applying."
+        }
+      ],
+      "sourceNote": "Sources reviewed in November 2026. Ranking weights, subscription prices and product architecture are Leiman Lab hypotheses, not validated performance claims.",
+      "readingMinutes": 15
+    }
+  }
+}
