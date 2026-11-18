@@ -65,7 +65,32 @@ loadArticles();
 // Drafts ("draft": true) open only by direct link: no lists, search, sitemap or RSS.
 const published = () => articles.filter(a => !a.draft);
 const hasEnglish = a => !!(a?.translations?.en && Array.isArray(a.translations.en.paragraphs) && a.translations.en.paragraphs.length);
-const localiseArticle = (a, lang = 'ru') => lang === 'en' && hasEnglish(a) ? { ...a, ...a.translations.en, lang: 'en' } : a;
+function localiseArticle(a, lang = 'ru') {
+  if (lang !== 'en' || !hasEnglish(a)) return a;
+  const en = a.translations.en;
+  // Every journal article is available in both languages. Keep readers in
+  // the language they selected when an article cites another journal issue.
+  const englishInternalUrl = url => {
+    const value = String(url || '');
+    if (/^\\/articles\\/[a-z0-9-]+(?:[#?].*)?$/.test(value)) return '/en' + value;
+    if (/^https:\\/\\/leimanlab\\.com\\/articles\\/[a-z0-9-]+(?:[#?].*)?$/.test(value)) {
+      return value.replace('https://leimanlab.com/articles/', 'https://leimanlab.com/en/articles/');
+    }
+    return value;
+  };
+  return {
+    ...a,...en,lang:'en',
+    paragraphs:en.paragraphs.map(b => ({
+      ...b,
+      ...(b.links ? { links:b.links.map(link => ({...link,url:englishInternalUrl(link.url)})) } : {}),
+      ...(b.source ? { source:englishInternalUrl(b.source) } : {})
+    })),
+    sources:(en.sources || a.sources || []).map(source => ({
+      ...source,url:englishInternalUrl(source.url)
+    })),
+    updated:en.updated || en.translationPublished || a.updated
+  };
+}
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 const dateLabel = iso => { const [y, m, d] = String(iso).split('-').map(Number); return `${d} ${MONTHS[m - 1]} ${y}`; };
 const today = () => new Date().toISOString().slice(0, 10);
