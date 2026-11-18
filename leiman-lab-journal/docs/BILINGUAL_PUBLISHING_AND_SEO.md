@@ -13,23 +13,23 @@
 
 ## Translation backlog and coverage
 
-As of 18 November 2026: **9 RU journal articles; 1 English article**.
+As of 18 November 2026: **9 Russian and 9 English journal articles**. All nine existing journal entries now have complete paragraph-level English editions and independent English metadata.
 
 | Issue | Slug | English edition |
 | --- | --- | --- |
-| 001 | black-october | Pending |
-| 002 | warhound | Pending |
-| 003 | human-voice | Pending |
-| 004 | after-black-october | Pending |
-| 005 | ai-index-2026 | Pending |
-| 006 | attention-economy-ai-2026 | Pending |
-| 007 | period-poluraspada-novogo | Pending |
-| 008 | ai-film-competitions-2026 | Pending |
+| 001 | black-october | Published |
+| 002 | warhound | Published |
+| 003 | human-voice | Published |
+| 004 | after-black-october | Published |
+| 005 | ai-index-2026 | Published |
+| 006 | attention-economy-ai-2026 | Published |
+| 007 | period-poluraspada-novogo | Published |
+| 008 | ai-film-competitions-2026 | Published |
 | 009 | ai-income-opportunities | Published |
 
-Until reviewed translations are available, legacy articles remain Russian-only with their own canonical. No false EN alternates should be created.
+Each published Russian article now has an English equivalent with an independently indexable canonical URL and reciprocal hreflang. Continue to require full bilingual content for every new issue.
 
-Product microsites `/ai-index`, `/ai-film-awards`, `/predictions`, `/commons`, `/about` are separate from article content and still require a distinct bilingual editorial project. Do not mistake a global EN nav for localized product content.
+Product microsites `/ai-index`, `/ai-film-awards`, `/predictions`, `/commons`, `/about` are separate from journal articles and still require dedicated bilingual content. Do not mistake a global EN nav for localized product content.
 
 ## Verification checklist
 
