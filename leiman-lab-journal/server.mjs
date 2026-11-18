@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { createEngagement, EngagementError } from './engagement.mjs';
 import { createCommons, CommonsError } from './commons.mjs';
+import { createOpportunityIntake } from './opportunities.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(ROOT, 'public');
@@ -28,6 +29,7 @@ const PUBLIC_ORIGIN = (process.env.PUBLIC_URL || 'https://leimanlab.com').replac
 const ogPngCache = new Map();
 const engagement = createEngagement(DATA_DIR);
 const commons = createCommons(DATA_DIR);
+const intake = createOpportunityIntake(DATA_DIR);
 const plural = (n, [one, few, many]) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many; };
 const fmt = n => n.toLocaleString('ru-RU');
 // Person key for de-duplication and rate limits: first X-Forwarded-For hop (Railway edge) + User-Agent. Only hashes are stored.
@@ -616,6 +618,7 @@ function analyticsView(origin) {
 async function adminApi(req, res, pathname) {
   if (!passwordOk(req)) { await new Promise(r => setTimeout(r, 800)); return sendJson(res, 401, { error: 'Неверный пароль' }); }
   if (pathname === '/api/admin/login' && req.method === 'POST') return sendJson(res, 200, { ok: true });
+  if (pathname === '/api/admin/opportunities/submissions' && req.method === 'GET') return sendJson(res, 200, { retentionDays: 30, submissions: intake.list() });
 
   if (pathname === '/api/admin/site') {
     if (req.method === 'POST') {
@@ -695,6 +698,25 @@ async function publicApi(req, res, pathname) {
 
 const server = http.createServer((req,res)=>{
   const apiPath = (req.url || '').split('?')[0];
+  if(apiPath === '/api/opportunities/cv' || /^\/api\/opportunities\/cv\/[a-f0-9]{32}$/.test(apiPath)) {
+    return (async () => {
+      if(!['POST','DELETE'].includes(req.method)) return sendJson(res,405,{error:'Method not allowed'});
+      if(!String(req.headers['content-type']||'').startsWith('application/json')) return sendJson(res,415,{error:'JSON required'});
+      const originHeader=req.headers.origin;
+      if(originHeader) {
+        let sourceHost;try{sourceHost=new URL(originHeader).host}catch{return sendJson(res,403,{error:'Invalid Origin'})}
+        if(sourceHost!==requestHost(req))return sendJson(res,403,{error:'Cross-origin submission blocked'});
+      }
+      if(req.headers['sec-fetch-site']==='cross-site')return sendJson(res,403,{error:'Cross-site submission blocked'});
+      const body=await readBody(req,16000);
+      if(req.method==='POST' && apiPath==='/api/opportunities/cv'){
+        const out=intake.submit(body,clientKey(req));return sendJson(res,out.status,out.body);
+      }
+      const id=apiPath.split('/').at(-1);
+      if(req.method==='DELETE') { const deleted=intake.remove(id,String(body.deletionToken||''));return sendJson(res,deleted?200:403,{ok:deleted,deleted}); }
+      return sendJson(res,405,{error:'Unsupported method'});
+    })().catch(err=>{console.error('opportunity intake:',err.message);return sendJson(res,err.code&&err.code<500?err.code:500,{error:'Unable to process CV submission'})});
+  }
   if (/^\/api\/(views|reads|likes|engagement|comments)\//.test(apiPath)) {
     return publicApi(req, res, apiPath).catch(err => {
       if (!(err instanceof EngagementError || err instanceof EditError)) console.error('engagement:', err);
@@ -747,6 +769,10 @@ const server = http.createServer((req,res)=>{
       {path:'/ai-index',lastmod:articleBySlug.get('ai-index-2026')?.updated||'2026-11-04'},
       {path:'/ai-film-awards',lastmod:'2026-11-10'},
       {path:'/predictions',lastmod:'2026-11-18'},
+      {path:'/opportunities',lastmod:'2026-11-18',alts:[{lang:'ru',path:'/opportunities'},{lang:'en',path:'/en/opportunities'}]},
+      {path:'/en/opportunities',lastmod:'2026-11-18',alts:[{lang:'ru',path:'/opportunities'},{lang:'en',path:'/en/opportunities'}]},
+      {path:'/privacy',lastmod:'2026-11-18',alts:[{lang:'ru',path:'/privacy'},{lang:'en',path:'/en/privacy'}]},
+      {path:'/en/privacy',lastmod:'2026-11-18',alts:[{lang:'ru',path:'/privacy'},{lang:'en',path:'/en/privacy'}]},
       {path:'/commons',lastmod:'2026-11-18'},
       ...rubrics.map(r=>({path:'/rubrics/'+r.slug,items:pub.filter(a=>a.rubric===r.slug)}))
         .filter(r=>r.items.length).map(r=>({path:r.path,lastmod:r.items.map(a=>a.updated||a.date).sort().at(-1)})),
@@ -774,6 +800,29 @@ const server = http.createServer((req,res)=>{
   if(englishArticle && articleBySlug.has(englishArticle[1]) && hasEnglish(articleBySlug.get(englishArticle[1]))) {
     const a=localiseArticle(articleBySlug.get(englishArticle[1]), 'en');
     return write(res,200,articleView(a,origin,'en'),'text/html; charset=utf-8',a.draft?{'Cache-Control':'no-store'}:{});
+  }
+  if(['/opportunities','/opportunities/','/en/opportunities','/en/opportunities/'].includes(pathname)) {
+    const lang=pathname.startsWith('/en/')?'en':'ru';
+    const content=readFileSync(path.join(PUBLIC,'assets','opportunities.'+lang+'.html'),'utf8');
+    const current=origin+(lang==='en'?'/en/opportunities':'/opportunities');
+    return write(res,200,page({content,lang,
+      title:lang==='en'?'Income Intelligence: Jobs, Grants & Career Opportunities — Leiman Lab':'Income Intelligence: вакансии, гранты и возможности заработка — Leiman Lab',
+      description:lang==='en'?'Research-backed directory of job and grant sources, opportunity fit methodology, CV pilot and proposed Pro subscriptions.':'Исследовательский каталог вакансий и грантов, методика рейтинга возможностей, приватная анкета CV и будущая подписка Pro.',
+      canonical:current,cover:origin+'/og/ai-income-opportunities.png',
+      extraStylesheet:'/assets/opportunities.css',bodyData:' data-page="opportunities"',
+      alternates:[{lang:'ru',href:origin+'/opportunities'},{lang:'en',href:origin+'/en/opportunities'}],
+      schema:{'@context':'https://schema.org','@type':'WebPage',name:'Income Intelligence',url:current,inLanguage:lang==='en'?'en-US':'ru-RU'}
+    }));
+  }
+  if(['/privacy','/privacy/','/en/privacy','/en/privacy/'].includes(pathname)) {
+    const lang=pathname.startsWith('/en/')?'en':'ru',en=lang==='en',current=origin+(en?'/en/privacy':'/privacy');
+    const content=`<main class="container" style="max-width:850px;padding:55px 20px 90px"><h1>${en?'Privacy notice: Income Intelligence pilot':'Приватность: пилот Income Intelligence'}</h1>
+      <p>${en?'Controller: Leiman Lab. Contact:':'Ответственный за данные: Leiman Lab. Связь:'} <a href="https://t.me/leimanleo">Telegram</a>.</p>
+      <p>${en?'We process your name, email, professional description, location and stated preferences only when you actively submit the pilot form with consent. We use these fields to evaluate the proposed service and, separately, to contact you only if you opted in.':'Мы обрабатываем имя, email, текст CV, местоположение и выбранные предпочтения, только если вы самостоятельно отправили анкету с согласием. Данные используются для оценки пилота, а для сообщений — лишь при отдельном согласии.'}</p>
+      <p>${en?'Data are kept for up to 30 days, AES-256-GCM encrypted on the hosting volume, accessible to the authorised site operator, and not sent to any AI model, employer, grant provider or analytics vendor. Hosting infrastructure processes the information to provide the service. This is not a guarantee against every operational or security risk.':'Данные хранятся до 30 дней, зашифрованы AES-256-GCM на серверном томе и доступны уполномоченному владельцу сайта. Сейчас они не отправляются в модели ИИ, работодателям, организаторам грантов и аналитическим сервисам. Хостинг обеспечивает техническую обработку данных. Это не гарантирует отсутствия любых рисков.'}</p>
+      <p>${en?'You can delete the submission with the one-time deletion token returned after submission, or contact the operator to request access, correction or deletion. Withdrawing consent will not affect processing already performed before withdrawal. Do not include sensitive information in your CV.':'Анкету можно удалить с помощью кода, выданного после отправки, или обратиться к владельцу сайта за доступом, исправлением и удалением данных. Отзыв согласия не отменяет обработку, законно выполненную до отзыва. Не включайте чувствительные данные в CV.'}</p>
+      <p><a href="${en?'/en/opportunities':'/opportunities'}">${en?'← Back to Income Intelligence':'← Назад в Income Intelligence'}</a></p></main>`;
+    return write(res,200,page({content,title:(en?'Privacy Notice':'Политика приватности')+' — Leiman Lab',description:en?'Income Intelligence CV intake, consent, retention and deletion.':'Обработка CV, согласие, хранение и удаление данных пилота Income Intelligence.',canonical:current,cover:origin+'/og/ai-income-opportunities.png',lang,alternates:[{lang:'ru',href:origin+'/privacy'},{lang:'en',href:origin+'/en/privacy'}]}));
   }
   if(pathname==='/ai-film-awards'||pathname==='/ai-film-awards/'){
     const content=readFileSync(path.join(PUBLIC,'assets','ai-film-awards.html'),'utf8');
