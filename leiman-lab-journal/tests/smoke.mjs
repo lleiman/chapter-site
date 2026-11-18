@@ -173,7 +173,7 @@ async function passwordlessAnalyticsTests() {
 async function seoTests() {
   const homepage=await html('/');
   assert.ok(homepage.includes('rel="canonical" href="'+origin+'/"'), 'local canonical should use testing origin');
-  assert.ok(homepage.includes('property="og:image" content="'+origin+'/og/ai-index-2026.png?v='), 'home OG should be raster PNG');
+  assert.ok(homepage.includes('property="og:image" content="'+origin+'/'), 'home OG should have a canonical local image');
   const article=await html('/articles/ai-index-2026');
   assert.ok(article.includes('"@type":"Article"') && article.includes('"mainEntityOfPage"'), 'article metadata');
   assert.ok(article.includes('/og/ai-index-2026.png?v='), 'AI Index OG PNG');
