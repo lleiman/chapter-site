@@ -599,7 +599,13 @@
         }
       ],
       "sourcesLabel": "SOURCES / METHODS",
-      "sourceNote": "Research snapshot: 4 November 2026. Leaderboard positions, service access and commercial terms may have changed. Leiman Lab has not yet published original blind-test scores."
+      "sourceNote": "Research snapshot: 4 November 2026. Leaderboard positions, service access and commercial terms may have changed. Leiman Lab has not yet published original blind-test scores.",
+      "changes": [
+        {
+          "date": "2026-11-04",
+          "text": "Editorial voice revised into the first-person singular; impersonal formulas and repetitions removed. Numerical claims, dates, links and model names retained."
+        }
+      ]
     }
   }
 }
