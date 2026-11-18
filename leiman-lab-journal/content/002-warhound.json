@@ -98,5 +98,105 @@
     }
   ],
   "sourceNote": "По состоянию на 25 октября 2026 года Warhound сообщила о финансировании и планах; результаты длительных испытаний генетически улучшенных служебных собак не опубликованы. Для данных о компании использованы обновлённый пресс-релиз и независимые публикации.",
-  "updated": "2026-10-25"
+  "updated": "2026-10-25",
+  "translations": {
+    "en": {
+      "title": "Warhound: The $200 Million Plan to Engineer Military Working Dogs",
+      "cardTitle": "Warhound and Military Biotech",
+      "summary": "A $200 million startup plans to clone and genetically edit military dogs while equipping them with Anduril technology. What is known and what remains untested.",
+      "deck": "Warhound's plans for genetically modified service dogs raise practical questions about genetics, training, cost and animal welfare. The public evidence is still limited.",
+      "description": "Warhound military dog startup: Palmer Luckey, Colossal Biosciences, $200M funding, cloning, genetic editing, Anduril equipment and what is actually verified.",
+      "section": "RESEARCH / BIOTECH & DEFENCE",
+      "tags": [
+        "Warhound",
+        "Military working dogs",
+        "Biotechnology",
+        "Anduril",
+        "Genetic engineering",
+        "Animal welfare"
+      ],
+      "readingMinutes": 5,
+      "paragraphs": [
+        {
+          "type": "lead",
+          "text": "Palmer Luckey, founder of Anduril, and Ben Lamm, CEO of Colossal Biosciences, announced a new company called Warhound. It raised $200 million for military working-dog cloning, genetic modification and protective equipment. No genetically enhanced working dogs have yet been publicly presented."
+        },
+        {
+          "type": "h2",
+          "text": "How Warhound plans to make them"
+        },
+        {
+          "type": "p",
+          "text": "According to Ben Lamm, the team has already collected cell samples from military working dogs for planned cloning. The first genetic interventions would target the risk of inherited diseases."
+        },
+        {
+          "type": "p",
+          "text": "The team has also discussed changing working capabilities, including scent detection. These remain proposals: the company has not published validated evidence of enhanced olfactory performance in military working dogs."
+        },
+        {
+          "type": "h2",
+          "text": "What is Anduril doing here?"
+        },
+        {
+          "type": "p",
+          "text": "Anduril is expected to supply protective vests, goggles, hearing protection, sensors and software connecting a dog to its handler. The announced technology is external equipment. The company has not announced implanting devices inside the animals."
+        },
+        {
+          "type": "aside",
+          "text": "As of 25 October 2026, Warhound had secured investment and outlined its plans. Genetically enhanced dogs were not yet in service, and there were no publicly available trial results involving the proposed animals."
+        },
+        {
+          "type": "h2",
+          "text": "Why change the existing system?"
+        },
+        {
+          "type": "p",
+          "text": "Warhound claims that more than 80% of US military working dogs are sourced from Europe and that fewer than half make it into service after screening and training. The company wants a more predictable supply of animals with higher training completion rates."
+        },
+        {
+          "type": "p",
+          "text": "What this will cost remains unknown. There is no public price for a trained dog, no evidence yet that the approach works, and no long-term health data on clones produced by the programme."
+        },
+        {
+          "type": "h2",
+          "text": "What is worth watching"
+        },
+        {
+          "type": "p",
+          "text": "Cloning copies a genome, not a training history. Working performance also depends on environment, conditioning and the relationship with a handler. Genetically similar animals can still perform differently."
+        },
+        {
+          "type": "p",
+          "text": "Testing the effects of genetic interventions would require controlled comparisons: animals trained under comparable programmes and followed for health outcomes. Warhound has not published that evidence."
+        },
+        {
+          "type": "p",
+          "text": "The company promises lifetime care for the animals, including after service. Evaluating that promise will require future data on injuries, health and lifespan. Those data do not yet exist."
+        }
+      ],
+      "sources": [
+        {
+          "title": "Warhound — official updated press release (23 October 2026)",
+          "url": "https://www.prnewswire.com/news-releases/warhound-launches-with-200-million-to-rebuild-americas-military-working-dog-supply-using-advanced-genetics-and-defense-technology-302918435.html",
+          "type": "COMPANY CLAIMS"
+        },
+        {
+          "title": "WIRED — on genetically modified military dogs",
+          "url": "https://www.wired.com/story/cool-cool-cool-palmer-luckey-made-a-genetically-modified-military-dog-startup/",
+          "type": "INDEPENDENT REPORTING"
+        },
+        {
+          "title": "Financial Times — Palmer Luckey unveils military dog startup",
+          "url": "https://www.ft.com/content/8a558139-2318-4509-8acd-199d5f888b9e",
+          "type": "INDEPENDENT REPORTING"
+        },
+        {
+          "title": "TechCrunch — Warhound raises $200M to engineer war dogs (22 October)",
+          "url": "https://techcrunch.com/2026/10/22/ben-lamm-raises-200m-for-warhound-to-engineer-war-dogs-and-arm-them-with-anduril-gear/",
+          "type": "INDEPENDENT REPORTING"
+        }
+      ],
+      "sourceNote": "Research snapshot: 25 October 2026. Announced investments and intentions are not evidence that planned animal interventions are effective or safe."
+    }
+  }
 }
