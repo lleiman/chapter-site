@@ -311,5 +311,317 @@
     }
   ],
   "sourceNote": "Научные утверждения сверены с опубликованными работами; собственные наблюдения описаны как редакторский разбор, без заявлений о доказанной эффективности скилла. В блоках «было → стало» использованы прежние версии текста и нынешние версии статей «Чёрный октябрь» и Warhound; часть примеров показывает переработку аргумента, а не буквальную замену формулировки. Материалы журналистов 2013–2016 годов использованы для сравнения стилистики. Состояние источников на 25 октября 2026 года.",
-  "updated": "2026-10-25"
+  "updated": "2026-10-25",
+  "translations": {
+    "en": {
+      "title": "How to Write With AI Without Losing Your Own Voice",
+      "cardTitle": "Writing With AI, Without the Generic Tone",
+      "summary": "I built an editing skill for working with AI on research articles, then tested its rules against linguistic studies and my own editing history.",
+      "description": "Research on AI-assisted writing, model language patterns, reader trust and six before-and-after editing examples, plus a Russian-language editing skill download.",
+      "section": "RESEARCH / WRITING & AI",
+      "tags": [
+        "AI writing",
+        "Editorial practice",
+        "Human voice",
+        "LLM language",
+        "Journalism",
+        "Reader trust"
+      ],
+      "readingMinutes": 14,
+      "paragraphs": [
+        {
+          "type": "lead",
+          "text": "I write articles with AI. I often begin with voice notes, dictating an idea, questions and observations. The model helps assemble a draft, locate research and test possible explanations. Sometimes it produces almost the entire first version. I then open the sources, check the claims and edit the piece."
+        },
+        {
+          "type": "p",
+          "text": "An unpleasant pattern appears at this stage. The text still contains my ideas, research references and sometimes a fairly complex argument, but the prose has become suspiciously smooth. The same transitions, rhetorical contrasts and interchangeable conclusions keep returning. I reread a paragraph and realise I will have to write it again."
+        },
+        {
+          "type": "p",
+          "text": "That problem led to the first version of a Claude and ChatGPT editing skill called No AI Tone. It analyses a finished draft, identifies specific weaknesses and suggests minimal revisions intended to preserve facts and the author's own formulations. The archive is available for readers to test on their writing.",
+          "links": [
+            {
+              "label": "Download No AI Tone Skill v1.1 (Russian ZIP)",
+              "url": "/files/leiman-lab-kit-001-human-voice.zip"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "I drew the rules from specific sources: Dmitry Kobak and colleagues' analysis of language in 15 million biomedical abstracts (Science Advances, 2025); Reinhart and colleagues' comparison of human and model grammar (PNAS, 2025); Russell, Karpinska and Iyyer's experiment on recognising AI-written text (ACL, 2025); and Altay and Gilardi's study of trust in headlines marked as AI-generated (PNAS Nexus, 2024). For editing, I also used Nora Gal's Russian-language book The Living and the Dead Word. Early techniques were tested on Black October and Warhound. The skill itself has not undergone independent evaluation.",
+          "links": [
+            {
+              "label": "Kobak et al. (2025)",
+              "url": "https://pubmed.ncbi.nlm.nih.gov/40601754/"
+            },
+            {
+              "label": "Reinhart et al. (2025)",
+              "url": "https://www.pnas.org/doi/10.1073/pnas.2422455122"
+            },
+            {
+              "label": "Russell et al. (2025)",
+              "url": "https://arxiv.org/abs/2501.15654"
+            },
+            {
+              "label": "Altay and Gilardi (2024)",
+              "url": "https://academic.oup.com/pnasnexus/article/3/10/pgae403/7795946"
+            },
+            {
+              "label": "Nora Gal",
+              "url": "https://azbyka.ru/deti/slovo-zhivoe-i-mertvoe-nora-gal?print=1"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "Where the recognisable AI voice comes from"
+        },
+        {
+          "type": "p",
+          "text": "AI-generated prose has measurable patterns. Dmitry Kobak and coauthors analysed more than 15 million biomedical abstracts published between 2010 and 2024. After ChatGPT became widespread, some words appeared much more frequently in English-language abstracts. The researchers estimated that language models were involved in preparing at least 13.5% of the texts in that corpus in 2024.",
+          "links": [
+            {
+              "label": "Kobak et al., original study",
+              "url": "https://arxiv.org/abs/2406.07016"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "A 2025 PNAS study compared grammatical habits of people and language models. In the English-language materials studied, some models used nominalisations roughly one and a half to twice as often and participial constructions two to five times as often. These figures describe particular models and a particular dataset. They cannot simply be transferred to Russian writing.",
+          "links": [
+            {
+              "label": "Reinhart et al., PNAS",
+              "url": "https://www.pnas.org/doi/10.1073/pnas.2422455122"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Editors also recognise patterns without counting them: inflated adjectives, identical openings, unnamed experts and rhetorical triples. Wikipedia maintains a list of such features. It is a useful editing reference, but it cannot reliably establish who or what wrote a particular passage.",
+          "links": [
+            {
+              "label": "Wikipedia: Signs of AI writing",
+              "url": "https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "To distinguish genuinely new problems from older ones, I compared these observations with journalism published between 2013 and 2016. Dmitry Kryukov's story about 3D scanners begins with a scene from a game before turning to the technology. Sultan Suleymanov's 2016 article about AI develops its argument through concrete systems and consequences. The two authors have different rhythms, and neither needs to conclude every paragraph with a general lesson. Clumsy phrasing and editorial clichés, however, existed long before generative AI.",
+          "links": [
+            {
+              "label": "Dmitry Kryukov (2013)",
+              "url": "https://www.kommersant.ru/doc/2209651"
+            },
+            {
+              "label": "Sultan Suleymanov (2016)",
+              "url": "https://meduza.io/feature/2016/06/27/skynet-ischet-koshku"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "What readers actually notice"
+        },
+        {
+          "type": "p",
+          "text": "In a study by Jenna Russell, Marzena Karpinska and Mohit Iyyer, five participants who frequently used ChatGPT for writing evaluated 300 English-language articles. Aggregating their decisions yielded only one error. This is a result for a small, experienced group, not evidence that general audiences can detect AI writing with equivalent accuracy.",
+          "links": [
+            {
+              "label": "Russell, Karpinska and Iyyer (2025)",
+              "url": "https://arxiv.org/abs/2501.15654"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "There is more direct evidence concerning trust. Sacha Altay and Fabrizio Gilardi conducted two experiments with 4,976 participants in the United States and United Kingdom. Labelling a news headline as AI-generated reduced perceived accuracy and willingness to share it, even when a human had written the headline. In the second experiment, the effect depended on how participants were told the model had been used: assistance with phrasing was perceived differently from fully automated production.",
+          "links": [
+            {
+              "label": "Altay and Gilardi (2024)",
+              "url": "https://academic.oup.com/pnasnexus/article/3/10/pgae403/7795946"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "The experiments concerned labels attached to headlines. They did not test whether recognisable prose patterns inside a long article produce the same reaction. That distinction matters here: readers may detect recurring phrases and infer authorship, but the strength of such a response remains to be studied."
+        },
+        {
+          "type": "h2",
+          "text": "A test on my own articles"
+        },
+        {
+          "type": "p",
+          "text": "I returned to the editing histories of Black October and Warhound. Across the two pieces, I identified 36 passages worth reconsidering: heavy technical language, generic questions and phrases that exaggerated their own significance. The changes concerned both writing and argumentation. Sometimes one word was enough; sometimes the passage needed to be rebuilt.",
+          "links": [
+            {
+              "label": "Black October",
+              "url": "/articles/black-october"
+            },
+            {
+              "label": "Warhound",
+              "url": "/articles/warhound"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "For this essay I selected six edits from the two articles. They range from removing a redundant final clause to rewriting an opening and tightening an evidentiary argument. Each comparison shows an earlier formulation on the left and the published version on the right. The English examples are translations of the Russian originals."
+        },
+        {
+          "type": "h3",
+          "text": "Black October: access, agents and evidence"
+        },
+        {
+          "type": "comparison",
+          "label": "BLACK OCTOBER / 001",
+          "before": "The main question is how much authority we have already delegated to AI and whether we have learned to limit that authority.",
+          "after": "We give these systems source code, production environments and secrets, then hope a prompt telling them to behave responsibly will be enough.",
+          "note": "An abstract question was replaced with the author's concrete position and specific resources at risk. The redundant ending about proper access controls was removed because the example already made the issue clear.",
+          "source": "/articles/black-october"
+        },
+        {
+          "type": "comparison",
+          "label": "BLACK OCTOBER / 001",
+          "before": "Lately I have been thinking more and more about how intelligent artificial intelligence has become. In particular, about how much access we have given it to real-world systems.",
+          "after": "Within a few days in October 2026, reports emerged about two serious PHP vulnerabilities, attacks involving AI agents, a malicious LiteLLM release and exposed secrets at Railway. All four stories concern access to code or infrastructure. The role of AI, however, is different in each case.",
+          "note": "The opening no longer reports the writer's thought process. It presents concrete events and immediately distinguishes incidents involving AI from incidents that did not.",
+          "source": "/articles/black-october"
+        },
+        {
+          "type": "comparison",
+          "label": "BLACK OCTOBER / 001",
+          "before": "Three different stories converged. AI is helping discover vulnerabilities faster. Attackers are automating intrusions with agents. Platforms and supply chains remain vulnerable with or without AI.",
+          "after": "Researchers used AI to help find the PHP flaws. In the campaigns documented by CrowdStrike, models selected actions and executed commands for attackers. LiteLLM suffered a compromised software supply chain; Railway suffered unauthorised access to secrets. The latter two incidents have not been attributed to autonomous agents.",
+          "note": "Four concrete incidents replaced an abstract three-part scheme. Editing required a new classification of the facts; otherwise the headline about agents implied a connection unsupported by the evidence.",
+          "source": "/articles/black-october"
+        },
+        {
+          "type": "h3",
+          "text": "Warhound: claims, testing and animal welfare"
+        },
+        {
+          "type": "comparison",
+          "label": "WARHOUND / 002",
+          "before": "Warhound wants to build a biobank of cell lines from elite working dogs and clone them later. It intends to edit genes first for health: inherited diseases, joints and muscles.",
+          "after": "According to Ben Lamm, the team has already collected cell samples from military working dogs for planned cloning. The first genetic interventions would target the risk of inherited diseases.",
+          "note": "The edit separates cell samples reportedly already collected from procedures merely proposed for the future. It also attributes the claim and avoids presenting an intention as an achieved result.",
+          "source": "/articles/warhound"
+        },
+        {
+          "type": "comparison",
+          "label": "WARHOUND / 002",
+          "before": "Warhound combines genetics, training and equipment in one dog. I wonder whether anyone will be able to tell which part worked.",
+          "after": "Testing the effects of genetic interventions would require controlled comparisons: animals trained under comparable programmes and followed for health outcomes. Warhound has not published that evidence.",
+          "note": "The rhetorical question becomes a verifiable requirement specifying the comparison, relevant variables and evidence that is missing. This is substantive editing, not a cosmetic change.",
+          "source": "/articles/warhound"
+        },
+        {
+          "type": "comparison",
+          "label": "WARHOUND / 002",
+          "before": "I worry even more about what will happen to the dogs themselves. Reports about completed missions will tell us little. I want to see how they live from birth until retirement.",
+          "after": "The company promises lifetime care for the animals, including after service. Evaluating that promise will require future data on injuries, health and lifespan. Those data do not yet exist.",
+          "note": "The personal reaction is recast as an evidentiary question: what the company promises and what information would allow its animal-welfare claims to be evaluated.",
+          "source": "/articles/warhound"
+        },
+        {
+          "type": "h2",
+          "text": "What the first skill version contains"
+        },
+        {
+          "type": "p",
+          "text": "I began with minimal intervention. The skill should identify a specific problem and explain why it fails. If deleting one word is enough, there is no reason to rewrite an entire paragraph. Every substantial edit should show a before-and-after comparison."
+        },
+        {
+          "type": "p",
+          "text": "The second principle is factual reliability. The model must not fabricate personal experiences, statistics, quotations or details merely to sound convincing. If the original draft lacks first-hand evidence, it should flag the gap and request clarification. Names, dates, links and direct quotations must be checked separately. If a source is wrong, the editor should show that problem to the author rather than silently repair it."
+        },
+        {
+          "type": "p",
+          "text": "A ban list of certain words cannot recreate a writer's voice. One person uses long sentences; another writes in short observations. In version 1.1, I added the option to work from voice notes and examples of the author's own writing, so the model could anchor its revisions in original material."
+        },
+        {
+          "type": "h2",
+          "text": "How to test whether the skill actually helps"
+        },
+        {
+          "type": "p",
+          "text": "Version 1.1 has two modes: editing an existing text and preparing an article from the author's notes or dictation. Neither has been independently compared with ordinary editing. A sensible experiment would ask the model to work with the same topic in several formats and preserve each draft."
+        },
+        {
+          "type": "p",
+          "text": "We would then measure editing time and factual errors. Readers could be shown the outputs without being told how they were produced and asked to assess clarity, persuasiveness and whether the prose sounds like an identifiable author. Until that trial exists, there is no basis for claiming that the skill reduces editing work or improves reader trust."
+        },
+        {
+          "type": "p",
+          "text": "The version 1.1 archive contains twelve editing techniques, instructions for working from dictation, source verification and a protocol for comparing results. After testing, the rules could be revised according to which actually save time and improve the writing."
+        },
+        {
+          "type": "resource",
+          "kit": "LEIMAN LAB KIT 001",
+          "label": "No AI Tone editing skill · v1.1 (Russian)",
+          "text": "Russian-language editorial skill for revising drafts and building articles from original notes: twelve editing techniques, source checks and a comparison protocol. Independent evaluation is still pending.",
+          "file": "leiman-lab-kit-001-human-voice.zip",
+          "format": "ZIP · RUSSIAN-LANGUAGE SKILL FOR CLAUDE / CHATGPT",
+          "note": "Documentation inside the archive is currently in Russian."
+        }
+      ],
+      "sources": [
+        {
+          "title": "Kobak et al. — Delving into LLM-assisted writing in biomedical publications through excess vocabulary (Science Advances, 2025)",
+          "url": "https://arxiv.org/abs/2406.07016",
+          "type": "CORPUS STUDY"
+        },
+        {
+          "title": "Reinhart et al. — Do LLMs write like humans? Variation in grammatical and rhetorical styles (PNAS, 2025)",
+          "url": "https://www.pnas.org/doi/10.1073/pnas.2422455122",
+          "type": "LANGUAGE RESEARCH"
+        },
+        {
+          "title": "Russell, Karpinska, Iyyer — People who frequently use ChatGPT for writing tasks are accurate and robust detectors of AI-generated text (ACL, 2025)",
+          "url": "https://arxiv.org/abs/2501.15654",
+          "type": "PERCEPTION STUDY"
+        },
+        {
+          "title": "Altay, Gilardi — People are skeptical of headlines labeled as AI-generated (PNAS Nexus, 2024)",
+          "url": "https://academic.oup.com/pnasnexus/article/3/10/pgae403/7795946",
+          "type": "EXPERIMENT"
+        },
+        {
+          "title": "Wikipedia — Signs of AI writing",
+          "url": "https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing",
+          "type": "EDITORIAL REFERENCE"
+        },
+        {
+          "title": "Dmitry Kryukov — Three-Dimensional Ascent, Sekret Firmy (2013)",
+          "url": "https://www.kommersant.ru/doc/2209651",
+          "type": "HISTORICAL JOURNALISM"
+        },
+        {
+          "title": "Sultan Suleymanov — Skynet Searches for a Cat, Meduza (2016)",
+          "url": "https://meduza.io/feature/2016/06/27/skynet-ischet-koshku",
+          "type": "HISTORICAL JOURNALISM"
+        },
+        {
+          "title": "Nora Gal — The Living and the Dead Word",
+          "url": "https://azbyka.ru/deti/slovo-zhivoe-i-mertvoe-nora-gal?print=1",
+          "type": "EDITORIAL PRACTICE"
+        },
+        {
+          "title": "Ilya Birman — Present in Simple Words",
+          "url": "https://ilyabirman.ru/meanwhile/all/prezentuyte-prostymi-slovami/",
+          "type": "EDITORIAL PRACTICE"
+        },
+        {
+          "title": "Maxim Ilyakhov — Signs of AI Writing, Gorbunov Bureau (2026)",
+          "url": "https://bureau.ru/soviet/20260816/",
+          "type": "EDITORIAL PRACTICE"
+        }
+      ],
+      "sourceNote": "English excerpts are translations of Russian editing examples. The downloadable skill is currently in Russian. Findings from particular studies should not be used to claim that all AI-written passages can be detected reliably."
+    }
+  }
 }
