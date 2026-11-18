@@ -28,7 +28,7 @@ const programDefaults = [
   { id:'prediction-replication', title:'Prediction OS: независимая проверка', status:'design', purpose:'Зафиксировать протокол и провести независимую репликацию гипотез на допустимых данных.', milestones:['Пререгистрация гипотез', 'Проверка доступа и этики данных', 'Слепой анализ', 'Публикация всех исходов'] },
   { id:'ai-index-benchmark', title:'AI Index: воспроизводимые тесты', status:'design', purpose:'Подготовить стандартизированный протокол сравнения моделей и задокументировать реальные затраты.', milestones:['Протокол и сценарии', 'Раскрытие версий и параметров', 'Независимые запуски', 'Открытый отчёт'] }
 ];
-const fresh = () => ({ schema:1, created:ISO(), members:[], proposals:[], comments:[], decisions:[], programs:programDefaults, treasury:[], legalStatus:'not-incorporated', daoStatus:'not-activated' });
+const fresh = () => ({ schema:1, created:ISO(), members:[], proposals:[], comments:[], decisions:[], programs:programDefaults, treasury:[], evidence:[], legalStatus:'not-incorporated', daoStatus:'not-activated' });
 
 export function createCommons(dataDir) {
   const file = path.join(dataDir, 'commons', 'state.json');
@@ -42,6 +42,7 @@ export function createCommons(dataDir) {
       throw new Error('Commons state corrupted; refusing to overwrite ' + file + ': ' + err.message);
     }
   }
+  state.evidence ||= [];
   const persist = () => {
     mkdirSync(path.dirname(file), { recursive:true });
     if (existsSync(file)) copyFileSync(file, file + '.bak');
@@ -73,7 +74,9 @@ export function createCommons(dataDir) {
       decisionId:p.decisionId || null
     })),
     decisions:state.decisions,
-    treasury:state.treasury
+    treasury:state.treasury,
+    evidence:state.evidence,
+    pilotMetrics:{ activeMembers:state.members.filter(m=>m.status==='active').length, publicProposals:state.proposals.filter(published).length, decisions:state.decisions.length, completedPrograms:state.programs.filter(p=>p.status==='completed').length, documentedOutputs:state.evidence.length, independentReplications:state.evidence.filter(x=>x.kind==='replication').length }
   });
   const adminState = () => ({
     ...publicState(),
@@ -170,6 +173,17 @@ export function createCommons(dataDir) {
       const d={id:id(),proposalId:p.id,title:p.title,decision:body.status,rationale,quorumMet:quorum,advisoryTally:tally,date:ISO(),governingBody:'pilot-steward'};
       p.decisionId=d.id;p.status=body.status;p.updated=ISO();state.decisions.push(d);persist();
       return {code:200,data:{decision:d}};
+    }
+    if (route === '/api/admin/commons/evidence' && req.method === 'POST') {
+      requireAdmin(authorized);
+      if(!['replication','study','protocol','correction','negative-result'].includes(body.kind)) throw new CommonsError('Некорректная категория результата');
+      if(!program(body.programId)) throw new CommonsError('Программа не найдена');
+      const title=textField(body.title,180);
+      const url=textField(body.url,400);
+      let parsed;try{parsed=new URL(url);}catch{throw new CommonsError('Нужна проверяемая ссылка на результат');}
+      if(parsed.protocol!=='https:' || parsed.username || parsed.password)throw new CommonsError('Только HTTPS-ссылки без учётных данных');
+      const evidence={id:id(),programId:body.programId,title,kind:body.kind,url,recorded:ISO(),verifiedBy:'pilot-steward',note:'Зарегистрированный публичный результат; методологическая экспертиза оценивается отдельно'};
+      state.evidence.push(evidence);persist();return {code:201,data:{evidence}};
     }
     if (route === '/api/admin/commons/programs' && req.method === 'POST') {
       requireAdmin(authorized);
