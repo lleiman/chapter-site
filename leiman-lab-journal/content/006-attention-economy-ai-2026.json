@@ -382,5 +382,386 @@
   "sourceNote": "Attention Capital Framework и 90-дневный гайд — аналитическая модель Leiman Lab, а не валидированная шкала. Источники сверены 6 ноября 2026 года; экспериментальные эффекты не следует автоматически переносить на другие аудитории.",
   "cover": "/assets/attention-economy-cover.svg",
   "headline": "Кому принадлежит внимание?",
-  "updated": "2026-11-06"
+  "updated": "2026-11-06",
+  "translations": {
+    "en": {
+      "title": "Who Owns Attention? Media Economics in the Age of AI",
+      "headline": "Who Owns Attention?",
+      "cardTitle": "Attention Economics in the Age of AI",
+      "summary": "Research from 2025–2026 on the attention economy, creator earnings, generative advertising and online social quality, with a 90-day practical guide.",
+      "deck": "Content production is getting cheaper, but creator earnings remain unequal and views do not guarantee trust or revenue. What does the evidence actually support?",
+      "description": "How AI changes the attention economy: research on creator income concentration, generative ads, audience retention, trust and a practical 90-day media plan.",
+      "section": "RESEARCH / ECONOMICS & ATTENTION",
+      "tags": [
+        "Attention economy",
+        "Creator economy",
+        "Generative advertising",
+        "AI production",
+        "Audience retention",
+        "Digital media"
+      ],
+      "readingMinutes": 17,
+      "paragraphs": [
+        {
+          "type": "lead",
+          "text": "I work in AI production and can see production costs changing. Tasks that once required a dedicated shoot or hours of post-production can sometimes be completed through a handful of generations. Yet making a video says nothing about whether people will see it, return for more, or generate revenue."
+        },
+        {
+          "type": "p",
+          "text": "I reviewed 2025–2026 research on attention economics, creator income, viewing psychology and generative advertising. This article separates measured findings from hypotheses and considers why inexpensive production can coexist with costly access to audiences. It concludes with a 90-day operating guide for creators, media teams and studios."
+        },
+        {
+          "type": "h2",
+          "text": "01 / Attention is more complex than minutes watched"
+        },
+        {
+          "type": "p",
+          "text": "In The Economics of Attention, published in the Journal of Economic Literature in September 2025, George Loewenstein and Zachary Wojtowicz examine attention in economic decisions, boredom, curiosity and the external effects of digital technologies. Their account is considerably richer than the familiar notion of a fixed pool of spare minutes.",
+          "links": [
+            {
+              "label": "Loewenstein & Wojtowicz (2025)",
+              "url": "https://doi.org/10.1257/jel.20241665"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "In Philosophical Psychology, Jelle Bruineberg critically examines the cognitive assumptions behind conventional models of the attention economy. Attention should not automatically be treated as one resource that gets consumed by incoming messages: context, activity and the relevance of an event also matter.",
+          "links": [
+            {
+              "label": "Bruineberg, Rethinking the Cognitive Foundations of the Attention Economy",
+              "url": "https://doi.org/10.1080/09515089.2025.2502428"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "For media, the practical implication is that thirty seconds of viewing can reflect curiosity, habit, irritation or accidental autoplay. One metric does not disclose the meaning of the behaviour. Reach is convenient for reporting, but insufficient to assess the relationship with an audience."
+        },
+        {
+          "type": "h2",
+          "text": "02 / Why easier production does not equalise earnings"
+        },
+        {
+          "type": "p",
+          "text": "In 2026, Ilan Strauss, Yanho Yang and Mariana Mazzucato published an analysis in Industrial and Corporate Change of income associated with 104,719 content creators on major platforms, using Patreon data snapshots from 2018, 2021 and 2024. The income distribution had a heavy tail, approximately corresponding to a Pareto parameter of α≈2. This indicates substantial concentration among top earners.",
+          "links": [
+            {
+              "label": "Strauss, Yang & Mazzucato (2026), рецензируемая статья",
+              "url": "https://doi.org/10.1093/icc/dtag044"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "The study finds that platforms with more concentrated incomes leave the middle segment of creators with less. But α≈2 does not mean only two percent of creators earn money. It is a parameter of a statistical distribution, not the share of successful influencers."
+        },
+        {
+          "type": "p",
+          "text": "One limitation matters: Patreon represents only part of a creator's income. Advertising, partnerships, licensing and merchandise can be paid elsewhere. The authors discuss recommendation algorithms as one possible driver of concentration, while also noting audience willingness to pay and conversion rates. These data cannot isolate the causal contribution of each algorithm."
+        },
+        {
+          "type": "p",
+          "text": "Another study of YouTube channels in Germany, Austria and Switzerland reports a Gini coefficient of 0.89 for estimated creator earnings. It examines a different market with a different method, so its figures cannot simply be combined with the Patreon study. Both nevertheless challenge the claim that new production tools automatically produce a stable middle class of creators.",
+          "links": [
+            {
+              "label": "Working on an algorithm-controlled platform as a content creator (2026)",
+              "url": "https://doi.org/10.1162/EUSO.a.42"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "03 / Cheap content and effective content are different things"
+        },
+        {
+          "type": "p",
+          "text": "Fast generation lowers the cost of making variants. Professional cost, however, includes rejected outputs, revisions, briefing, legal checks, client approval and human working time. A clip that cost one dollar to generate did not necessarily cost one dollar to produce."
+        },
+        {
+          "type": "p",
+          "text": "Hartmann, Exner and Domdey compared more than 10,000 generated marketing images with human-made work, collecting 254,400 evaluations. Their results indicate that model-generated images can compete in perceived quality, realism and aesthetics. Visual appeal and commercial outcomes are still separate variables.",
+          "links": [
+            {
+              "label": "Hartmann, Exner & Domdey, International Journal of Research in Marketing",
+              "url": "https://doi.org/10.1016/j.ijresmar.2024.09.002"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Lee, Todri, Adamopoulos and Ghose studied professionally designed ads, AI edits of existing ads and wholly AI-created advertisements. In their field tests, fully generated variants improved click-through rate by as much as 19% relative to controls, while straightforward AI edits of existing advertisements did not show a consistent advantage.",
+          "links": [
+            {
+              "label": "Lee et al., The Impact of Visual Generative AI on Advertising Effectiveness (препринт)",
+              "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5638311"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "The 'up to 19%' result comes from particular test conditions. It does not mean all AI advertising raises sales by 19%: CTR counts clicks, not profit. This distinction matters when a studio promises business outcomes while controlling only some of the relevant factors."
+        },
+        {
+          "type": "p",
+          "text": "A Marketing Science study of personalised generative-AI video advertising reported a 6–9 percentage-point engagement increase over two control conditions in a mobile campaign for one direct-to-consumer brand. The experiment supports the possibility of effective personalisation, not a universal effect across products and audiences.",
+          "links": [
+            {
+              "label": "Generative AI and Personalized Video Advertisements, Marketing Science",
+              "url": "https://doi.org/10.1287/mksc.2023.0494"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "04 / When greater activity produces a worse environment"
+        },
+        {
+          "type": "p",
+          "text": "A Scientific Reports experiment with 680 US residents compared different AI assistance mechanisms within social conversations. Some tools raised activity and publishing volume while reducing participants' perceived quality and authenticity of the exchange. Negative effects were also observed for other people in the discussion.",
+          "links": [
+            {
+              "label": "Møller et al., The Impact of Generative AI on Social Media: An Experimental Study (2026)",
+              "url": "https://doi.org/10.1038/s41598-026-40110-8"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "The study concerns conversational platforms rather than short-form video directly. It nonetheless reveals a potential editorial trap: posting activity can rise while audience experience declines. Consistency alone is not evidence of value."
+        },
+        {
+          "type": "h2",
+          "text": "05 / Who controls access to the viewer?"
+        },
+        {
+          "type": "p",
+          "text": "A creator on a social network has content, followers and analytics, but distribution remains controlled by a third-party platform. Recommendations may bring tens of thousands of unfamiliar viewers one day and stop doing so the next. Following an account is therefore not the same as guaranteeing that person's attention."
+        },
+        {
+          "type": "p",
+          "text": "I distinguish three layers. Borrowed reach comes from recommendations, ads and search. Returning audiences seek out a creator's next work themselves. Directly managed relationships arise through opt-in newsletters, a website, a paid product or a customer base. Even this last layer depends on infrastructure, but it reduces reliance on one algorithmic feed."
+        },
+        {
+          "type": "p",
+          "text": "Owning a domain does not make a publisher independent of Google, just as a newsletter does not guarantee a 100% open rate. The difference is that you have more room to measure and build long-term relationships outside the interface of a single platform."
+        },
+        {
+          "type": "h2",
+          "text": "06 / What an AI studio is worth now"
+        },
+        {
+          "type": "p",
+          "text": "When clients can make a satisfactory illustration themselves, simple image generation faces price pressure. The value of direction, editing, visual coherence and quality control does not disappear. Businesses need materials suited to a concrete problem, not an unlimited supply of images."
+        },
+        {
+          "type": "p",
+          "text": "Contracts should separate production, research and ongoing operations. Production delivers the asset; research compares options under comparable conditions; operations provide a recurring system for improvement and measurement. A studio should accept responsibility for sales only to the extent that it controls the product, budget, distribution channel and measurement."
+        },
+        {
+          "type": "h2",
+          "text": "07 / When AI mediates the customer's choice"
+        },
+        {
+          "type": "p",
+          "text": "A generative assistant can influence a purchasing decision even if no separate advertising banner appears. Qiu and Mei distinguish several levels: explicit product mentions, how information is framed, the direction of a suggested action and possible long-term shifts in preferences. Their work proposes a conceptual framework for transparency, not evidence that all these mechanisms have been deployed at scale.",
+          "links": [
+            {
+              "label": "Qiu & Mei, Generative AI Advertising as a Problem of Trustworthy Commercial Intervention",
+              "url": "https://arxiv.org/abs/2605.18673"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "In experimental work by Meguellati and colleagues, LLM-written ads performed comparably to human-written messages when personalised for personality traits. In a second part of the study, participants preferred AI messages in tests of certain persuasive techniques. These experiments measure preferences, not long-term trust or actual purchases.",
+          "links": [
+            {
+              "label": "Meguellati et al., LLM-Generated Ads (2025)",
+              "url": "https://arxiv.org/abs/2512.03373"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "08 / The Leiman Lab model: five states of attention"
+        },
+        {
+          "type": "p",
+          "text": "To avoid collapsing views, interest and money into one metric, I use a working Attention Capital Framework. It is my analytical structure for designing measurements, not a scientifically validated scale. Its five stages help formulate more useful questions for media projects."
+        },
+        {
+          "type": "h3",
+          "text": "Acquisition"
+        },
+        {
+          "type": "p",
+          "text": "How many relevant people encountered the material? Record impressions, video starts and the source of first contact. Compare metrics only when a platform defines them consistently."
+        },
+        {
+          "type": "h3",
+          "text": "Retention"
+        },
+        {
+          "type": "p",
+          "text": "Did people remain long enough to grasp the material? Examine retention, completion, reading depth and saves. A high value still does not prove a positive experience."
+        },
+        {
+          "type": "h3",
+          "text": "Return"
+        },
+        {
+          "type": "p",
+          "text": "Does a person actively seek a continuation? Track return visits, consensual subscriptions and repeat engagement with recurring series or tools. Measurement must not become covert tracking."
+        },
+        {
+          "type": "h3",
+          "text": "Trust"
+        },
+        {
+          "type": "p",
+          "text": "Would someone use the material to make a decision? The quality of feedback, unsolicited recommendations and factual accuracy matter more than likes alone. There is no universal numeric measure of trust."
+        },
+        {
+          "type": "h3",
+          "text": "Action"
+        },
+        {
+          "type": "p",
+          "text": "Did an action meaningful to the project follow: an enquiry, service subscription, purchase, partnership or research participation? Define the intended outcome before publication rather than selecting the nicest number afterwards."
+        },
+        {
+          "type": "aside",
+          "label": "LEIMAN LAB HYPOTHESIS",
+          "text": "As production costs fall, competitive advantage may move toward those who give audiences a reason to return and can measure economic outcomes. This is a hypothesis to test, not an established law."
+        },
+        {
+          "type": "h2",
+          "text": "09 / A practical 90-day plan"
+        },
+        {
+          "type": "h3",
+          "text": "Days 1–15 / Define the audience and economic objective"
+        },
+        {
+          "type": "p",
+          "text": "Describe a specific reader or viewer, their recurring need and the reason they might return. Choose one desired outcome: purchase, subscription, enquiry or participation. State real constraints, including budget, publishing frequency and available channels."
+        },
+        {
+          "type": "h3",
+          "text": "Days 16–30 / Publish a connected series"
+        },
+        {
+          "type": "p",
+          "text": "Produce eight to twelve pieces in two or three formats. For each, record the hypothesis and the costs of research, generation, editing, production and distribution. Comparing alternatives within one genre is more useful than mixing ten unrelated topics."
+        },
+        {
+          "type": "h3",
+          "text": "Days 31–45 / Examine initial reactions"
+        },
+        {
+          "type": "p",
+          "text": "Measure the opening seconds, watch or reading depth, clicks and saves. Try to compare variants before similar audiences and without major differences in paid distribution. Observational results are not evidence of causation."
+        },
+        {
+          "type": "h3",
+          "text": "Days 46–60 / Build a reason to return"
+        },
+        {
+          "type": "p",
+          "text": "Offer a continuation: the next part of a study, an updated ranking, a tool, a reliable publishing calendar or a curated digest. Create an opt-in point of contact on your own website or newsletter."
+        },
+        {
+          "type": "h3",
+          "text": "Days 61–75 / Test commercial action"
+        },
+        {
+          "type": "p",
+          "text": "Make one meaningful offer. Measure qualified clicks, enquiries, sales and cash actually received. Track production and distribution costs separately. If nothing converts, inspect the sample size and quality before rejecting the entire idea."
+        },
+        {
+          "type": "h3",
+          "text": "Days 76–90 / Review the evidence"
+        },
+        {
+          "type": "p",
+          "text": "Compare reach, retention, return behaviour and revenue. Identify what repeats reliably, what depends on a random viral event and which channel creates the greatest dependence on external rules. Design the next series using outcomes you genuinely measured."
+        },
+        {
+          "type": "h3",
+          "text": "Minimum measurement dataset"
+        },
+        {
+          "type": "p",
+          "text": "Date, topic, format, intended audience, labour hours, tool costs, distribution expenses, impressions, views, retention, return visits, clicks, enquiries, sales and traffic source. Such a table is more valuable than a generic leaderboard of 'most viral creatives'."
+        },
+        {
+          "type": "h2",
+          "text": "10 / What the evidence supports"
+        },
+        {
+          "type": "p",
+          "text": "Evidence suggests that attention cannot be reduced to watch time; creator earnings are heavily unequal; generative advertising can outperform alternatives in specific conditions; and more AI-generated activity can sometimes worsen the social environment. These findings come from different methods and populations and cannot be collapsed into one causal formula."
+        },
+        {
+          "type": "p",
+          "text": "It is not established that content production will stop being paid or that owning a mailing list will automatically generate revenue. From my perspective as a producer, however, the direction is clear: define a meaningful objective, manage production, collect credible evidence and give the audience a reason to return. Generation is increasingly one stage in a larger system."
+        }
+      ],
+      "sources": [
+        {
+          "title": "Loewenstein & Wojtowicz — The Economics of Attention (2025)",
+          "url": "https://doi.org/10.1257/jel.20241665",
+          "type": "REVIEW"
+        },
+        {
+          "title": "Bruineberg — Rethinking the Cognitive Foundations of the Attention Economy",
+          "url": "https://doi.org/10.1080/09515089.2025.2502428",
+          "type": "RESEARCH ARTICLE"
+        },
+        {
+          "title": "Strauss, Yang & Mazzucato — Rich-get-richer? (2026)",
+          "url": "https://doi.org/10.1093/icc/dtag044",
+          "type": "PEER-REVIEWED ARTICLE"
+        },
+        {
+          "title": "Working on an algorithm-controlled platform as a content creator (2026)",
+          "url": "https://doi.org/10.1162/EUSO.a.42",
+          "type": "PEER-REVIEWED STUDY"
+        },
+        {
+          "title": "Hartmann, Exner & Domdey — The Power of Generative Marketing (2025)",
+          "url": "https://doi.org/10.1016/j.ijresmar.2024.09.002",
+          "type": "PEER-REVIEWED ARTICLE"
+        },
+        {
+          "title": "Lee et al. — The Impact of Visual Generative AI on Advertising Effectiveness (2025)",
+          "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5638311",
+          "type": "PREPRINT"
+        },
+        {
+          "title": "Generative AI and Personalized Video Advertisements (2025)",
+          "url": "https://doi.org/10.1287/mksc.2023.0494",
+          "type": "FIELD EXPERIMENT"
+        },
+        {
+          "title": "Møller et al. — The Impact of Generative AI on Social Media (2026)",
+          "url": "https://doi.org/10.1038/s41598-026-40110-8",
+          "type": "RANDOMISED EXPERIMENT"
+        },
+        {
+          "title": "Meguellati et al. — LLM-Generated Ads (2025)",
+          "url": "https://arxiv.org/abs/2512.03373",
+          "type": "PREPRINT"
+        },
+        {
+          "title": "Qiu & Mei — Generative AI Advertising as a Problem of Trustworthy Commercial Intervention (2026)",
+          "url": "https://arxiv.org/abs/2605.18673",
+          "type": "CONCEPTUAL PREPRINT"
+        }
+      ],
+      "sourcesLabel": "RESEARCH / REFERENCES",
+      "sourceNote": "Research snapshot: November 2026. The Attention Capital Framework is an editorial model, not a validated psychometric measure. Findings from different samples and study designs should not be conflated."
+    }
+  }
 }
