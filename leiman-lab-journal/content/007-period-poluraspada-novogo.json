@@ -320,5 +320,317 @@
       "date": "2026-11-07",
       "text": "Уточнены выводы исследований об ИИ и творчестве, эффекте редизайна для разных групп аудитории и ритме изменений; расширена методологическая часть и обновлено поисковое описание."
     }
-  ]
+  ],
+  "translations": {
+    "en": {
+      "title": "The Half-Life of Novelty: When Should a Brand Redesign?",
+      "headline": "The Half-Life of Novelty",
+      "cardTitle": "The Half-Life of Novelty",
+      "summary": "Why new visual forms become familiar, when a redesign harms recognition, and how to choose a rhythm of change. Eight studies and a practical framework.",
+      "deck": "How AI affects idea diversity, why loyal and new customers react differently to redesign, and what should remain stable in a brand. Eight academic sources and a decision framework.",
+      "description": "Research on design obsolescence, AI creativity, brand recognition and redesign strategy, with eight scientific papers and a practical framework for managing change.",
+      "section": "RESEARCH / CULTURE & DESIGN",
+      "tags": [
+        "Design strategy",
+        "Brand identity",
+        "AI creativity",
+        "Cultural acceleration",
+        "Redesign",
+        "Organisational change"
+      ],
+      "readingMinutes": 15,
+      "paragraphs": [
+        {
+          "type": "lead",
+          "text": "In AI production I can see how quickly a technique that recently required dedicated production can now be reproduced: a visual style, an editing transition or a camera move. But faster imitation does not mean design stops working. Companies face a difficult choice: update their expression as culture shifts, or protect recognisable elements that already create value."
+        },
+        {
+          "type": "p",
+          "text": "I compared eight scientific papers on cultural dynamics, generative creativity, organisational identity, reactions to redesign and the rhythm of strategic change. They study different phenomena. None demonstrates that every design now becomes obsolete faster. Together, they help distinguish the loss of novelty from the loss of usefulness. The article ends with a practical decision protocol for brands, digital products and media."
+        },
+        {
+          "type": "h2",
+          "text": "01 / Cultural speed can be measured, but not with one number"
+        },
+        {
+          "type": "p",
+          "text": "In 2019, Lukas Schneider and Claudius Gros analysed half a century of album charts from the United States, United Kingdom, Germany and the Netherlands. On some markets, albums that eventually reached number one previously took weeks to get there; in later years, they often debuted at the top. Time spent in charts and the rate of positional turnover also changed. The authors interpreted these patterns as acceleration in certain cultural processes.",
+          "links": [
+            {
+              "label": "Schneider & Gros (2019), Royal Society Open Science",
+              "url": "https://doi.org/10.1098/rsos.190944"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "This example is important but narrow. Music-chart rankings do not measure the lifespan of a design decision, and chart methodologies have changed over time. Faster circulation, diminished perceived novelty and loss of practical usefulness are three distinct events. We should not confuse them."
+        },
+        {
+          "type": "aside",
+          "label": "THREE CLOCKS OF NOVELTY",
+          "text": "The first clock measures how widely a technique spreads. The second tracks audience habituation. The third concerns whether the technique continues to be useful. They can move at different speeds."
+        },
+        {
+          "type": "h2",
+          "text": "02 / AI can improve individual output while making the collection more uniform"
+        },
+        {
+          "type": "p",
+          "text": "In an experiment by Anil Doshi and Oliver Hauser, 293 participants wrote short stories that were then evaluated by 600 other participants. Some authors received ideas from a language model. AI suggestions increased ratings for creativity, writing quality and enjoyment, particularly among less creative participants. At the same time, AI-assisted stories became more similar to one another. The researchers identified causal effects of suggestions in a specific writing task: an individual benefit may coexist with less diversity across the full set of work.",
+          "links": [
+            {
+              "label": "Doshi & Hauser (2024), Science Advances",
+              "url": "https://doi.org/10.1126/sciadv.adn5290"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "This effect was not measured on logos or interfaces. For creative industries, it suggests a testable question: can improving individual outputs with the same models reduce the distinctiveness of an entire category? If so, advantage may depend less on access to generation and more on an independent working method and consistent creative decisions."
+        },
+        {
+          "type": "p",
+          "text": "In Nature, Michael Park, Erin Leahey and Russell Funk analysed 45 million research papers and 3.9 million patents across six decades. Their CD index uses citation patterns to assess how much new work redirects future research. Disruptiveness declined. Both the measure and its interpretation have limitations, and science is not visual fashion. Still, the study provides a counterpoint: faster circulation of cultural forms does not necessarily produce more substantial breakthroughs.",
+          "links": [
+            {
+              "label": "Park, Leahey & Funk (2023), Nature",
+              "url": "https://doi.org/10.1038/s41586-022-05543-x"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "03 / Identity can adapt"
+        },
+        {
+          "type": "p",
+          "text": "In 2000, Dennis Gioia, Majken Schultz and Kevin Corley introduced the idea of adaptive instability. They described organisational identity as relatively fluid: a firm's understanding of itself shifts in interaction with how outside audiences perceive it. This is a theoretical model, not proof that every change is beneficial.",
+          "links": [
+            {
+              "label": "Gioia, Schultz & Corley (2000), Academy of Management Review",
+              "url": "https://doi.org/10.5465/amr.2000.2791603"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "A journal makes the distinction tangible. Its sections, technologies, formats and even previously held conclusions may change. Meanwhile, its methods of fact-checking and willingness to revise findings can remain recognisable. Continuity can reside in how an organisation works and the record of its decisions."
+        },
+        {
+          "type": "p",
+          "text": "In psychology, Dan McAdams and Kate McLean describe narrative identity as an evolving story linking the past with an imagined future. It is a useful parallel, not direct evidence for branding: a person and an organisation are different systems.",
+          "links": [
+            {
+              "label": "McAdams & McLean (2013), Current Directions in Psychological Science",
+              "url": "https://doi.org/10.1177/0963721413475622"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "04 / The cost of redesign: why loyal users resist"
+        },
+        {
+          "type": "p",
+          "text": "In a field experiment with 632 participants, Michael Walsh, Karen Winterich and Vikas Mittal studied reactions to changes in the shape of Adidas and New Balance logos, including greater roundness. Highly committed customers reacted more negatively, while less committed people responded more positively. The study examined how brand attachment affects redesign perception; it did not establish the economic effect of every redesign.",
+          "links": [
+            {
+              "label": "Walsh, Winterich & Mittal (2010), Journal of Product & Brand Management",
+              "url": "https://doi.org/10.1108/10610421011033421"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "The practical lesson is that asking the audience whether they like a new logo and taking the average is insufficient. Loyal customers and people with weaker relationships to the brand should be analysed separately. A change that attracts newcomers can weaken relationships with existing users."
+        },
+        {
+          "type": "p",
+          "text": "Recognition accumulates value through audience memory, learned user habits and familiar product cues. Stability does not guarantee success either. Walsh's findings show that reactions can move in opposite directions across segments. Redesign decisions therefore need an explicit goal and audience analysis, not merely the design team's taste."
+        },
+        {
+          "type": "h2",
+          "text": "05 / The most useful variable may be rhythm"
+        },
+        {
+          "type": "p",
+          "text": "Patricia Klarner and Sebastian Raisch examined strategic changes at 67 European insurance companies from 1995 to 2004. Within their sample, regular rhythms of change were associated with better organisational outcomes than irregular changes. Frequency and rhythm had distinct relationships with performance. This is an industry-specific observational study, not an experiment establishing a universal redesign calendar.",
+          "links": [
+            {
+              "label": "Klarner & Raisch (2012), Academy of Management Journal",
+              "url": "https://doi.org/10.5465/amj.2010.0767"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Nothing here justifies a rule such as 'redesign every three months'. One industry in one historical period cannot set a timetable for all brands. It does show that maximum speed and a deliberately managed rhythm are different things."
+        },
+        {
+          "type": "p",
+          "text": "In 1991, James March explained why organisations need to balance exploration, the search for new possibilities, with exploitation, the improvement of what already works. Focusing entirely on exploitation may support short-term efficiency while creating future fragility. Endless exploration consumes resources needed for ongoing work.",
+          "links": [
+            {
+              "label": "March (1991), Organization Science",
+              "url": "https://doi.org/10.1287/orsc.2.1.71"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "06 / An architecture of continuity"
+        },
+        {
+          "type": "p",
+          "text": "The papers describe opposing forces. Recognisable design accumulates value but can cease to meet new needs. Experiments create possibilities but cost resources and can reduce distinctiveness. I therefore propose a Leiman Lab working framework: an architecture of continuity that separates stable elements, changeable elements and the reasons to revisit them. This is a conceptual synthesis, not an empirically validated method."
+        },
+        {
+          "type": "h3",
+          "text": "Invariants"
+        },
+        {
+          "type": "p",
+          "text": "What should the audience still recognise one year from now? For a brand, perhaps a composition logic; for a product, dependable completion of its core task; for a publication, the research method; for a team, its obligations and quality standards. Invariants should be supported by evidence, not treated as sacred out of habit."
+        },
+        {
+          "type": "h3",
+          "text": "Variables"
+        },
+        {
+          "type": "p",
+          "text": "What can change without destroying accumulated value? Presentation formats, visual variations, distribution channels, production tools and particular interaction patterns. Different components should be updated at different speeds."
+        },
+        {
+          "type": "h3",
+          "text": "Rules for transformation"
+        },
+        {
+          "type": "p",
+          "text": "What signal should trigger change? Declining task success, changing needs, reduced distinctiveness, new technical constraints or a controlled experiment. The mere existence of a new trend is not a sufficient trigger."
+        },
+        {
+          "type": "aside",
+          "label": "LEIMAN LAB PRINCIPLE",
+          "text": "The number of changes is not a measure of progress. Progress means preserving valuable relationships while improving outcomes."
+        },
+        {
+          "type": "h2",
+          "text": "07 / Can we measure the half-life of novelty?"
+        },
+        {
+          "type": "p",
+          "text": "For future research, I propose three measures. The half-life of perceived novelty: the time until the share of people who describe a design as new falls by half. The half-life of distinctiveness: the time until correct recognition against alternatives falls by half. The half-life of functional relevance: the time until a predefined measure of usefulness falls by half. These are proposed operational definitions, not established universal standards."
+        },
+        {
+          "type": "p",
+          "text": "Real estimates would require repeated measurements among comparable audiences and attention to confounding factors. The key possibility is that the three periods differ: a style may feel familiar but still work extremely well, while an interface may look fresh but make tasks more difficult."
+        },
+        {
+          "type": "h2",
+          "text": "08 / A practical protocol: what to change now"
+        },
+        {
+          "type": "h3",
+          "text": "Step 1 / Identify the value"
+        },
+        {
+          "type": "p",
+          "text": "State why people return. Separately document the cues by which they recognise you and the actual indicators of success. For a publication, these might be completed reads and repeat visits; for a digital product, task completion and retention; for a brand, correct attribution and trust."
+        },
+        {
+          "type": "h3",
+          "text": "Step 2 / Set different speeds for different layers"
+        },
+        {
+          "type": "p",
+          "text": "Do not refresh everything at once. Preserve a stable core, update working formats according to evidence and reserve limited room for bold experiments. This reduces the risk of losing recognition and functionality simultaneously."
+        },
+        {
+          "type": "h3",
+          "text": "Step 3 / Define the condition for reconsideration"
+        },
+        {
+          "type": "p",
+          "text": "Before making a change, document the expected effect, the cost of failure and the risk to different audience segments. When redesigning a logo, separately study loyal and new customers: Walsh's research shows why an average score may hide opposite responses. 'It needs to feel fresh' is almost impossible to test."
+        },
+        {
+          "type": "h3",
+          "text": "Step 4 / Test memory, not just immediate reaction"
+        },
+        {
+          "type": "p",
+          "text": "Compare more than clicks and initial ratings. Look at delayed recognition, repeat visits, interaction errors and stable associations. A positive reaction today does not guarantee better results six months later."
+        },
+        {
+          "type": "h3",
+          "text": "Step 5 / Preserve a history of changes"
+        },
+        {
+          "type": "p",
+          "text": "Record what changed, why it changed and what happened next. Over time, those records become an internal evidence base for choosing an adaptation rhythm without chasing every fashionable technique."
+        },
+        {
+          "type": "h2",
+          "text": "09 / What remains unknown"
+        },
+        {
+          "type": "p",
+          "text": "None of the eight papers measures a universal design lifespan. Music charts, AI-assisted writing experiments, responses to sporting-goods logos and strategic changes in insurance companies examine different phenomena. They cannot be combined into a single rate at which visual design becomes obsolete. The proposed half-lives would require independent longitudinal measurements among comparable audiences."
+        },
+        {
+          "type": "p",
+          "text": "Taken together, the evidence supports a more cautious view: long-term resilience can be designed as the ability to change selected parts while preserving necessary relationships. Such a system has memory, a characteristic rhythm and reasons for altering course."
+        },
+        {
+          "type": "p",
+          "text": "My practical conclusion from working on AI products and production is that the most valuable design decision in the near future may be understanding which part of an existing system should be left alone."
+        }
+      ],
+      "sources": [
+        {
+          "title": "Schneider & Gros (2019), Royal Society Open Science",
+          "url": "https://doi.org/10.1098/rsos.190944",
+          "type": "MUSIC CHART ANALYSIS"
+        },
+        {
+          "title": "Doshi & Hauser (2024), Science Advances",
+          "url": "https://doi.org/10.1126/sciadv.adn5290",
+          "type": "RANDOMISED EXPERIMENT"
+        },
+        {
+          "title": "Gioia, Schultz & Corley (2000), Academy of Management Review",
+          "url": "https://doi.org/10.5465/amr.2000.2791603",
+          "type": "THEORETICAL ARTICLE"
+        },
+        {
+          "title": "Klarner & Raisch (2012), Academy of Management Journal",
+          "url": "https://doi.org/10.5465/amj.2010.0767",
+          "type": "67-COMPANY STUDY"
+        },
+        {
+          "title": "March (1991), Organization Science",
+          "url": "https://doi.org/10.1287/orsc.2.1.71",
+          "type": "ORGANISATIONAL LEARNING THEORY"
+        },
+        {
+          "title": "Walsh, Winterich & Mittal (2010), Journal of Product & Brand Management",
+          "url": "https://doi.org/10.1108/10610421011033421",
+          "type": "FIELD EXPERIMENT"
+        },
+        {
+          "title": "Park, Leahey & Funk (2023), Nature",
+          "url": "https://doi.org/10.1038/s41586-022-05543-x",
+          "type": "BIBLIOMETRIC ANALYSIS"
+        },
+        {
+          "title": "McAdams & McLean (2013), Current Directions in Psychological Science",
+          "url": "https://doi.org/10.1177/0963721413475622",
+          "type": "SCIENTIFIC REVIEW"
+        }
+      ],
+      "sourcesLabel": "RESEARCH / REFERENCES",
+      "sourceNote": "Eight distinct studies inform this discussion. None validates a universal design half-life. The continuity architecture and proposed half-life measures are Leiman Lab working hypotheses."
+    }
+  }
 }
