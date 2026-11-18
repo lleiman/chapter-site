@@ -87,5 +87,10 @@ export function createOpportunityIntake(dataDir) {
       try {const row=read(f.slice(0,-5));delete row.deletionHash;return row;}catch{return null;}
     }).filter(Boolean).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
   }
+  // Deletion does not depend on future submissions or an admin opening the dashboard.
+  // Reconcile expired records on start and hourly while the server is running.
+  clean();
+  const cleanupTimer = setInterval(clean, 60 * 60 * 1000);
+  cleanupTimer.unref?.();
   return {submit,remove,list};
 }
