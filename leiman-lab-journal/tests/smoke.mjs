@@ -1,5 +1,6 @@
 /** Run: npm test. Zero dependencies. */
 import { spawn } from 'node:child_process';
+import { organismUiTest } from './organism-ui.mjs';
 import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync, readdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -60,6 +61,7 @@ async function main() {
   await seoTests();
   await incomeBilingualTests();
   await organismTests();
+  organismUiTest();
   await allArticleTranslationsTest();
   await passwordlessAnalyticsTests();
   await commonsTests();
