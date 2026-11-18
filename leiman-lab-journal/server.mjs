@@ -56,7 +56,7 @@ function loadArticles() {
   articles.length = 0; articleBySlug.clear();
   for (const [slug, base] of gitArticles) {
     const edited = readJson(overrideFile(slug));
-    const a = edited ? { ...edited, slug } : base;
+    const a = edited ? { ...base, ...edited, translations: { ...(base.translations || {}), ...(edited.translations || {}) }, slug } : base;
     articles.push(a); articleBySlug.set(slug, a);
   }
   articles.sort((a, b) => b.date.localeCompare(a.date));
