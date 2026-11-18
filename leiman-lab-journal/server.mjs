@@ -175,7 +175,7 @@ ${date ? `<meta property="article:published_time" content="${escaped(date)}">` :
 </head><body${bodyData}>
 <header class="site-header"><div class="container header-inner">
 <a class="identity" href="${lang === 'en' ? '/en/' : '/'}" aria-label="Leiman Lab — home">${logo}<span class="wordmark">LEIMAN <b>LAB</b></span></a>
-<nav aria-label="${lang === 'en' ? 'Main navigation' : 'Основная навигация'}"><a href="${lang === 'en' ? '/en/#journal' : '/#journal'}">${lang === 'en' ? 'Journal' : 'Журнал'}</a><a href="/opportunities">INCOME</a><a href="/ai-index">AI INDEX</a><a href="/ai-film-awards">AI FILM AWARDS</a><a href="/predictions">PREDICTION OS</a><a href="/commons">COMMONS</a><a href="/about">${lang === 'en' ? 'Author' : 'Об авторе'}</a><a href="/search">${lang === 'en' ? 'Search (RU)' : 'Поиск'}</a><a class="locale-switch" href="${escaped(alternates.find(x => x.lang !== lang)?.href || (lang === 'en' ? '/' : '/en/'))}" lang="${lang === 'en' ? 'ru' : 'en'}">${lang === 'en' ? 'RU' : 'EN'}</a><a href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer"><span class="nav-long">Telegram</span><span class="nav-short">TG</span> ↗</a></nav>
+<nav aria-label="${lang === 'en' ? 'Main navigation' : 'Основная навигация'}"><a href="${lang === 'en' ? '/en/#journal' : '/#journal'}">${lang === 'en' ? 'Journal' : 'Журнал'}</a><a href="${lang === 'en' ? '/en/opportunities' : '/opportunities'}">INCOME</a><a href="/ai-index">AI INDEX</a><a href="/ai-film-awards">AI FILM AWARDS</a><a href="/predictions">PREDICTION OS</a><a href="/commons">COMMONS</a><a href="/about">${lang === 'en' ? 'Author' : 'Об авторе'}</a><a href="/search">${lang === 'en' ? 'Search (RU)' : 'Поиск'}</a><a class="locale-switch" href="${escaped(alternates.find(x => x.lang !== lang)?.href || (lang === 'en' ? '/' : '/en/'))}" lang="${lang === 'en' ? 'ru' : 'en'}">${lang === 'en' ? 'RU' : 'EN'}</a><a href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer"><span class="nav-long">Telegram</span><span class="nav-short">TG</span> ↗</a></nav>
 </div></header>
 ${content}
 <footer class="site-footer"><div class="container footer-inner">
@@ -796,6 +796,8 @@ const server = http.createServer((req,res)=>{
       {path:'/ai-index',lastmod:articleBySlug.get('ai-index-2026')?.updated||'2026-11-04'},
       {path:'/ai-film-awards',lastmod:'2026-11-10'},
       {path:'/predictions',lastmod:'2026-11-18'},
+      {path:'/organism',lastmod:'2026-11-18',alts:[{lang:'ru',path:'/organism'},{lang:'en',path:'/en/organism'}]},
+      {path:'/en/organism',lastmod:'2026-11-18',alts:[{lang:'ru',path:'/organism'},{lang:'en',path:'/en/organism'}]},
       {path:'/opportunities',lastmod:'2026-11-18',alts:[{lang:'ru',path:'/opportunities'},{lang:'en',path:'/en/opportunities'}]},
       {path:'/en/opportunities',lastmod:'2026-11-18',alts:[{lang:'ru',path:'/opportunities'},{lang:'en',path:'/en/opportunities'}]},
       {path:'/privacy',lastmod:'2026-11-18',alts:[{lang:'ru',path:'/privacy'},{lang:'en',path:'/en/privacy'}]},
@@ -827,6 +829,28 @@ const server = http.createServer((req,res)=>{
   if(englishArticle && articleBySlug.has(englishArticle[1]) && hasEnglish(articleBySlug.get(englishArticle[1]))) {
     const a=localiseArticle(articleBySlug.get(englishArticle[1]), 'en');
     return write(res,200,articleView(a,origin,'en'),'text/html; charset=utf-8',a.draft?{'Cache-Control':'no-store'}:{});
+  }
+  if(['/organism','/organism/','/en/organism','/en/organism/'].includes(pathname)) {
+    const lang=pathname.startsWith('/en/')?'en':'ru';
+    const content=readFileSync(path.join(PUBLIC,'assets','organism.'+lang+'.html'),'utf8');
+    const current=origin+(lang==='en'?'/en/organism':'/organism');
+    const title=lang==='en'?'Income Intelligence Organism: Interactive Finance Curator — Leiman Lab':'Income Intelligence Organism: финансовый куратор и карта возможностей — Leiman Lab';
+    const description=lang==='en'
+      ? 'Explore a living interactive simulation of how Income Intelligence could discover bounties, verify demand, coordinate human and AI professionals and share contracted value.'
+      : 'Интерактивная карта финансового куратора: поиск заданий, проверка спроса, сборка команд из людей и ИИ, исполнение и распределение вознаграждения.';
+    return write(res,200,page({content,lang,title,description,canonical:current,
+      cover:origin+'/og/ai-income-opportunities.png',
+      extraStylesheet:'/assets/organism.css',bodyData:' data-page="organism"',
+      alternates:[{lang:'ru',href:origin+'/organism'},{lang:'en',href:origin+'/en/organism'}],
+      schema:{'@context':'https://schema.org','@graph':[
+        {'@type':'WebPage',name:'The Opportunity Organism',description,url:current,inLanguage:lang==='en'?'en-US':'ru-RU',isPartOf:{'@type':'WebSite',name:'Leiman Lab',url:origin+'/'}},
+        {'@type':'BreadcrumbList',itemListElement:[
+          {'@type':'ListItem',position:1,name:'Leiman Lab',item:origin+(lang==='en'?'/en/':'/')},
+          {'@type':'ListItem',position:2,name:'Income Intelligence',item:origin+(lang==='en'?'/en/opportunities':'/opportunities')},
+          {'@type':'ListItem',position:3,name:'The Opportunity Organism',item:current}
+        ]}
+      ]}
+    }));
   }
   if(['/opportunities','/opportunities/','/en/opportunities','/en/opportunities/'].includes(pathname)) {
     const lang=pathname.startsWith('/en/')?'en':'ru';
