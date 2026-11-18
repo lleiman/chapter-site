@@ -155,5 +155,161 @@
     }
   ],
   "sourceNote": "Обновлено 25 октября 2026 года с учётом итогового отчёта LiteLLM от 23 октября и предварительного расследования Railway от 22 октября. Роль ИИ в четырёх случаях различается; они не являются доказательством единой автономной атаки.",
-  "updated": "2026-10-25"
+  "updated": "2026-10-25",
+  "translations": {
+    "en": {
+      "title": "Black October: Who Gave AI the Keys to the Internet?",
+      "headline": "Black October: Who Gave AI the Keys to the Internet?",
+      "cardTitle": "Black October: AI and Security",
+      "summary": "Four October incidents: critical PHP vulnerabilities, AI-agent attacks, the LiteLLM supply-chain compromise and leaked Railway secrets.",
+      "deck": "An evidence-led account of four October security incidents, what AI actually did in each, and the limits of prompt-based security.",
+      "description": "October 2026 AI and security incidents: PHP vulnerabilities, agentic attacks, compromised LiteLLM releases and exposed Railway secrets, with primary sources.",
+      "section": "RESEARCH / SECURITY & AI AGENTS",
+      "tags": [
+        "AI security",
+        "Agentic AI",
+        "PHP vulnerabilities",
+        "LiteLLM",
+        "Railway security",
+        "Supply-chain attacks"
+      ],
+      "readingMinutes": 7,
+      "paragraphs": [
+        {
+          "type": "p",
+          "text": "Within a few days in October 2026, reports emerged about two serious PHP vulnerabilities, attacks involving AI agents, a malicious LiteLLM release and exposed secrets at Railway. All four stories concern access to code or infrastructure. The role of AI, however, is different in each case."
+        },
+        {
+          "type": "p",
+          "text": "In one incident, a researcher used an AI model to discover a flaw. In another, attackers used agents to perform parts of an operation. LiteLLM and Railway faced infrastructure compromises. There is still no evidence that those two compromises were independently carried out by autonomous AI agents."
+        },
+        {
+          "type": "h2",
+          "text": "01 / What happened"
+        },
+        {
+          "type": "h3",
+          "text": "PHP: critical vulnerabilities and rapid exploitation"
+        },
+        {
+          "type": "p",
+          "text": "On 21 October, OpenAI, Wiz, Cloudflare and their partners disclosed two serious PHP vulnerabilities. A researcher known as Calif found one of the issues with the help of GPT-5.6 Sol. AI was used here on the defensive side. This was not an autonomous attack."
+        },
+        {
+          "type": "p",
+          "text": "Cloudflare enabled protections in advance and warned that servers using widely deployed PHP versions could be at risk.",
+          "links": [
+            {
+              "label": "OpenAI disclosure",
+              "url": "https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/"
+            },
+            {
+              "label": "Cloudflare analysis",
+              "url": "https://blog.cloudflare.com/php-vulnerabilities-waf-protection/"
+            }
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "CrowdStrike: agents used by attackers"
+        },
+        {
+          "type": "p",
+          "text": "CrowdStrike described four new groups that used AI agents in campaigns between May and August 2026. In one case, an attacker compromised at least 15 healthcare organisations in Argentina. The attacker used a pair of agents through Claude Code."
+        },
+        {
+          "type": "p",
+          "text": "During these attacks, the agents selected subsequent actions and executed commands.",
+          "links": [
+            {
+              "label": "CrowdStrike investigation",
+              "url": "https://www.crowdstrike.com/en-us/blog/crowdstrike-uncovers-new-agentic-ai-campaigns/"
+            }
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "LiteLLM: a compromised release"
+        },
+        {
+          "type": "p",
+          "text": "On 21 October, attackers compromised the LiteLLM release process. Version 1.107.0 and certain Docker images included malware designed to steal credentials and execute code remotely. The infected packages were available for fewer than three hours."
+        },
+        {
+          "type": "p",
+          "text": "According to LiteLLM's 23 October post-incident analysis, the attackers used stolen GitHub tokens, modified the publishing workflow and released packages from a substituted repository. The report describes tokens being exposed in system logs. It does not establish that an autonomous AI agent conducted the compromise.",
+          "links": [
+            {
+              "label": "LiteLLM incident analysis, 23 October",
+              "url": "https://docs.litellm.ai/blog/security-incident-oct-21-2026-attack-chain"
+            }
+          ]
+        },
+        {
+          "type": "h3",
+          "text": "Railway: application secrets at risk"
+        },
+        {
+          "type": "p",
+          "text": "On 21 October, Railway reported suspicious activity affecting a system that stores customers' environment variables. Preliminary findings indicated that an unauthorised party might have obtained some encrypted values and, in certain cases, decrypted ones. Such variables commonly contain API keys and database passwords."
+        },
+        {
+          "type": "p",
+          "text": "In its preliminary report dated 22 October, Railway confirmed that an intruder had accessed parts of its internal infrastructure and exposed some customers' secrets. The company advised users who had registered before 21 October to rotate keys stored on Railway.",
+          "links": [
+            {
+              "label": "Railway preliminary report, 22 October",
+              "url": "https://blog.railway.com/p/preliminary-report-october-security-incident"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "02 / What these incidents have in common"
+        },
+        {
+          "type": "p",
+          "text": "Researchers used AI to help find the PHP flaws. In the campaigns documented by CrowdStrike, models selected actions and executed commands for attackers. LiteLLM suffered a compromised software supply chain; Railway suffered unauthorised access to secrets. The latter two incidents have not been attributed to autonomous agents."
+        },
+        {
+          "type": "h2",
+          "text": "03 / Where control ends"
+        },
+        {
+          "type": "p",
+          "text": "We give these systems source code, production environments and secrets, then hope a prompt telling them to behave responsibly will be enough."
+        },
+        {
+          "type": "p",
+          "text": "A prohibition written in a prompt does not revoke a program's permissions. If an agent can access live credentials and a shell, instructions to be careful cannot provide a meaningful security boundary. Least-privilege access, isolation, audit logs and human approval for dangerous operations are necessary."
+        }
+      ],
+      "sourcesLabel": "SOURCES",
+      "sourceNote": "The article reflects reports available in October 2026. Vendor statements, preliminary findings and independent evidence should not be treated as interchangeable.",
+      "sources": [
+        {
+          "title": "OpenAI — coordinated disclosure of PHP vulnerabilities",
+          "url": "https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/"
+        },
+        {
+          "title": "Cloudflare — php2shell protections",
+          "url": "https://blog.cloudflare.com/php-vulnerabilities-waf-protection/"
+        },
+        {
+          "title": "CrowdStrike — agentic AI campaigns",
+          "url": "https://www.crowdstrike.com/en-us/blog/crowdstrike-uncovers-new-agentic-ai-campaigns/"
+        },
+        {
+          "title": "LiteLLM — The attack chain behind the Oct 21, 2026 release compromise (23 October)",
+          "url": "https://docs.litellm.ai/blog/security-incident-oct-21-2026-attack-chain",
+          "type": "POST-INCIDENT REPORT"
+        },
+        {
+          "title": "Railway — Preliminary Report: Oct 21 Security Incident (22 October)",
+          "url": "https://blog.railway.com/p/preliminary-report-october-security-incident",
+          "type": "PRELIMINARY REPORT"
+        }
+      ]
+    }
+  }
 }
