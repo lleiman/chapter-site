@@ -245,5 +245,251 @@
       "type": "ОФИЦИАЛЬНЫЙ ИСТОЧНИК"
     }
   ],
-  "sourceNote": "Информация проверена 10 ноября 2026 года. Сроки могут изменяться, а призовые суммы и условия выплат зависят от официальных правил конкретного конкурса."
+  "sourceNote": "Информация проверена 10 ноября 2026 года. Сроки могут изменяться, а призовые суммы и условия выплат зависят от официальных правил конкретного конкурса.",
+  "translations": {
+    "en": {
+      "title": "AI Film Competitions 2026–2027: The $1 Million Prize and What It Takes to Enter",
+      "cardTitle": "AI Film Competitions: Awards and Economics",
+      "summary": "A $1 million AI film prize, festival deadlines, entry requirements and the economics of participating, with a competition calendar and calculator.",
+      "deck": "I reviewed AI Film Award, Artefact, AKOOL, WAIFF and Runway: costs, cash versus credits, rights, eligibility and a director's strategy for entering.",
+      "description": "AI film competitions and awards in 2026–2027: prize money up to $1 million, deadlines, eligibility, entry conditions and an AI film budget calculator.",
+      "section": "RESEARCH / AI CINEMA ECONOMY",
+      "readingMinutes": 12,
+      "tags": [
+        "AI filmmaking",
+        "AI Film Award",
+        "Film competitions",
+        "Generative video",
+        "Film festivals"
+      ],
+      "paragraphs": [
+        {
+          "type": "lead",
+          "text": "The $1 million grand prize for an AI-generated short film is real: it belongs to the AI Film Award 2027. Submissions close on 20 November 2026. I collected the relevant competitions, checked the organisers' stated terms and examined when entering makes economic sense."
+        },
+        {
+          "type": "p",
+          "text": "The market is more complicated than posters displaying six-figure prizes suggest. One programme rewards directing, another requires a specific proprietary model, and a third offers access to a festival network. Cash prizes, promotional budgets and generative-video credits should never be treated as interchangeable forms of income."
+        },
+        {
+          "type": "h2",
+          "text": "01 / The million-dollar prize: what it actually requires"
+        },
+        {
+          "type": "p",
+          "text": "The AI Film Award 2027, associated with the 1 Billion Followers Summit, TikTok and Seedance, advertises a $1,000,000 grand prize. Entrants must submit an original film lasting five to seven minutes, in 16:9 landscape format, with English subtitles and one of five themes: social issues, misinformation, humans and AI, climate, or human relationships. Seedance must account for at least 70% of the finished film. The deadline is 20 November 2026.",
+          "links": [
+            {
+              "label": "Official competition terms",
+              "url": "https://www.1billionsummit.com/ai-award-2027"
+            },
+            {
+              "label": "Submission form",
+              "url": "https://www.1billionsummit.com/ai-award-2027/submit"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "According to the published schedule, ten shortlisted films are expected to be announced on 15 December, with the winner named on 10 January 2027. The organiser says creators retain rights but grant a non-exclusive licence for screening and promotion. Tax obligations fall to the winner. Reading the actual legal terms before applying matters far more than reading the promotional headline."
+        },
+        {
+          "type": "aside",
+          "label": "DEADLINE NOTE",
+          "text": "As of this article's original research date, ten calendar days remained. That could be enough for a project already well underway, but it is an exceptionally risky schedule for producing a complex film from scratch."
+        },
+        {
+          "type": "h2",
+          "text": "02 / Four more competitions: money, festivals and restrictions"
+        },
+        {
+          "type": "p",
+          "text": "The Artefact AI Film Festival accepts submissions until 2 December 2026. Its third-season theme is (Dis)Connection. Films may be no longer than 314 seconds, and generative AI must be used in pre-production, production and post-production. Published prize information lists a €10,000 grand prize.",
+          "links": [
+            {
+              "label": "Artefact festival",
+              "url": "https://artefact-ai-film-festival.com/"
+            },
+            {
+              "label": "Rules",
+              "url": "https://www.artefact-ai-film-festival.com/rules"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "According to the current English-language page, the AKOOL AI Film Challenge accepts entries until 20 December 2026. It describes a creator-rewards programme of up to $500,000 and a $100 reward for a qualifying submission. Neither figure guarantees payment to every entrant, nor does it mean a single winner receives $500,000 in cash. The judging breakdown is storytelling 30%, originality 20%, execution 20%, AKOOL usage 15%, and desire to watch more 15%. Some localised pages carry older dates, so applicants should prioritise the active submission form and official rules.",
+          "links": [
+            {
+              "label": "AKOOL official challenge",
+              "url": "https://akool.com/aifilmchallenge"
+            },
+            {
+              "label": "Application form",
+              "url": "https://info.akool.com/film-challenge-application"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "WAIFF Cannes 2027 accepts entries until 15 February 2027 across categories including short film, feature film, advertising and music video. There is no verified million-dollar cash award attached to the festival. Its principal value lies in selection, screenings and industry connections. Submission fees increase from €15 before 15 November to €30 before 31 January and €60 in February. Local selection rounds apply in some countries.",
+          "links": [
+            {
+              "label": "WAIFF Cannes rules and registration",
+              "url": "https://worldaifilmfestival.com/cannes-2027/"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "The Runway AI Festival 2026 has already closed. Its Film category included a $50,000 cash grand prize plus one million Runway credits, with requirements including a complete narrative between three and fifteen minutes using generative video. Past entries are useful benchmarks for creative standards, but an already closed programme must not appear in a list of open calls.",
+          "links": [
+            {
+              "label": "Runway AI Festival 2026",
+              "url": "https://aif.runwayml.com/"
+            },
+            {
+              "label": "Prize terms",
+              "url": "https://aif.runway.com/terms-film"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "03 / Who is paying for AI cinema, and why?"
+        },
+        {
+          "type": "p",
+          "text": "For model developers, competitions demonstrate technology in finished creative work and generate public examples. For festivals, they attract a new category of filmmaker. A prize can finance a director's production, but building a livelihood around irregular contest payouts is an inherently unstable strategy."
+        },
+        {
+          "type": "p",
+          "text": "Three distinct benefits matter: cash payments, professional distribution and commercial opportunities arising from the work. A film may not win but could become a valuable studio showreel or a basis for an advertising commission. Neither hypothetical outcome belongs in a revenue forecast without supporting evidence."
+        },
+        {
+          "type": "h2",
+          "text": "04 / How to evaluate a competition before production"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Eligibility: country, age, language, duration, format and mandatory AI model.",
+            "Rights: music, images, voices, performer consent, the licence granted to organisers and restrictions on previously released work.",
+            "Economics: cash awards separately from platform credits, entry fees, generation costs, crew hours and taxes.",
+            "Creative fit: whether the story meets the theme and publicly stated judging criteria.",
+            "Future use: whether other festivals and public release remain permitted."
+          ],
+          "text": ""
+        },
+        {
+          "type": "p",
+          "text": "A single film will not necessarily meet the rules of every festival. For instance, a minimum Seedance production share may conflict with an existing workflow; an early social-media release may violate a premiere requirement. These conflicts are worth identifying before paying for generation."
+        },
+        {
+          "type": "h2",
+          "text": "05 / How to improve the submission"
+        },
+        {
+          "type": "p",
+          "text": "First write a complete story and explain what makes it distinct from a technology demo. Build a short animatic, test the pacing and allocate resources to pivotal scenes. Story structure, editing and sound often reveal creative weaknesses more effectively than adding more difficult generations. This is a production recommendation, not a statistically proven formula for winning."
+        },
+        {
+          "type": "p",
+          "text": "A useful submission package includes a logline, synopsis, final video, subtitles, model and version list, generation records, third-party licences and performer consent. Where a specific model is mandatory, record which shots meet that requirement."
+        },
+        {
+          "type": "h2",
+          "text": "06 / Calculator: a million-dollar prize is not expected income"
+        },
+        {
+          "type": "p",
+          "text": "Example: 80 hours at an internal rate of $20 plus $600 in direct costs equals $2,200 in total cost. For a single $50,000 prize, with no other benefit or taxes counted, the break-even win probability would be 4.4%. For a $1 million prize, the threshold is 0.22%. These are hypothetical calculations, not the actual odds of a particular film."
+        },
+        {
+          "type": "p",
+          "text": "The interactive index includes a production-cost calculator, a probability scenario and deadline calendar. Any probability entered is the user's own assumption. Without reliable numbers of submissions and validated modelling, we cannot estimate an individual's chance of winning.",
+          "links": [
+            {
+              "label": "AI Film Awards Index: Calendar and Calculator",
+              "url": "https://leimanlab.com/ai-film-awards"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "07 / A practical production protocol"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Choose two or three competitions for which the work genuinely meets the formal requirements.",
+            "Study published judging criteria and winners from earlier editions.",
+            "Build a short script test and animatic before expensive generation.",
+            "Count labour and repeated iterations, not just subscription costs.",
+            "Retain rights documentation and generation records from day one.",
+            "Submit early: the final day introduces technical risk and timezone mistakes.",
+            "Plan a future for the film regardless of the competition result."
+          ],
+          "text": ""
+        },
+        {
+          "type": "aside",
+          "label": "CONCLUSION",
+          "text": "Generative tools have lowered the technical threshold of film production. Differentiation still depends on directing, storytelling, production discipline and the ability to meet a particular competition's requirements."
+        },
+        {
+          "type": "p",
+          "text": "The directory below is an editorial selection, not an exhaustive global database. Dates and awards were checked against the listed sources on 10 November 2026; organisers can change their terms. Verify the official rules again before submission."
+        }
+      ],
+      "sources": [
+        {
+          "title": "AI Film Award 2027 — official competition",
+          "url": "https://www.1billionsummit.com/ai-award-2027",
+          "type": "OFFICIAL SOURCE"
+        },
+        {
+          "title": "AI Film Award 2027 — submission",
+          "url": "https://www.1billionsummit.com/ai-award-2027/submit",
+          "type": "OFFICIAL SOURCE"
+        },
+        {
+          "title": "Artefact — festival website",
+          "url": "https://artefact-ai-film-festival.com/",
+          "type": "OFFICIAL SOURCE"
+        },
+        {
+          "title": "Artefact — rules",
+          "url": "https://www.artefact-ai-film-festival.com/rules",
+          "type": "OFFICIAL SOURCE"
+        },
+        {
+          "title": "AKOOL — challenge",
+          "url": "https://akool.com/aifilmchallenge",
+          "type": "OFFICIAL SOURCE"
+        },
+        {
+          "title": "AKOOL — application",
+          "url": "https://info.akool.com/film-challenge-application",
+          "type": "OFFICIAL SOURCE"
+        },
+        {
+          "title": "WAIFF Cannes 2027 — rules and deadlines",
+          "url": "https://worldaifilmfestival.com/cannes-2027/",
+          "type": "OFFICIAL SOURCE"
+        },
+        {
+          "title": "Runway AI Festival 2026 — prizes",
+          "url": "https://aif.runwayml.com/",
+          "type": "OFFICIAL SOURCE"
+        },
+        {
+          "title": "Runway — rules наград",
+          "url": "https://aif.runway.com/terms-film",
+          "type": "OFFICIAL SOURCE"
+        }
+      ],
+      "sourceNote": "Information and published terms were reviewed on 10 November 2026. Deadline and award rules may change; confirm them on the organisers' official sites before applying."
+    }
+  }
 }
