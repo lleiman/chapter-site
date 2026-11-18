@@ -630,7 +630,13 @@
         }
       ],
       "sourcesLabel": "RESEARCH / REFERENCES",
-      "sourceNote": "Eight distinct studies inform this discussion. None validates a universal design half-life. The continuity architecture and proposed half-life measures are Leiman Lab working hypotheses."
+      "sourceNote": "Eight distinct studies inform this discussion. None validates a universal design half-life. The continuity architecture and proposed half-life measures are Leiman Lab working hypotheses.",
+      "changes": [
+        {
+          "date": "2026-11-07",
+          "text": "Research conclusions on AI creativity, redesign effects across different audience groups and change rhythms clarified; methodology expanded and search description updated."
+        }
+      ]
     }
   }
 }
