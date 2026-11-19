@@ -180,6 +180,16 @@ async function cashPrizeRoutesTest(){
   assert.ok(page.includes('id="editors-picks"'),'featured list exists');
   assert.ok(page.indexOf('id="editors-picks"')<page.indexOf('id="radar"'),'awards render first');
   assert.ok(page.includes('id="id-top-bounty-results"'),'cash award area present');
+  assert.ok(page.includes('id="id-feature-prizes"')&&page.includes('id="id-feature-grants"'),
+    locale+' prize/grant category controls');
+  assert.ok(page.includes('role="tablist"'),locale+' category tabs accessible');
+  assert.ok(page.includes('id="id-feature-grants-panel" role="tabpanel"')&&
+    page.includes('id="id-feature-grants-panel" role="tabpanel" aria-labelledby="id-feature-grants" hidden'),
+    locale+' grants initially hidden');
+  assert.ok(page.includes('id="id-feature-see-more"')&&page.includes('aria-expanded="false"'),
+    locale+' collapsible See more initially closed');
+  assert.ok(page.includes('id="id-feature-grants-results"'),locale+' dynamically loaded grant preview');
+
   assert.equal((page.match(/<details class="id-award-row">/g)||[]).length,5,
     'five compact editable prize details rows should render before JS');
   assert.equal((page.match(/<summary class="id-award-summary">/g)||[]).length,5,
@@ -209,7 +219,16 @@ async function cashPrizeRoutesTest(){
  }
  const index=await (await get('/api/income/index?type=bounty')).json();
  assert.equal(index.count,0,'retired issue source must not appear in unified index');
- assert.equal((await get('/assets/income-bounties.js')).status,200);
+ const featuredClient=(await (await get('/assets/income-bounties.js')).text());
+ assert.ok(featuredClient.includes("grantTab.addEventListener('click'"),'grants toggle wired');
+ assert.ok(featuredClient.includes("more.addEventListener('click'"),'see-more button wired');
+ assert.ok(featuredClient.includes("loadFeaturedGrants()"),'official funded grants load on demand');
+ const featuredCSS=(await (await get('/assets/income-desk.css')).text());
+ assert.ok(featuredCSS.includes("#id-top-bounty-results > .id-award-row:nth-child(n+3)"),
+    'CSS initially hides all but two prize rows');
+ assert.ok(featuredCSS.includes("#id-feature-grants-results > .id-award-row:nth-child(n+3)"),
+    'CSS initially hides all but two grant rows');
+  assert.equal((await get('/assets/income-bounties.js')).status,200);
  console.log('✓ monetised organiser prize picks SSR, only official monetary grants, no crypto or unverified bounty source');
 }
 
