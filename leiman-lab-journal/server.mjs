@@ -15,6 +15,7 @@ import { createCommons, CommonsError } from './commons.mjs';
 import { createOpportunityIntake } from './opportunities.mjs';
 import { createIncomeEngine } from './income-engine.mjs';
 import { createGrantSearch } from './grant-search.mjs';
+import { createUkTenders } from './uk-tenders.mjs';
 import { createBriefIntake } from './brief-intake.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -36,6 +37,7 @@ const intake = createOpportunityIntake(DATA_DIR);
 const briefs = createBriefIntake(DATA_DIR);
 const incomeEngine = createIncomeEngine();
 const grantSearch = createGrantSearch();
+const ukTenders = createUkTenders();
 const incomeSources = JSON.parse(readFileSync(path.join(DIR,'income-sources.json'),'utf8'));
 
 const plural = (n, [one, few, many]) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many; };
@@ -749,6 +751,12 @@ const server = http.createServer((req,res)=>{
   if (apiPath === '/api/income/sources' && req.method === 'GET') {
     return sendJson(res,200,{...incomeSources,sourceStatus:'editorial_directory',
       warning:'An official source is not proof that a specific opportunity is open or that a foreign applicant qualifies.'});
+  }
+  if (apiPath === '/api/income/uk-tenders' && req.method === 'GET') {
+    const url=new URL(req.url,'http://localhost');
+    return ukTenders.search(Object.fromEntries(url.searchParams),clientKey(req))
+      .then(out=>sendJson(res,out.status,out.body))
+      .catch(()=>sendJson(res,503,{provider:'UK Find a Tender',results:[],error:'UK tender provider unavailable'}));
   }
   if (apiPath === '/api/income/grants' && req.method === 'GET') {
     const url=new URL(req.url,'http://localhost');
