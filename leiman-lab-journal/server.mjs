@@ -44,7 +44,7 @@ const opportunityIndex = createOpportunityIndex(DATA_DIR);
 const economicMemory = createEconomicMemory(DATA_DIR);
 // Persist provider-originated, non-personal search results; never transfer CVs or profiles.
 function retainSourceResponse(out,provider){
- if(out.status===200&&Array.isArray(out.body?.results)){
+ if(out.status===200&&out.body?.sourceStatus!=='stale'&&Array.isArray(out.body?.results)){
   try{opportunityIndex.ingest(out.body.results,provider)}
   catch(err){console.error('Index ingest failed:',err.message)}
  }
