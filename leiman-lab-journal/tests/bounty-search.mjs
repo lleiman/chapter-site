@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {createBountySearch,normalizeBountyIssue} from '../bounty-search.mjs';
+import {createBountySearch,normalizeBountyIssue,scoreBountyCandidate} from '../bounty-search.mjs';
 import {createOpportunityIndex} from '../opportunity-index.mjs';
 import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
@@ -41,6 +41,36 @@ export async function testBountySearch(){
  const unavailable=await createBountySearch({fetcher:async()=>{throw Error('provider down')}}).search({q:'docs'},'different-client');
  assert.equal(unavailable.status,503);
  assert.deepEqual(unavailable.body.results,[]);
+ const tougher={...issue,id:789012,number:45,
+  html_url:'https://github.com/example/project/issues/45',
+  title:'Bounty: critical cryptography kernel overhaul',
+  body:'$1800 bounty. Audit entire framework and rewrite complex kernel cryptography.'};
+ const docScore=scoreBountyCandidate(normalized,{now:Date.parse('2026-11-19T12:00:00Z')});
+ const hardScore=scoreBountyCandidate(normalizeBountyIssue(tougher),{now:Date.parse('2026-11-19T12:00:00Z')});
+ assert.ok(docScore.score>hardScore.score,'manageable scope should outrank high but complex reward');
+ assert.equal(docScore.paymentVerified,false);
+ assert.equal(docScore.effortVerified,false);
+ let topRequests=0;
+ const topSearch=createBountySearch({fetcher:async(url)=>{
+  topRequests++;
+  const page=Number(new URL(url).searchParams.get('page'));
+  assert.ok(new URL(url).searchParams.get('q').includes('label:bounty'));
+  return {ok:true,json:async()=>({
+   total_count:3,items:page===1?[issue,tougher]:page===2?[issue]:[]
+  })};
+ }});
+ const featured=await topSearch.top('unfiltered-picks');
+ assert.equal(featured.status,200);
+ assert.equal(featured.body.independentOfUserFilters,true);
+ assert.equal(featured.body.results.length,2,'deduplicate across recent pages');
+ assert.equal(featured.body.results[0].id,normalized.id,'candidate review score, not largest reward alone');
+ assert.equal(featured.body.results[0].editorial.paymentVerified,false);
+ assert.equal(featured.body.candidatePool,2);
+ assert.equal(topRequests,3,'three independent pages, not user-filtered search');
+ const emptyTop=await createBountySearch({fetcher:async()=>{throw Error('down')}}).top('offline');
+ assert.equal(emptyTop.status,503);
+ assert.deepEqual(emptyTop.body.results,[],'never fabricate featured issues');
+
  const temp=mkdtempSync(path.join(tmpdir(),'income-bounty-test-'));
  try{
   const db=createOpportunityIndex(temp);
