@@ -28,8 +28,26 @@ if(ops){
    <div><small>LOCATION / WORK MODE</small><strong>${escape(c.location)} / ${escape(c.workMode)}</strong></div></div>
    <p><small>OPTIONAL CONTACT PERMISSION: ${c.contactOptIn?'YES':'NO'}. Do not contact unless permitted.</small></p></article>`;
  }
+ async function refreshEconomicMemory(){
+  const data=await request('/api/admin/income/memory');
+  const summary=data.summary||{total:0,byCurrency:{}};
+  $('ops-memory-summary').textContent=summary.total+' structured observations · '+
+   Object.entries(summary.byCurrency||{}).map(([currency,stat])=>
+    currency+': '+Number(stat.received).toLocaleString('en-US')+' received / '+
+    Number(stat.directCosts).toLocaleString('en-US')+' direct costs / '+
+    Number(stat.netBeforeOverhead).toLocaleString('en-US')+' before overhead').join(' | ')+
+   ' · OPERATOR-REPORTED, NOT AUDITED';
+  $('ops-memory-list').innerHTML=(data.observations||[]).map(item=>
+   '<article class="ops-item"><div class="ops-item-head"><span>'+escape(item.period)+' · '+escape(item.category)+
+   '</span><span>'+escape(item.outcome)+'</span></div>'+
+   '<p>'+escape(item.currency)+' '+Number(item.amountReceived).toLocaleString('en-US')+' received · '+
+   Number(item.directCosts).toLocaleString('en-US')+' direct costs · '+Number(item.hours)+'h</p>'+
+   '<button type="button" data-economic-delete="'+escape(item.id)+'">DELETE RECORD</button></article>').join('')
+   ||'<p>No observations collected. Historical data are not fabricated.</p>';
+ }
  async function refresh(){
   const [clients,applicants]=await Promise.all([request('/api/admin/income/briefs'),request('/api/admin/opportunities/submissions')]);
+  await refreshEconomicMemory();
   const briefs=clients.briefs||[],cvs=applicants.submissions||[];
   $('ops-content').hidden=false;$('ops-auth').hidden=true;
   $('ops-briefs').innerHTML=briefs.map(renderBrief).join('')||'<p>No briefs currently awaiting review.</p>';
@@ -55,6 +73,28 @@ if(ops){
  });
  $('ops-refresh').addEventListener('click',async()=>{try{await refresh()}catch(e){alert(e.message)}});
  $('ops-lock').addEventListener('click',()=>{secret='';$('ops-content').hidden=true;$('ops-auth').hidden=false;$('ops-message').textContent='Locked.'});
+ $('ops-memory-form').addEventListener('submit',async event=>{
+  event.preventDefault();
+  const form=event.currentTarget,values=Object.fromEntries(new FormData(form));
+  values.amountReceived=Number(values.amountReceived);
+  values.directCosts=Number(values.directCosts);
+  values.hours=Number(values.hours);
+  values.nonPersonalConfirmation=form.elements.nonPersonalConfirmation.checked;
+  const status=$('ops-memory-status');status.textContent='Recording without client identifiers…';
+  try{
+    await request('/api/admin/income/memory',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(values)});
+    form.reset();status.textContent='Observation saved. No client brief data were copied.';
+    await refreshEconomicMemory();
+  }catch(error){status.textContent=error.message}
+ });
+ $('ops-memory-list').addEventListener('click',async e=>{
+  const button=e.target.closest('[data-economic-delete]');if(!button)return;
+  if(!confirm('Delete this structured observation permanently?'))return;
+  try{
+    await request('/api/admin/income/memory/'+button.dataset.economicDelete,{method:'DELETE'});
+    await refreshEconomicMemory();
+  }catch(err){alert(err.message)}
+ });
  $('ops-briefs').addEventListener('submit',async e=>{
   const form=e.target.closest('.ops-status-form');if(!form)return;
   e.preventDefault();const body=Object.fromEntries(new FormData(form));
