@@ -20,6 +20,7 @@ if(bountiesRoot){
  };
  const form=$('id-bounty-form'),status=$('id-bounty-status'),count=$('id-bounty-count');
  const list=$('id-bounty-results'),threshold=$('id-bounty-reward'),order=$('id-bounty-order');
+ const assumedHours=$('id-bounty-hours');
  let results=[];
  const date=x=>typeof x==='string'?x.slice(0,10):'—';
  const money=x=>x.rewardAmount!=null&&x.rewardCurrency?
@@ -30,16 +31,17 @@ if(bountiesRoot){
    <div class="id-job-meta"><span>${labels.candidate}</span><span>${labels.date}: ${esc(date(x.updatedAt))}</span></div>
    <h4>${esc(x.title)}</h4><p>${esc(x.issuer)} · ${esc(x.excerpt||'')}</p>
    <div class="id-bounty-amount"><small>${labels.unverified}</small><strong>${esc(money(x))}</strong></div>
+   <p class="id-bounty-rate">${x.rewardAmount!=null&&x.rewardCurrency==='USD'?(en?'HYPOTHETICAL REWARD / YOUR HOUR ESTIMATE: ':'УСЛОВНАЯ НАГРАДА / ВАША ОЦЕНКА: ')+esc(new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(x.rewardAmount/Number(assumedHours.value)))+'/h':(en?'No reliable hourly estimate available.':'Нельзя вычислить условную почасовую ставку.')}</p>
    <p class="id-grant-warning">${labels.notPrize}. ${labels.listing}</p>
    <a href="${esc(x.sourceUrl)}" target="_blank" rel="noopener noreferrer">${labels.see}</a></article>`;
  }
  function draw(){
   let filtered=results.filter(x=>threshold.value==='all'||x.rewardAmount!=null&&x.rewardCurrency==='USD'&&x.rewardAmount>=Number(threshold.value));
-  if(order.value==='reward')filtered=filtered.slice().sort((a,b)=>(b.rewardAmount||0)-(a.rewardAmount||0));
+  if(order.value==='reward'||order.value==='hourly')filtered=filtered.slice().sort((a,b)=>(b.rewardAmount||0)-(a.rewardAmount||0));
   count.textContent=filtered.length+' / '+results.length;
   list.innerHTML=filtered.length?filtered.map(renderCard).join(''):'<p class="id-legal">'+labels.none+'</p>';
  }
- threshold.addEventListener('change',draw);order.addEventListener('change',draw);
+ threshold.addEventListener('change',draw);order.addEventListener('change',draw);assumedHours.addEventListener('change',draw);
  form.addEventListener('submit',async event=>{
   event.preventDefault();const q=String(new FormData(form).get('q')||'').trim();
   status.textContent=labels.loading;count.textContent='';list.replaceChildren();
