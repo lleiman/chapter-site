@@ -97,7 +97,7 @@ if(desk){
  }
  const runJobs=async()=>{
   const fd=new FormData(search),q=String(fd.get('q')||'').trim();
-  if(q.length<2){status.textContent=en?'Enter at least two letters.':'Введите хотя бы два символа.';return}
+  if(q.length===1){status.textContent=en?'Use at least two letters, or leave it blank to browse recent jobs.':'Введите хотя бы два символа либо оставьте поле пустым для новых вакансий.';return}
   const params=new URLSearchParams({q,skills:String(fd.get('skills')||''),country:String(fd.get('country')||'').toUpperCase()});
   status.textContent=tr.loading;count.textContent='';list.replaceChildren();
   const btn=search.querySelector('button[type=submit]');btn.disabled=true;
@@ -115,7 +115,7 @@ if(desk){
  };
  search.addEventListener('submit',e=>{e.preventDefault();runJobs()});
  // Show source-backed opportunities on arrival, rather than an empty landing page.
- if(search.elements.q.value.trim().length>1)runJobs();
+ runJobs();
  const form=$('id-plan-form'),out=$('id-plan-output');
  form.addEventListener('submit',async e=>{
   e.preventDefault();if(!form.reportValidity())return;
