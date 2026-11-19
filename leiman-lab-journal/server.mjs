@@ -833,11 +833,9 @@ const server = http.createServer((req,res)=>{
       .then(out=>{retainSourceResponse(out,'UK Find a Tender');return sendJson(res,out.status,out.body)})
       .catch(()=>sendJson(res,503,{provider:'UK Find a Tender',results:[],error:'UK tender provider unavailable'}));
   }
-  if (apiPath === '/api/income/grants' && req.method === 'GET') {
-    const url=new URL(req.url,'http://localhost');
-    return grantSearch.search(Object.fromEntries(url.searchParams),clientKey(req))
-     .then(out=>sendJson(res,out.status,out.body))
-     .catch(()=>sendJson(res,503,{provider:'Grants.gov',results:[],error:'Official grants search unavailable'}));
+  if(apiPath==='/api/income/grants' && req.method==='GET'){
+    return sendJson(res,410,{provider:'Grants.gov',results:[],
+      error:'Unpriced grants are no longer published. Use /api/income/prizes/funded-grants for official monetary awards.'});
   }
   if (apiPath === '/api/income/jobs' && req.method === 'GET') {
     const url=new URL(req.url,'http://localhost');
