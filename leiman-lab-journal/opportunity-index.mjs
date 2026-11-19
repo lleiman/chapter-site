@@ -7,8 +7,8 @@ import path from 'node:path';
 import {mkdirSync,existsSync,readFileSync,writeFileSync,renameSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 
-const TYPES=new Set(['employment','grant','tender','bounty','contract','research']);
-const SOURCES=new Set(['Himalayas','Grants.gov','UK Find a Tender','GitHub Bounty Candidates']);
+const TYPES=new Set(['employment','grant','tender','contract','research']);
+const SOURCES=new Set(['Himalayas','Grants.gov','UK Find a Tender']);
 const MAX_RECORDS=5500;
 const KEEP_MS=90*86400000;
 const clean=(x,n=300)=>String(x??'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,n);
@@ -19,14 +19,14 @@ export function normalizeOpportunity(raw){
  if(!raw || !TYPES.has(raw.type) || !SOURCES.has(raw.source))return null;
  const sourceUrl=safeUrl(raw.sourceUrl),title=clean(raw.title,240);
  if(!sourceUrl||!title)return null;
- const domains={'Himalayas':'himalayas.app','Grants.gov':'www.grants.gov','UK Find a Tender':'www.find-tender.service.gov.uk','GitHub Bounty Candidates':'github.com'};
+ const domains={'Himalayas':'himalayas.app','Grants.gov':'www.grants.gov','UK Find a Tender':'www.find-tender.service.gov.uk'};
  try{if(new URL(sourceUrl).hostname!==domains[raw.source])return null}catch{return null}
  const identity=raw.source+':'+String(raw.id||sourceUrl);
  const id=createHash('sha256').update(identity).digest('hex').slice(0,24);
- const country=['employment','bounty'].includes(raw.type)?'GLOBAL':raw.country==='US'?'US':raw.country==='GB'?'GB':null;
+ const country=raw.type==='employment'?'GLOBAL':raw.country==='US'?'US':raw.country==='GB'?'GB':null;
  const salary=raw.type==='employment'?raw.salary:null;
  const countries=Array.isArray(raw.locationRestrictions)?raw.locationRestrictions.map(x=>clean(x,3).toUpperCase()).filter(Boolean).slice(0,100):[];
- const status=raw.type==='bounty'?'unverified_candidate':raw.status==='planned'?'planned':raw.status==='posted'||raw.status==='active'?'source_reported_open':'source_reported';
+ const status=raw.status==='planned'?'planned':raw.status==='posted'||raw.status==='active'?'source_reported_open':'source_reported';
  const listedAt=date(raw.publishedAt||raw.postedAt);
  const deadline=date(raw.deadline||raw.expiresAt);
  const excerpt=clean(raw.excerpt,800);
@@ -104,7 +104,7 @@ export function createOpportunityIndex(dataDir){
  if(existsSync(file))try{
   const loaded=JSON.parse(readFileSync(file,'utf8'));
   if(loaded?.version===2&&typeof loaded.records==='object'&&!Array.isArray(loaded.records))
-   entries=Object.fromEntries(Object.entries(loaded.records).slice(0,MAX_RECORDS));
+   entries=Object.fromEntries(Object.entries(loaded.records).filter(([,v])=>v&&v.type!=='bounty'&&SOURCES.has(v.source)).slice(0,MAX_RECORDS));
  }catch{throw Error('Opportunity index on volume is corrupt; refusing to silently overwrite historical records.')}
  const save=()=>{
   const tmp=file+'.tmp';
