@@ -115,3 +115,12 @@
 .id-top-bounty-outcome span{font-size:19px;font-weight:700;color:var(--accent);overflow-wrap:anywhere}
 .id-top-bounty-outcome small{font:10px/1.4 ui-monospace,Consolas,monospace;color:#74786e}
 @media(max-width:760px){.id-bounty-featured-head{grid-template-columns:1fr}.id-bounty-featured-count{text-align:left}.id-top-bounty{grid-template-columns:35px minmax(0,1fr);gap:12px}.id-top-bounty-rank{font-size:22px}.id-top-bounty-outcome{grid-column:2;align-items:flex-start;text-align:left;flex-direction:row;flex-wrap:wrap;gap:10px}.id-top-bounty-outcome strong{font-size:19px}.id-top-bounty-outcome span{font-size:18px}}
+
+
+/* Landing: selected source-backed opportunities are the FIRST discovery surface.
+   Keep the full section aligned with the existing editorial grid. */
+.id-featured-home{max-width:1440px;margin:0 auto;padding:56px 44px 54px;border-top:0;border-bottom:2px solid var(--dark);background:var(--paper)}
+.id-featured-home .id-bounty-featured-head{margin-bottom:24px}
+.id-featured-home .id-bounty-featured-head h3{font-size:clamp(34px,5vw,64px)}
+.id-featured-home .id-bounty-featured-count{max-width:250px}
+@media(max-width:730px){.id-featured-home{padding:38px 18px 40px}.id-featured-home .id-bounty-featured-head{display:block}.id-featured-home .id-bounty-featured-count{margin-top:14px;text-align:left}}
