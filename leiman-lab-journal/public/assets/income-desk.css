@@ -33,3 +33,31 @@
 .id-grant-warning{font:11px/1.55 ui-monospace,Consolas,monospace;color:#985c4b;border-left:2px solid var(--accent);padding-left:13px;margin:15px 0 20px}
 @media(max-width:970px){.id-source-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:730px){.id-source-grid,.id-grant-results{grid-template-columns:1fr}.id-source-card{min-height:220px}.id-grants-box .id-search-form{grid-template-columns:1fr}.id-grants-box .id-search-form button{grid-column:1}.id-grant-card{padding:19px}}
+
+
+/* Income Intelligence v0.2: indexed opportunity intelligence */
+.id-v2{background:#eae7df}
+.id-v2-summary{font:700 11px/1.55 ui-monospace,Consolas,monospace;letter-spacing:.04em;padding:15px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:25px 0;color:#5b6059}
+.id-v2 .id-search-form{grid-template-columns:1.2fr .7fr .7fr auto;background:#f4f2ec}
+.id-v2-layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(285px,.6fr);gap:24px;margin-top:25px;align-items:start}
+.id-v2-results{display:grid;grid-template-columns:1fr;gap:1px;background:#c8c8bd;border:1px solid #c8c8bd}
+.id-v2-card{padding:19px 23px;background:#f6f4ef}
+.id-v2-card-top{display:flex;justify-content:space-between;gap:13px;font:10px/1.5 ui-monospace,Consolas,monospace;color:#767a72}
+.id-v2-card h3{font-size:23px;line-height:1.2;letter-spacing:-.04em;margin:14px 0}
+.id-v2-card p{font-size:13px;color:#515950;line-height:1.52;max-width:680px;margin:0 0 15px}
+.id-v2-card-footer{border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:12px}
+.id-v2-card-footer a{color:var(--accent);font:700 11px ui-monospace,monospace;text-decoration:none}
+.id-v2-card-footer button{font:700 11px ui-monospace,Consolas,monospace;border:1px solid var(--ink);background:none;color:var(--ink);padding:9px 12px;cursor:pointer}
+.id-v2-card-footer button:hover{background:var(--ink);color:white}
+.id-v2-assessment{position:sticky;top:20px;border:1px solid var(--ink);background:#f7f5ef;padding:23px}
+.id-v2-assessment h3{font-size:25px;letter-spacing:-.06em;line-height:1.2}
+.id-v2-assessment form{display:grid;gap:14px}
+.id-v2-assessment label{font-size:10px}
+.id-v2-assessment form button{margin-top:10px}
+#id-v2-assess-result{border-top:1px solid var(--line);margin-top:20px;padding-top:16px;font:13px/1.6 Arial,sans-serif;overflow-wrap:anywhere}
+#id-v2-assess-result h4{font-size:17px;margin:15px 0}
+#id-v2-assess-result h5{font:700 11px ui-monospace,Consolas,monospace;letter-spacing:.04em;margin-bottom:5px}
+#id-v2-assess-result ul{padding-left:17px}
+.id-v2-verdict{font:700 11px ui-monospace,monospace;color:var(--accent);padding:10px;border:1px solid var(--accent)}
+@media(max-width:1080px){.id-v2-layout{grid-template-columns:1fr}.id-v2-assessment{position:static}}
+@media(max-width:730px){.id-v2 .id-search-form{grid-template-columns:1fr}.id-v2-assessment{padding:15px}.id-v2-card{padding:16px}}
