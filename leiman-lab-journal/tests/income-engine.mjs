@@ -42,12 +42,16 @@ export async function testIncomeEngine(){
    return {ok:true,json:async()=>({jobs:[sampleJob,{
      ...sampleJob,guid:'https://himalayas.app/companies/test-employer/jobs/product-designer-duplicate',
      applicationLink:'https://himalayas.app/companies/test-employer/jobs/product-designer-duplicate'
-   }],totalCount:2,updatedAt:Math.floor(Date.now()/1000)})};
+   },{
+     ...sampleJob,guid:'https://himalayas.app/companies/test-employer/jobs/unpriced-designer',
+     applicationLink:'https://himalayas.app/companies/test-employer/jobs/unpriced-designer',
+     title:'Unpaid or undisclosed compensation',minSalary:null,maxSalary:null
+   }],totalCount:3,updatedAt:Math.floor(Date.now()/1000)})};
  }});
  const first=await engine.findJobs({q:'designer',skills:'Figma',country:'US'},'test-a');
  assert.equal(first.status,200);
  assert.equal(first.body.results.length,1);
- assert.equal(first.body.totalFromProvider,2,'provider total remains separate from deduplicated results');
+ assert.equal(first.body.totalFromProvider,3,'provider total includes unpriced and duplicate records, unlike the displayed results');
  assert.equal(first.body.results[0].sourceUrl,sampleJob.guid);
  assert.equal(first.body.results[0].applicationLink,sampleJob.applicationLink);
  const second=await engine.findJobs({q:'designer',skills:'Figma',country:'US'},'test-a');
