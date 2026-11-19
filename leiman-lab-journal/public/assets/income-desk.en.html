@@ -16,7 +16,20 @@
  </section>
 <p class="id-legal">Jobs sourced from Himalayas. Apply through the provided Himalayas link. Results refresh at the provider's cadence and may close sooner. <a href="https://himalayas.app" target="_blank" rel="noopener noreferrer">Himalayas ↗</a></p>
  <p class="id-legal">Fit is a transparent relevance heuristic, not the probability of getting hired. The source has not been independently contacted.</p></section>
- <section id="curator" class="id-section id-curator"><div class="id-section-code">02 / FINANCE CURATOR</div><header><h2>Turn a brief into a delivery plan.</h2><p>Describe a real problem and a proposed budget. The curator maps requirements to human roles and bounded AI assistants, then models an illustrative allocation. No contracts, quotes or outreach happen automatically.</p></header>
+ <section class="id-section id-global" id="global-opportunities">
+ <div class="id-section-code">02 / INTERNATIONAL OPPORTUNITY NETWORK</div>
+ <header><h2>Countries, funding and procurement.</h2><p>Explore official sources across regions. Availability, eligibility and legal requirements are different questions. Each source states what can be accessed and what still needs verification.</p></header>
+ <div class="id-global-tools"><label>COUNTRY / REGION<select id="id-source-region"><option value="all">All regions</option><option value="global">International</option><option value="us">United States</option><option value="uk">United Kingdom</option><option value="eu">European Union</option><option value="ca">Canada</option><option value="au">Australia</option><option value="sg">Singapore</option><option value="id">Indonesia</option></select></label>
+ <label>OPPORTUNITY TYPE<select id="id-source-kind"><option value="all">All types</option><option value="jobs">Employment</option><option value="grants">Grants & funding</option><option value="tenders">Tenders & contracts</option><option value="research">Research / fellowships</option></select></label></div>
+ <div class="id-global-status" id="id-source-status" role="status">Loading official source registry…</div><div id="id-source-results" class="id-source-grid"></div>
+ <p class="id-legal">"Official directory" means a verified government or organisation website, not a live imported listing. Restricted APIs remain disabled until access and licensing are settled. No source grants automatic international eligibility.</p>
+ <div class="id-grants-box"><div class="id-section-code">LIVE SOURCE / U.S. FEDERAL GRANTS</div><h3>Search official Grants.gov opportunities.</h3>
+ <p>This search uses the public Grants.gov API. Records marked posted may still be restricted by institution type, citizenship, country, registration requirements or programme rules. Every listing needs individual review.</p>
+ <form id="id-grant-search" class="id-search-form"><label>FUNDING TOPIC / KEYWORD<input type="search" name="q" placeholder="e.g. artificial intelligence" required maxlength="100" value="artificial intelligence"></label><button class="id-action" type="submit">SEARCH U.S. GRANTS →</button></form>
+ <div id="id-grant-status" class="id-results-head" role="status">Search the official feed.</div><div id="id-grant-results" class="id-grant-results"></div><p class="id-legal">Source: <a href="https://www.grants.gov/search-grants" target="_blank" rel="noopener noreferrer">Grants.gov ↗</a> · Applicant eligibility cannot be inferred from the country where you currently live.</p>
+ </div>
+</section>
+<section id="curator" class="id-section id-curator"><div class="id-section-code">03 / FINANCE CURATOR</div><header><h2>Turn a brief into a delivery plan.</h2><p>Describe a real problem and a proposed budget. The curator maps requirements to human roles and bounded AI assistants, then models an illustrative allocation. No contracts, quotes or outreach happen automatically.</p></header>
  <div class="id-two-column"><form id="id-plan-form" class="id-form">
  <label>PROJECT TITLE<input type="text" name="title" required minlength="4" maxlength="160" placeholder="e.g. Interactive exhibition production"></label>
  <label>DELIVERABLES / REQUIREMENTS<textarea name="brief" required minlength="25" maxlength="3000" rows="7" placeholder="Describe deliverables, quality expectations, constraints and intended use in at least 25 characters."></textarea></label>
@@ -24,7 +37,7 @@
  <button class="id-action" type="submit">GENERATE CAPABILITY PLAN →</button></form>
  <div class="id-plan-output" id="id-plan-output" role="region" aria-live="polite"><div class="id-empty-state"><span>02 / CURATOR</span><p>Enter a brief and budget to see a capability plan and review gates.</p></div></div></div>
  <p class="id-legal">All financial allocations are modelling assumptions, not binding offers or verified project costs.</p></section>
- <section id="request" class="id-section id-request"><div class="id-section-code">03 / BUSINESS INTAKE</div><header><h2>Have a project that needs execution?</h2><p>Submit a brief for private review by the Leiman Lab team. It will not become a public bounty or reserve resources. Review and any engagement are discretionary.</p></header>
+ <section id="request" class="id-section id-request"><div class="id-section-code">04 / BUSINESS INTAKE</div><header><h2>Have a project that needs execution?</h2><p>Submit a brief for private review by the Leiman Lab team. It will not become a public bounty or reserve resources. Review and any engagement are discretionary.</p></header>
  <form id="id-brief-form" class="id-form id-brief-form"><div class="id-inline"><label>CONTACT NAME<input type="text" autocomplete="name" maxlength="100" name="name" required></label>
  <label>EMAIL<input type="email" autocomplete="email" maxlength="180" name="email" required></label></div>
  <label>PROJECT TITLE<input name="title" type="text" required minlength="5" maxlength="160"></label>
