@@ -5,10 +5,22 @@
  <div class="id-bounty-featured-head"><div>
   <div class="id-section-code">00 / ДЕНЕЖНЫЕ ВОЗМОЖНОСТИ · ОФИЦИАЛЬНЫЕ ИСТОЧНИКИ</div>
   <h3 id="id-top-bounty-heading">Выбор редакции</h3>
-  <p>Пять конкурсов с опубликованными денежными призами. Откройте строку, чтобы увидеть условия и правила.</p>
-  </div><div class="id-bounty-featured-count" id="id-top-bounty-meta">5 ВАРИАНТОВ · ДЕНЕЖНЫЕ ПРИЗЫ</div></div>
- <div id="id-top-bounty-results" class="id-bounty-featured-list"><!-- CASH_AWARDS_SSR --></div>
- <p class="id-awards-footnote">Суммы опубликованы организаторами. Выплата зависит от победы и допуска.</p>
+  <p id="id-featured-description">Сначала два варианта. Переключайте категории или откройте весь список.</p>
+  </div><div class="id-bounty-featured-count" id="id-top-bounty-meta">2 ИЗ 5 · ДЕНЕЖНЫЕ ПРИЗЫ</div></div>
+ <div class="id-featured-switch" role="tablist" aria-label="Тип возможности">
+  <button type="button" id="id-feature-prizes" class="is-active" role="tab" aria-selected="true" aria-controls="id-feature-prizes-panel">Призы</button>
+  <button type="button" id="id-feature-grants" role="tab" aria-selected="false" aria-controls="id-feature-grants-panel" tabindex="-1">Гранты</button>
+ </div>
+ <div id="id-feature-prizes-panel" role="tabpanel" aria-labelledby="id-feature-prizes">
+  <div id="id-top-bounty-results" class="id-bounty-featured-list"><!-- CASH_AWARDS_SSR --></div>
+ </div>
+ <div id="id-feature-grants-panel" role="tabpanel" aria-labelledby="id-feature-grants" hidden>
+  <div id="id-feature-grants-status" role="status" aria-live="polite">Гранты загружаются при открытии вкладки.</div>
+  <div id="id-feature-grants-results" class="id-bounty-featured-list"></div>
+  <a class="id-featured-browse-link" href="#bounties">Поиск грантов по теме ↓</a>
+ </div>
+ <button type="button" id="id-feature-see-more" class="id-feature-see-more" aria-expanded="false" aria-controls="id-top-bounty-results">Показать ещё (3) <span aria-hidden="true">↓</span></button>
+ <p id="id-featured-footnote" class="id-awards-footnote">Опубликованные денежные призы выплачиваются только победителям при соблюдении правил.</p>
  </section>
 <section id="radar" class="id-section"><div class="id-section-code">01 / РЕАЛЬНЫЕ ВОЗМОЖНОСТИ</div><header><h2>Найдите конкретное предложение.</h2><p>Удалённые вакансии с указанной зарплатой, первоисточником, ограничениями по странам и объяснением соответствия. Объявления без суммы скрываются; трудоустройство не гарантируется.</p></header>
  <form id="id-job-search" class="id-search-form"><label>ПРОФЕССИЯ / ЗАПРОС<input name="q" type="search" maxlength="90" placeholder="например, product designer (необязательно)"></label>
