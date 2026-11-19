@@ -651,6 +651,18 @@ async function adminApi(req, res, pathname) {
   if (pathname === '/api/admin/login' && req.method === 'POST') return sendJson(res, 200, { ok: true });
   if (pathname === '/api/admin/opportunities/submissions' && req.method === 'GET') return sendJson(res, 200, { retentionDays: 30, submissions: intake.list() });
   if (pathname === '/api/admin/income/briefs' && req.method === 'GET') return sendJson(res, 200, { retentionDays: 30, briefs: briefs.list() });
+  const briefUpdate = pathname.match(/^\/api\/admin\/income\/briefs\/([a-f0-9]{32})$/);
+  if(briefUpdate && req.method==='POST'){
+    if(!String(req.headers['content-type']||'').startsWith('application/json'))return sendJson(res,415,{error:'JSON required'});
+    if(req.headers['sec-fetch-site']==='cross-site')return sendJson(res,403,{error:'Cross-site request blocked'});
+    if(req.headers.origin){
+      let host;try{host=new URL(req.headers.origin).host}catch{return sendJson(res,403,{error:'Invalid origin'})}
+      if(host!==requestHost(req))return sendJson(res,403,{error:'Origin mismatch'});
+    }
+    const changes=await readBody(req,6000);
+    const result=briefs.update(briefUpdate[1],changes);
+    return sendJson(res,result.status,result.body);
+  }
 
   if (pathname === '/api/admin/site') {
     if (req.method === 'POST') {
@@ -866,6 +878,14 @@ const server = http.createServer((req,res)=>{
   if(englishArticle && articleBySlug.has(englishArticle[1]) && hasEnglish(articleBySlug.get(englishArticle[1]))) {
     const a=localiseArticle(articleBySlug.get(englishArticle[1]), 'en');
     return write(res,200,articleView(a,origin,'en'),'text/html; charset=utf-8',a.draft?{'Cache-Control':'no-store'}:{});
+  }
+  if(pathname==='/income-ops'){
+    const content=readFileSync(path.join(PUBLIC,'assets','income-ops.html'),'utf8');
+    return write(res,200,page({content,lang:'en',title:'Income Intelligence Operations — Private',
+      description:'Private operator console for reviewing consented business briefs and pilot outcomes.',
+      canonical:origin+'/income-ops',cover:origin+'/og/ai-income-opportunities.png',
+      extraStylesheet:'/assets/income-ops.css',noindex:true,bodyData:' data-page="income-ops"'
+    }),'text/html; charset=utf-8',{'Cache-Control':'no-store','X-Robots-Tag':'noindex, nofollow'});
   }
   if(['/income-desk','/income-desk/','/en/income-desk','/en/income-desk/'].includes(pathname)) {
     const lang=pathname.startsWith('/en/')?'en':'ru';
