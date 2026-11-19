@@ -1,90 +1,72 @@
 import assert from 'node:assert/strict';
-import {createBountySearch,normalizeBountyIssue,scoreBountyCandidate} from '../bounty-search.mjs';
-import {createOpportunityIndex} from '../opportunity-index.mjs';
-import {mkdtempSync,rmSync} from 'node:fs';
+import {readFileSync,mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
+import {publishedCashAwards,renderCashAwards} from '../cash-awards.mjs';
+import {grantWithPublishedMoney,createFundedGrantRadar} from '../funded-grants.mjs';
+import {createOpportunityIndex} from '../opportunity-index.mjs';
 
-export async function testBountySearch(){
- const issue={
-  id:123456,number:42,title:'Bounty: update project documentation',state:'open',
-  html_url:'https://github.com/example/project/issues/42',
-  repository_url:'https://api.github.com/repos/example/project',
-  labels:[{name:'bounty'},{name:'documentation'}],
-  body:'Reward: $250 for merging documentation with examples and screenshots.',
-  created_at:'2026-11-12T00:00:00Z',updated_at:'2026-11-19T01:00:00Z',comments:1
- };
- const normalized=normalizeBountyIssue(issue);
- assert.equal(normalized.type,'bounty');
- assert.equal(normalized.source,'GitHub Bounty Candidates');
- assert.equal(normalized.rewardAmount,250);
- assert.equal(normalized.rewardCurrency,'USD');
- assert.equal(normalized.rewardFunded,false);
- assert.equal(normalized.paymentGuarantee,'none');
- assert.equal(normalizeBountyIssue({...issue,state:'closed'}),null);
- assert.equal(normalizeBountyIssue({...issue,pull_request:{url:'https://api.github.com/repos/e/r/pulls/42'}}),null);
- assert.equal(normalizeBountyIssue({...issue,html_url:'https://evil.example/test'}),null);
- const unpriced=normalizeBountyIssue({...issue,body:'Fix the docs please, reward discussed privately'});
- assert.equal(unpriced.rewardAmount,null,'no invented cash figure');
- let requests=0;
- const engine=createBountySearch({fetcher:async(url)=>{
-  requests++;assert.ok(url.startsWith('https://api.github.com/search/issues?'),'official read-only API');
-  return {ok:true,json:async()=>({items:[issue],total_count:1})};
- }});
- const fresh=await engine.search({q:'docs'},'test-client');
- assert.equal(fresh.status,200);
- assert.equal(fresh.body.results.length,1);
- assert.equal(fresh.body.results[0].rewardFunded,false);
- const cached=await engine.search({q:'docs'},'test-client');
- assert.equal(cached.body.sourceStatus,'cached');
- assert.equal(requests,1);
- const unavailable=await createBountySearch({fetcher:async()=>{throw Error('provider down')}}).search({q:'docs'},'different-client');
- assert.equal(unavailable.status,503);
- assert.deepEqual(unavailable.body.results,[]);
- const tougher={...issue,id:789012,number:45,
-  html_url:'https://github.com/example/project/issues/45',
-  title:'Bounty: critical cryptography kernel overhaul',
-  body:'$1800 bounty. Audit entire framework and rewrite complex kernel cryptography.'};
- const docScore=scoreBountyCandidate(normalized,{now:Date.parse('2026-11-19T12:00:00Z')});
- const hardScore=scoreBountyCandidate(normalizeBountyIssue(tougher),{now:Date.parse('2026-11-19T12:00:00Z')});
- assert.ok(docScore.score>hardScore.score,'manageable scope should outrank high but complex reward');
- assert.equal(docScore.paymentVerified,false);
- assert.equal(docScore.effortVerified,false);
- let topRequests=0;
- const topSearch=createBountySearch({fetcher:async(url)=>{
-  topRequests++;
-  const page=Number(new URL(url).searchParams.get('page'));
-  assert.ok(new URL(url).searchParams.get('q').includes('label:bounty'));
-  return {ok:true,json:async()=>({
-   total_count:3,items:page===1?[issue,tougher]:page===2?[issue]:[]
-  })};
- }});
- const featured=await topSearch.top('unfiltered-picks');
- assert.equal(featured.status,200);
- assert.equal(featured.body.independentOfUserFilters,true);
- assert.equal(featured.body.results.length,2,'deduplicate across recent pages');
- assert.equal(featured.body.results[0].id,normalized.id,'candidate review score, not largest reward alone');
- assert.equal(featured.body.results[0].editorial.paymentVerified,false);
- assert.equal(featured.body.candidatePool,2);
- assert.equal(topRequests,3,'three independent pages, not user-filtered search');
- const anotherVisit=await topSearch.top('second-reader');
- assert.equal(anotherVisit.body.sourceStatus,'cached');
- assert.equal(topRequests,3,'featured picks shared between visitors without new provider calls');
- const emptyTop=await createBountySearch({fetcher:async()=>{throw Error('down')}}).top('offline');
- assert.equal(emptyTop.status,503);
- assert.deepEqual(emptyTop.body.results,[],'never fabricate featured issues');
-
- const temp=mkdtempSync(path.join(tmpdir(),'income-bounty-test-'));
+export async function testCashPrizeDiscovery(){
+ const original=JSON.parse(readFileSync('content/cash-awards.json','utf8'));
+ const now=new Date('2026-11-19T10:00:00Z');
+ const awards=publishedCashAwards(original,{now});
+ assert.equal(awards.length,5,'five fully cash-specified prizes from official sites');
+ assert.ok(awards.every(x=>x.cashAward>0&&x.cashEvidence.startsWith('official_')));
+ assert.ok(awards.every(x=>!x.paymentGuaranteed&&x.nonCashExcluded));
+ assert.ok(awards.some(x=>x.id==='heygen-video-contest-2026'&&x.cashAward===3500));
+ assert.ok(awards.some(x=>x.id==='higgsfield-talent-2026'&&x.cashAward===200000));
+ assert.ok(!awards.some(x=>/akool|crypto|web3|github/i.test(x.title+x.issuer)));
+ assert.equal(publishedCashAwards(original,{now:new Date('2027-06-01T00:00:00Z')}).length,0,'expired awards vanish');
+ assert.equal(publishedCashAwards({records:[{...original.records[0],cashAward:null}]},{now}).length,0,'no unpriced entries');
+ assert.equal(publishedCashAwards({records:[{...original.records[0],title:'Crypto token giveaway'}]},{now}).length,0);
+ assert.equal(publishedCashAwards({records:[{...original.records[0],cashEvidence:'unverified_text'}]},{now}).length,0);
+ assert.equal(publishedCashAwards({records:[{...original.records[0],cashAward:1000,cashCurrency:'CREDITS'}]},{now}).length,0);
+ const html=renderCashAwards(awards,'en'),ru=renderCashAwards(awards,'ru');
+ assert.ok(html.includes('CASH AWARD')&&html.includes('OFFICIAL RULES'));
+ assert.ok(ru.includes('ДЕНЕЖНЫЙ ПРИЗ')&&ru.includes('ОФИЦИАЛЬНЫЕ ПРАВИЛА'));
+ assert.ok(html.includes('HeyGen')&&!html.includes('AKOOL'));
+ const opportunity={id:'us-grant-801',title:'Arts Innovation Programme',issuer:'Federal Arts Agency',
+   source:'Grants.gov',sourceUrl:'https://www.grants.gov/search-results-detail/801',
+   deadline:'2027-04-21',status:'posted',postedAt:'2026-11-10'};
+ const filled={errorcode:0,data:{id:801,synopsis:{
+   awardCeiling:'75,000',awardFloor:'10,000',applicantTypes:[{description:'Nonprofit organisations'}],
+   synopsisDesc:'Project funding for arts organisations'
+ }}};
+ const parsed=grantWithPublishedMoney(opportunity,filled);
+ assert.equal(parsed.cashAmount,75000);
+ assert.equal(parsed.fundingFloor,10000);
+ assert.equal(parsed.amountBasis,'published_award_ceiling');
+ assert.equal(parsed.paymentGuaranteed,false);
+ assert.equal(grantWithPublishedMoney(opportunity,{data:{id:801,synopsis:{awardCeiling:'0',awardFloor:''}}}),null);
+ assert.equal(grantWithPublishedMoney(opportunity,{data:{id:801,synopsis:{awardCeiling:'100',synopsisDesc:'Crypto blockchain financing'}}}),null);
+ let calls=0,searches=0;
+ const radar=createFundedGrantRadar({
+  grantSearch:{search:async()=>{searches++;return {status:200,body:{
+    sourceStatus:'fresh',results:[opportunity,{...opportunity,id:'us-grant-802',title:'No amounts announced',sourceUrl:'https://www.grants.gov/search-results-detail/802'}]
+  }};}},
+  fetcher:async(url,opts)=>{
+   calls++;assert.equal(url,'https://api.grants.gov/v1/api/fetchOpportunity');
+   const id=JSON.parse(opts.body).opportunityId;
+   return {ok:true,json:async()=>id===801?filled:{errorcode:0,data:{id:802,synopsis:{awardCeiling:null,awardFloor:null}}}};
+  }
+ });
+ const first=await radar.search({q:'arts'},'test');
+ assert.equal(first.status,200);
+ assert.equal(first.body.results.length,1,'only monetary grants survive');
+ assert.equal(first.body.results[0].cashEvidence,'official_grant_synopsis');
+ assert.equal(first.body.skippedNoMoney,1);
+ assert.equal(calls,2);
+ const second=await radar.search({q:'arts'},'test');
+ assert.equal(second.body.sourceStatus,'cached');
+ assert.equal(calls,2);assert.equal(searches,1);
+ const offline=await createFundedGrantRadar({grantSearch:{search:async()=>({status:503})}}).search({q:'arts'},'offline');
+ assert.equal(offline.status,503);assert.deepEqual(offline.body.results,[]);
+ const tmp=mkdtempSync(path.join(tmpdir(),'cash-prize-index-test-'));
  try{
-  const db=createOpportunityIndex(temp);
-  const result=db.ingest(fresh.body.results,'GitHub Bounty Candidates');
-  assert.equal(result.inserted,1);
-  const found=db.search({type:'bounty'});
-  assert.equal(found.records.length,1);
-  assert.equal(found.records[0].bountyRewardAmount,250);
-  assert.equal(found.records[0].bountyPaymentVerified,false);
-  assert.equal(found.records[0].eligibility.status,'needs_review');
-  assert.equal(createOpportunityIndex(temp).stats().byType.bounty,1,'bounty index persists');
- }finally{rmSync(temp,{recursive:true,force:true})}
- console.log('✓ payout-unverified bounty leads, safe reward extraction, provider failure and persistent indexing');
+  const index=createOpportunityIndex(tmp);
+  assert.equal(index.ingest([{source:'GitHub Bounty Candidates',type:'bounty',
+   id:'example',sourceUrl:'https://github.com/foo/bar/issues/3',title:'Crypto task'}],'GitHub Bounty Candidates').inserted,0);
+  assert.equal(index.stats().total,0,'old unverified bounty source cannot reenter the index');
+ }finally{rmSync(tmp,{recursive:true,force:true})}
+ console.log('✓ official cash award whitelist, expiry, no crypto or credits, bilingual SSR, monetary grant details and retired issue bounties');
 }
