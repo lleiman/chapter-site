@@ -39,6 +39,10 @@ export async function testCashPrizeDiscovery(){
  assert.equal(parsed.paymentGuaranteed,false);
  assert.equal(grantWithPublishedMoney(opportunity,{data:{id:801,synopsis:{awardCeiling:'0',awardFloor:''}}}),null);
  assert.equal(grantWithPublishedMoney(opportunity,{data:{id:801,synopsis:{awardCeiling:'100',synopsisDesc:'Crypto blockchain financing'}}}),null);
+ assert.equal(grantWithPublishedMoney({...opportunity,title:'Arts and Artifacts International Indemnity Program'},filled),null,
+  'an insurance indemnity face value is not cash funding');
+ assert.equal(grantWithPublishedMoney(opportunity,{data:{id:801,synopsis:{awardCeiling:'250000',synopsisDesc:'Loan guarantee for the arts'}}}),null,
+  'loan guarantees do not represent available cash grants');
  let calls=0,searches=0;
  const radar=createFundedGrantRadar({
   grantSearch:{search:async()=>{searches++;return {status:200,body:{
