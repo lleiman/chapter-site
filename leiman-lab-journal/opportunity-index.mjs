@@ -134,8 +134,11 @@ export function createOpportunityIndex(dataDir){
   const matches=Object.values(entries).filter(v=>
     (!type||type==='all'||v.type===type)&&
     (!source||source==='all'||v.source===source)&&
-    (!countries||v.country===countries||v.country==='GLOBAL')&&
+    (!countries||(v.type==='employment'
+      ? (v.worldwide||v.locationUnclear||!v.locationCountries.length||v.locationCountries.includes(countries))
+      : v.country===countries))&&
     (includeExpired||!v.deadline||v.deadline>=today)&&
+    (query.includeStale==='true'||Date.now()-Date.parse(v.sourceLastSeen)<14*86400000)&&
     (!q||(v.title+' '+v.issuer+' '+v.excerpt).toLowerCase().includes(q))
   ).sort((a,b)=>{
     const aExpired=a.deadline&&a.deadline<today,bExpired=b.deadline&&b.deadline<today;
@@ -143,9 +146,10 @@ export function createOpportunityIndex(dataDir){
     return b.sourceLastSeen.localeCompare(a.sourceLastSeen)
   });
   return {count:matches.length,records:matches.slice(0,limit).map(v=>({
-   ...v,eligibility:evaluateEligibility(v,profile),capabilityFit:compareCapabilities(v,profile)
+   ...v,sourceFreshnessHours:Math.max(0,Math.round((Date.now()-Date.parse(v.sourceLastSeen))/3600000)),
+   eligibility:evaluateEligibility(v,profile),capabilityFit:compareCapabilities(v,profile)
   })),indexUpdatedAt:existsSync(file)?new Date().toISOString():null,
-    disclaimer:'Indexed provider-reported records; no applicant is considered legally eligible without source-level review. Not a full-market index.'};
+    disclaimer:'Indexed provider-reported records. Records not re-seen for 14 days are hidden by default; no applicant is considered legally eligible without source review. Not an exhaustive market index.'};
  }
  function stats(){
   const values=Object.values(entries);
