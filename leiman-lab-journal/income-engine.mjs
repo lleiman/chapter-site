@@ -122,8 +122,18 @@ export function createIncomeEngine({fetcher=globalThis.fetch}={}){
         else return {status:503,body:{error:'Live provider unavailable. No listings have been fabricated.',provider:'Himalayas',results:[],retryAfterSeconds:90}};
       }
     }
-    const results=(data.jobs||[]).map(normaliseJob).filter(Boolean).map(j=>({...j,fit:opportunityFit(j,{q,skills,country})}))
-      .filter(j=>j.fit.eligible).sort((a,b)=>b.fit.score-a.fit.score).slice(0,24);
+    const ranked=(data.jobs||[]).map(normaliseJob).filter(Boolean).map(j=>({...j,fit:opportunityFit(j,{q,skills,country})}))
+      .filter(j=>j.fit.eligible).sort((a,b)=>b.fit.score-a.fit.score);
+    // A provider may list near-identical copies of one job under different source IDs.
+    // Keep distinct roles and locations, but suppress duplicate company/title/contract pairs.
+    const unique=new Set(),results=[];
+    for(const job of ranked){
+      const key=[job.company,job.title,job.employmentType,
+        job.locationRestrictions.join(',')].join('|').toLowerCase().replace(/\s+/g,' ').trim();
+      if(unique.has(key))continue;
+      unique.add(key);results.push(job);
+      if(results.length>=24)break;
+    }
     return {status:200,body:{results,query:{q,skills,country,page},provider:'Himalayas',sourceUrl:'https://himalayas.app',
       sourceStatus,providerUpdatedAt:Number.isFinite(data.updatedAt)?new Date(data.updatedAt*1000).toISOString():null,
       retrievedAt:new Date().toISOString(),totalFromProvider:data.totalCount??null,
