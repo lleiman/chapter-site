@@ -179,7 +179,7 @@ ${date ? `<meta property="article:published_time" content="${escaped(date)}">` :
 </head><body${bodyData}>
 <header class="site-header"><div class="container header-inner">
 <a class="identity" href="${lang === 'en' ? '/en/' : '/'}" aria-label="Leiman Lab — home">${logo}<span class="wordmark">LEIMAN <b>LAB</b></span></a>
-<nav aria-label="${lang === 'en' ? 'Main navigation' : 'Основная навигация'}"><a href="${lang === 'en' ? '/en/#journal' : '/#journal'}">${lang === 'en' ? 'Journal' : 'Журнал'}</a><a href="${lang === 'en' ? '/en/opportunities' : '/opportunities'}">INCOME</a><a href="/ai-index">AI INDEX</a><a href="/ai-film-awards">AI FILM AWARDS</a><a href="/predictions">PREDICTION OS</a><a href="/commons">COMMONS</a><a href="/about">${lang === 'en' ? 'Author' : 'Об авторе'}</a><a href="/search">${lang === 'en' ? 'Search (RU)' : 'Поиск'}</a><a class="locale-switch" href="${escaped(alternates.find(x => x.lang !== lang)?.href || (lang === 'en' ? '/' : '/en/'))}" lang="${lang === 'en' ? 'ru' : 'en'}">${lang === 'en' ? 'RU' : 'EN'}</a><a href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer"><span class="nav-long">Telegram</span><span class="nav-short">TG</span> ↗</a></nav>
+<nav aria-label="${lang === 'en' ? 'Main navigation' : 'Основная навигация'}"><a href="${lang === 'en' ? '/en/#journal' : '/#journal'}">${lang === 'en' ? 'Journal' : 'Журнал'}</a><a href="${lang === 'en' ? '/en/income-desk' : '/income-desk'}">INCOME</a><a href="/ai-index">AI INDEX</a><a href="/ai-film-awards">AI FILM AWARDS</a><a href="/predictions">PREDICTION OS</a><a href="/commons">COMMONS</a><a href="/about">${lang === 'en' ? 'Author' : 'Об авторе'}</a><a href="/search">${lang === 'en' ? 'Search (RU)' : 'Поиск'}</a><a class="locale-switch" href="${escaped(alternates.find(x => x.lang !== lang)?.href || (lang === 'en' ? '/' : '/en/'))}" lang="${lang === 'en' ? 'ru' : 'en'}">${lang === 'en' ? 'RU' : 'EN'}</a><a href="https://t.me/aiadepts" target="_blank" rel="noopener noreferrer"><span class="nav-long">Telegram</span><span class="nav-short">TG</span> ↗</a></nav>
 </div></header>
 ${content}
 <footer class="site-footer"><div class="container footer-inner">
@@ -831,6 +831,8 @@ const server = http.createServer((req,res)=>{
       {path:'/ai-index',lastmod:articleBySlug.get('ai-index-2026')?.updated||'2026-11-04'},
       {path:'/ai-film-awards',lastmod:'2026-11-10'},
       {path:'/predictions',lastmod:'2026-11-18'},
+      {path:'/income-desk',lastmod:'2026-11-19',alts:[{lang:'ru',path:'/income-desk'},{lang:'en',path:'/en/income-desk'}]},
+      {path:'/en/income-desk',lastmod:'2026-11-19',alts:[{lang:'ru',path:'/income-desk'},{lang:'en',path:'/en/income-desk'}]},
       {path:'/organism',lastmod:'2026-11-18',alts:[{lang:'ru',path:'/organism'},{lang:'en',path:'/en/organism'}]},
       {path:'/en/organism',lastmod:'2026-11-18',alts:[{lang:'ru',path:'/organism'},{lang:'en',path:'/en/organism'}]},
       {path:'/opportunities',lastmod:'2026-11-18',alts:[{lang:'ru',path:'/opportunities'},{lang:'en',path:'/en/opportunities'}]},
@@ -864,6 +866,19 @@ const server = http.createServer((req,res)=>{
   if(englishArticle && articleBySlug.has(englishArticle[1]) && hasEnglish(articleBySlug.get(englishArticle[1]))) {
     const a=localiseArticle(articleBySlug.get(englishArticle[1]), 'en');
     return write(res,200,articleView(a,origin,'en'),'text/html; charset=utf-8',a.draft?{'Cache-Control':'no-store'}:{});
+  }
+  if(['/income-desk','/income-desk/','/en/income-desk','/en/income-desk/'].includes(pathname)) {
+    const lang=pathname.startsWith('/en/')?'en':'ru';
+    const pagePath=lang==='en'?'/en/income-desk':'/income-desk';
+    const content=readFileSync(path.join(PUBLIC,'assets','income-desk.'+lang+'.html'),'utf8');
+    return write(res,200,page({content,lang,
+      title:lang==='en'?'Income Intelligence — Live Jobs & Finance Curator':'Income Intelligence — вакансии и финансовый куратор',
+      description:lang==='en'?'Search live remote opportunities, create explainable capability plans, and privately submit a business brief for human review.':'Ищите реальные удалённые вакансии, собирайте план исполнения задач и отправляйте приватные заявки на рассмотрение.',
+      canonical:origin+pagePath,cover:origin+'/og/ai-income-opportunities.png',
+      extraStylesheet:'/assets/income-desk.css',bodyData:' data-page="income-desk"',
+      alternates:[{lang:'ru',href:origin+'/income-desk'},{lang:'en',href:origin+'/en/income-desk'}],
+      schema:{'@context':'https://schema.org','@type':'WebPage',name:'Income Intelligence',url:origin+pagePath,inLanguage:lang==='en'?'en-US':'ru-RU',isPartOf:{'@type':'WebSite',name:'Leiman Lab',url:origin+'/'}}
+    }));
   }
   if(['/organism','/organism/','/en/organism','/en/organism/'].includes(pathname)) {
     const lang=pathname.startsWith('/en/')?'en':'ru';
@@ -906,6 +921,7 @@ const server = http.createServer((req,res)=>{
       <p>${en?'Controller: Leiman Lab. Contact:':'Ответственный за данные: Leiman Lab. Связь:'} <a href="https://t.me/leimanleo">Telegram</a>.</p>
       <p>${en?'We process your name, email, professional description, location and stated preferences only when you actively submit the pilot form with consent. We use these fields to evaluate the proposed service and, separately, to contact you only if you opted in.':'Мы обрабатываем имя, email, текст CV, местоположение и выбранные предпочтения, только если вы самостоятельно отправили анкету с согласием. Данные используются для оценки пилота, а для сообщений — лишь при отдельном согласии.'}</p>
       <p>${en?'Data are kept for up to 30 days, AES-256-GCM encrypted on the hosting volume, accessible to the authorised site operator, and not sent to any AI model, employer, grant provider or analytics vendor. Hosting infrastructure processes the information to provide the service. This is not a guarantee against every operational or security risk.':'Данные хранятся до 30 дней, зашифрованы AES-256-GCM на серверном томе и доступны уполномоченному владельцу сайта. Сейчас они не отправляются в модели ИИ, работодателям, организаторам грантов и аналитическим сервисам. Хостинг обеспечивает техническую обработку данных. Это не гарантирует отсутствия любых рисков.'}</p>
+      <p>${en?'Business project briefs may also be submitted with separate consent; these are encrypted and deleted after 30 days, and are not contracts or paid reservations.':'Заявки компаний принимаются с отдельным согласием, шифруются и удаляются через 30 дней. Отправка не является заключением договора или бронированием.'}</p>
       <p>${en?'You can delete the submission with the one-time deletion token returned after submission, or contact the operator to request access, correction or deletion. Withdrawing consent will not affect processing already performed before withdrawal. Do not include sensitive information in your CV.':'Анкету можно удалить с помощью кода, выданного после отправки, или обратиться к владельцу сайта за доступом, исправлением и удалением данных. Отзыв согласия не отменяет обработку, законно выполненную до отзыва. Не включайте чувствительные данные в CV.'}</p>
       <p><a href="${en?'/en/opportunities':'/opportunities'}">${en?'← Back to Income Intelligence':'← Назад в Income Intelligence'}</a></p></main>`;
     return write(res,200,page({content,title:(en?'Privacy Notice':'Политика приватности')+' — Leiman Lab',description:en?'Income Intelligence CV intake, consent, retention and deletion.':'Обработка CV, согласие, хранение и удаление данных пилота Income Intelligence.',canonical:current,cover:origin+'/og/ai-income-opportunities.png',lang,alternates:[{lang:'ru',href:origin+'/privacy'},{lang:'en',href:origin+'/en/privacy'}]}));
