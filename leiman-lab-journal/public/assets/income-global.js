@@ -56,6 +56,39 @@ if(root){
   <p class="id-grant-warning">${labels.grantWarn}</p>
   <a href="${esc(g.sourceUrl)}" target="_blank" rel="noopener noreferrer">${labels.grantOpen}</a></article>`;
  }
+ const ukForm=el('id-uk-search'),ukStatus=el('id-uk-status'),ukResults=el('id-uk-results');
+ const ukText=en?{
+   loading:'Reading the official UK tender feed…',empty:'No matching active tender-stage notices in the limited recent sample. Try a broader term or search the official portal.',
+   error:'UK official API is unavailable. No synthetic results have been generated.',
+   agency:'BUYER',deadline:'DEADLINE',notProvided:'NOT LISTED',open:'READ NOTICE ↗',
+   sample:'RECENT-SAMPLE ONLY',eligibility:'BIDDER ELIGIBILITY UNVERIFIED. Verify nationality, registration, documents and live status.'
+ }:{
+   loading:'Читаем официальные данные о тендерах Великобритании…',
+   empty:'В ограниченной выборке недавних уведомлений совпадений нет. Попробуйте другой термин или официальный портал.',
+   error:'Британский API недоступен. Вымышленные тендеры не добавляются.',
+   agency:'ЗАКАЗЧИК',deadline:'СРОК',notProvided:'НЕ УКАЗАН',open:'ОТКРЫТЬ УВЕДОМЛЕНИЕ ↗',
+   sample:'НЕПОЛНАЯ ВЫБОРКА',eligibility:'ДОПУСК НЕ ПРОВЕРЕН. Уточняйте гражданство или юрисдикцию, регистрацию, документы и текущий статус.'
+ };
+ function ukCard(t){
+  return `<article class="id-grant-card"><div class="id-job-meta"><span>UK / TENDER / ${esc(t.status)}</span><span>${esc(t.id)}</span></div>
+   <h4>${esc(t.title)}</h4><p>${esc(t.excerpt||'')}</p>
+   <div class="id-grant-detail"><div><small>${ukText.agency}</small><strong>${esc(t.issuer)}</strong></div>
+   <div><small>${ukText.deadline}</small><strong>${esc(t.deadline||ukText.notProvided)}</strong></div></div>
+   <p class="id-grant-warning">${ukText.eligibility}</p>
+   <a href="${esc(t.sourceUrl)}" target="_blank" rel="noopener noreferrer">${ukText.open}</a></article>`;
+ }
+ ukForm.addEventListener('submit',async event=>{
+  event.preventDefault();if(!ukForm.reportValidity())return;
+  const q=String(new FormData(ukForm).get('q')||'').trim(),button=ukForm.querySelector('button');
+  ukStatus.textContent=ukText.loading;ukResults.replaceChildren();button.disabled=true;
+  try{
+   const r=await fetch('/api/income/uk-tenders?'+new URLSearchParams({q}),{headers:{Accept:'application/json'}});
+   const data=await r.json();if(!r.ok)throw Error(data.error||ukText.error);
+   ukStatus.textContent=data.results.length+' / '+data.inspectedNotices+' · '+ukText.sample+' · '+data.sourceStatus.toUpperCase();
+   ukResults.innerHTML=data.results.length?data.results.map(ukCard).join(''):'<p>'+ukText.empty+'</p>';
+  }catch(err){ukStatus.textContent=err.message||ukText.error}
+  finally{button.disabled=false}
+ });
  grantForm.addEventListener('submit',async event=>{
   event.preventDefault();if(!grantForm.reportValidity())return;
   const fd=new FormData(grantForm),q=String(fd.get('q')||'').trim();
