@@ -5,7 +5,7 @@
  */
 const DETAIL_URL='https://api.grants.gov/v1/api/fetchOpportunity';
 const MAX_DETAILS=14,CACHE_MS=45*60*1000;
-const BLOCKED=/(?:\bcrypto\b|\btoken\b|\bblockchain\b|\bweb3\b|\bNFT\b|\bsecurity bounty\b)/i;
+const BLOCKED=/(?:\bcrypto(?:currency|currencies)?\b|\bweb3\b|\bblockchain\b|\btoken sale\b|\bNFTs?\b|\bDeFi\b|\bdigital assets?\b|\bsecurity bounty\b|\bbug bounty\b)/i;
 const cache=new Map(),rate=new Map();
 const money=s=>{
  if(typeof s==='number')return Number.isFinite(s)&&s>0?s:null;
