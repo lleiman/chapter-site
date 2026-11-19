@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-19",
+  "version": "2026-11-19-bounty-expansion",
   "method": "Editorial source-policy directory, not live availability claims.",
   "sources": [
     {
@@ -278,6 +278,125 @@
       "ru": "API вакансий разных стран. Коммерческая аналитика, лидогенерация и регулярное использование в платном продукте требуют письменного договора. Без него интеграция не включена.",
       "eligibility": "per_listing",
       "readiness": "license_required"
+    },
+    {
+      "id": "githubbounties",
+      "name": "GitHub bounty-tagged issues",
+      "region": "global",
+      "countries": [
+        "GLOBAL"
+      ],
+      "kind": "bounties",
+      "access": "live",
+      "url": "https://github.com/issues",
+      "search": "https://github.com/search?q=is%3Aissue+is%3Aopen+label%3Abounty&type=issues",
+      "policy": "https://docs.github.com/en/rest/search/search",
+      "en": "Public open issues tagged bounty, imported into a live feed. Reward figures are unverified text claims; check funding, owner authority, competing submissions and acceptance conditions before starting.",
+      "ru": "Открытые GitHub-задачи с меткой bounty, загружаются в живую ленту. Указанные суммы не подтверждены; до начала работы проверяйте финансирование, заказчика, конкуренцию и условия приёмки.",
+      "eligibility": "per_issue",
+      "readiness": "live"
+    },
+    {
+      "id": "opire",
+      "name": "Opire",
+      "region": "global",
+      "countries": [
+        "GLOBAL"
+      ],
+      "kind": "bounties",
+      "access": "official_directory",
+      "url": "https://opire.dev/",
+      "search": "https://app.opire.dev/bounties",
+      "policy": "https://docs.opire.dev/rewards/introduction",
+      "en": "Paid open-source issue bounties. Owners fund rewards, but payments may be arranged directly between parties; inspect each claim and payout before work.",
+      "ru": "Вознаграждения за исправление задач в открытых проектах. Оплата может производиться напрямую между сторонами; проверяйте условия и гарантию выплаты.",
+      "eligibility": "per_issue",
+      "readiness": "directory"
+    },
+    {
+      "id": "algora",
+      "name": "Algora",
+      "region": "global",
+      "countries": [
+        "GLOBAL"
+      ],
+      "kind": "bounties",
+      "access": "official_directory",
+      "url": "https://algora.io/",
+      "search": "https://algora.io/bounties",
+      "policy": "https://api.docs.algora.io/",
+      "en": "GitHub-linked cash coding bounties. Verify the actual open issue, reward status and claim rules. No stable public feed is yet enabled on Leiman Lab.",
+      "ru": "Денежные награды за программные задачи на GitHub. Проверяйте активность задачи, размер выплаты и правила назначения. Автоматический импорт пока не подключён.",
+      "eligibility": "per_issue",
+      "readiness": "directory"
+    },
+    {
+      "id": "opikbounties",
+      "name": "Opik Developer Bounties",
+      "region": "global",
+      "countries": [
+        "GLOBAL"
+      ],
+      "kind": "bounties",
+      "access": "official_directory",
+      "url": "https://www.comet.com/docs/opik/contributing/developer-programs/bounties",
+      "search": "https://www.comet.com/docs/opik/contributing/developer-programs/bounties",
+      "policy": "https://www.comet.com/docs/opik/contributing/developer-programs/bounties",
+      "en": "Official examples include issue fixes and documentation work. Reward is conditional on review, merging and programme rules.",
+      "ru": "Официальная программа задач, включая исправления и документацию. Выплата зависит от проверки, принятия изменений и правил программы.",
+      "eligibility": "per_issue",
+      "readiness": "directory"
+    },
+    {
+      "id": "devpost",
+      "name": "Devpost Open Hackathons",
+      "region": "global",
+      "countries": [
+        "GLOBAL"
+      ],
+      "kind": "competitions",
+      "access": "official_directory",
+      "url": "https://devpost.com/hackathons",
+      "search": "https://devpost.com/hackathons?status=open",
+      "policy": "https://help.devpost.com/",
+      "en": "Open online and regional challenges with prize pools. Prize pools are NOT guaranteed per-entrant payouts; individual award criteria, judging and geography matter.",
+      "ru": "Открытые конкурсы и хакатоны с призовыми фондами. Фонд НЕ равен гарантированной выплате участнику; учитывайте правила, судейство и ограничения по странам.",
+      "eligibility": "per_competition",
+      "readiness": "directory"
+    },
+    {
+      "id": "hackerone",
+      "name": "HackerOne Program Directory",
+      "region": "global",
+      "countries": [
+        "GLOBAL"
+      ],
+      "kind": "security_bounties",
+      "access": "official_directory",
+      "url": "https://www.hackerone.com/hackers",
+      "search": "https://www.hackerone.com/bug-bounty-programs",
+      "policy": "https://www.hackerone.com/terms/disclosure-guidelines",
+      "en": "Authorised security vulnerability programmes. Only test systems explicitly in programme scope; some programmes offer recognition rather than cash.",
+      "ru": "Авторизованные программы поиска уязвимостей. Проверяйте разрешённые цели и методы; некоторые программы не предлагают денежных наград.",
+      "eligibility": "per_program",
+      "readiness": "directory"
+    },
+    {
+      "id": "immunefi",
+      "name": "Immunefi Bug Bounties",
+      "region": "global",
+      "countries": [
+        "GLOBAL"
+      ],
+      "kind": "security_bounties",
+      "access": "official_directory",
+      "url": "https://immunefi.com/",
+      "search": "https://immunefi.com/bug-bounty/",
+      "policy": "https://immunefi.com/rules/",
+      "en": "Web3 security research bounties with strict scope and proof requirements. Rewards depend on valid in-scope severity and programme terms; high expertise and risk.",
+      "ru": "Программы поиска уязвимостей Web3 со строгими правилами и требованием доказательства. Награды зависят от критичности, допусков и условий; требуется высокая квалификация.",
+      "eligibility": "per_program",
+      "readiness": "directory"
     }
   ]
 }
