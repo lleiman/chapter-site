@@ -181,7 +181,13 @@
     },
     {
       "type": "p",
-      "text": "Представим режиссёра с опытом генеративного видео. Поиск профессии «AI filmmaker» найдёт несколько вакансий. Более широкий поиск проверит конкурсы ИИ-кино, оплачиваемые резиденции, продакшен-тендеры, брендовые видео, короткие контракты арт-директора и программы поддержки авторов. Часть возможностей отпадёт по географии или требованию использовать конкретную модель."
+      "text": "Представим режиссёра с опытом генеративного видео. Поиск профессии «AI filmmaker» найдёт несколько вакансий. Более широкий поиск проверит конкурсы ИИ-кино, оплачиваемые резиденции, продакшен-тендеры, брендовые видео, короткие контракты арт-директора и программы поддержки авторов. Часть возможностей отпадёт по географии или требованию использовать конкретную модель.",
+      "links": [
+        {
+          "label": "Исследование Leiman Lab: конкурсы ИИ-кино 2026–2027",
+          "url": "/articles/ai-film-competitions-2026"
+        }
+      ]
     },
     {
       "type": "p",
@@ -524,7 +530,13 @@
         },
         {
           "type": "p",
-          "text": "Consider a filmmaker experienced in generative video. Searching 'AI filmmaker' retrieves some roles. A broader system would also check AI film competitions, funded residencies, production tenders, branded-video commissions, short art-direction contracts and creator support programmes. Geography, rights and mandatory-model requirements will disqualify some results."
+          "text": "Consider a filmmaker experienced in generative video. Searching 'AI filmmaker' retrieves some roles. A broader system would also check AI film competitions, funded residencies, production tenders, branded-video commissions, short art-direction contracts and creator support programmes. Geography, rights and mandatory-model requirements will disqualify some results.",
+          "links": [
+            {
+              "label": "Leiman Lab guide: AI film competitions 2026–2027",
+              "url": "/articles/ai-film-competitions-2026"
+            }
+          ]
         },
         {
           "type": "p",
@@ -631,7 +643,11 @@
       ],
       "sourceNote": "Sources were reviewed in November 2026. Proposed scoring weights, possible subscription prices and functionality beyond the deployed beta are Leiman Lab hypotheses, not verified commercial results.",
       "readingMinutes": 15,
-      "translationPublished": "2026-11-18"
+      "translationPublished": "2026-11-18",
+      "seoTitle": "Income Intelligence: Cash Prizes, Grants and Paid Jobs",
+      "updated": "2026-11-19"
     }
-  }
+  },
+  "seoTitle": "ИИ для поиска заработка: гранты, конкурсы и вакансии",
+  "updated": "2026-11-19"
 }
