@@ -123,7 +123,7 @@ export function createIncomeEngine({fetcher=globalThis.fetch}={}){
       }
     }
     const ranked=(data.jobs||[]).map(normaliseJob).filter(Boolean).map(j=>({...j,fit:opportunityFit(j,{q,skills,country})}))
-      .filter(j=>j.fit.eligible).sort((a,b)=>b.fit.score-a.fit.score);
+      .filter(j=>j.fit.eligible && (Number(j.salary.min)>0 || Number(j.salary.max)>0)).sort((a,b)=>b.fit.score-a.fit.score);
     // A provider may list near-identical copies of one job under different source IDs.
     // Keep distinct roles and locations, but suppress duplicate company/title/contract pairs.
     const unique=new Set(),results=[];
@@ -137,7 +137,7 @@ export function createIncomeEngine({fetcher=globalThis.fetch}={}){
     return {status:200,body:{results,query:{q,skills,country,page},provider:'Himalayas',sourceUrl:'https://himalayas.app',
       sourceStatus,providerUpdatedAt:Number.isFinite(data.updatedAt)?new Date(data.updatedAt*1000).toISOString():null,
       retrievedAt:new Date().toISOString(),totalFromProvider:data.totalCount??null,
-      disclaimer:'External employment listings, not secured contracts or bounties. Apply through Himalayas. Verify restrictions and availability. Scores are not hiring probabilities.'}};
+      disclaimer:'Only vacancies with disclosed positive salary amounts are displayed. Salary is advertised compensation, not a guaranteed job offer. Apply through Himalayas. Verify restrictions and availability. Relevance scores are not hiring probabilities.'}};
   }
   function plan(input={}){
     const title=safeString(input.title||'',160);
