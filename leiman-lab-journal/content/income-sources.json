@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-19-cash-only",
+  "version": "2026-11-19-official-cash-only",
   "method": "Official cash-prize and project-funding sources. No crypto, credit-only, unpriced bounty programmes or unverifiable rewards.",
   "sources": [
     {
@@ -314,23 +314,6 @@
       "readiness": "directory"
     },
     {
-      "id": "akool2026",
-      "name": "AKOOL AI Film Challenge",
-      "region": "global",
-      "countries": [
-        "GLOBAL"
-      ],
-      "kind": "competitions",
-      "access": "official_directory",
-      "url": "https://www.akool.com/aifilmchallenge",
-      "search": "https://www.akool.com/aifilmchallenge",
-      "policy": "https://www.akool.com/aifilmchallenge",
-      "en": "AI film challenge with organiser-listed cash-denominated awards ($50,000 first prize), plus conditional creator bonuses. Deadline December 20, 2026.",
-      "ru": "Конкурс ИИ-кино с заявленной денежной наградой $50 000 за первое место и условными бонусами. Дедлайн 20 декабря 2026 года.",
-      "eligibility": "per_competition",
-      "readiness": "directory"
-    },
-    {
       "id": "redditgame2026",
       "name": "Reddit Game of the Day Hackathon",
       "region": "global",
@@ -361,6 +344,23 @@
       "policy": "https://cognizant-agenticweb.devpost.com/rules",
       "en": "Agentic web challenge with official $5,000, $3,000, and $2,000 cash awards. Credits are additional. Closing January 11, 2027.",
       "ru": "Конкурс агентных веб-систем с денежными наградами $5 000, $3 000 и $2 000. Кредиты отдельно. Дедлайн 11 января 2027 года.",
+      "eligibility": "per_competition",
+      "readiness": "directory"
+    },
+    {
+      "id": "heygen2026",
+      "name": "HeyGen Video Contest — cash awards",
+      "region": "global",
+      "countries": [
+        "GLOBAL"
+      ],
+      "kind": "competitions",
+      "access": "official_directory",
+      "url": "https://www.heygen.com/en-in/blog/video-contest",
+      "search": "https://www.heygen.com/en-in/blog/video-contest",
+      "policy": "https://dynamic.heygen.ai/www/contest/heygen-video-contest/heygen-video-contest-official-rules.pdf?v=2",
+      "en": "HeyGen has published an itemised $15,000 CASH award schedule, separate from noncash credits. Grand Prix $3,500, smaller prizes. Closes December 1, 2026. Check PayPal receiving-country eligibility.",
+      "ru": "HeyGen опубликовал разбивку $15 000 ДЕНЕЖНЫХ наград отдельно от кредитов. Гран-при $3 500, есть меньшие призы. Дедлайн 1 декабря 2026 года. Проверьте возможность принимать PayPal в своей стране.",
       "eligibility": "per_competition",
       "readiness": "directory"
     }
