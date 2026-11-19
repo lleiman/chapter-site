@@ -808,6 +808,11 @@ const server = http.createServer((req,res)=>{
       return sendJson(res,out?200:404,out||{error:'Opportunity not indexed'});
     })().catch(()=>sendJson(res,400,{error:'Invalid assessment request'}));
   }
+  if(apiPath==='/api/income/bounties/top' && req.method==='GET'){
+    return bountySearch.top(clientKey(req))
+      .then(out=>sendJson(res,out.status,out.body))
+      .catch(()=>sendJson(res,503,{results:[],error:'Featured bounty selection unavailable'}));
+  }
   if(apiPath==='/api/income/bounties' && req.method==='GET'){
     const params=new URL(req.url,'http://localhost');
     return bountySearch.search(Object.fromEntries(params.searchParams),clientKey(req))
