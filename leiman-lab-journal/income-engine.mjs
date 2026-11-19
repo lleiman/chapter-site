@@ -22,7 +22,7 @@ const CAPABILITIES = [
 
 export const normaliseQuery = value => String(value || '').trim().replace(/[<>]/g,'').slice(0,90);
 const tokens = value => String(value || '').toLowerCase().match(/[a-zа-яё0-9+#]{3,}/gi)?.slice(0,24) || [];
-const safeString = (v,n=300) => String(v ?? '').replace(/<[^>]*>/g,' ').replace(/\\s+/g,' ').trim().slice(0,n);
+const safeString = (v,n=300) => String(v ?? '').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,n);
 const validUrl = value => {
   try {const u=new URL(String(value));return u.protocol==='https:' && (u.hostname==='himalayas.app'||u.hostname.endsWith('.himalayas.app'))?u.toString():null}
   catch{return null}
