@@ -65,6 +65,7 @@ async function main() {
   organismUiTest();
   await testIncomeEngine();
   await incomeDeskRoutesTest();
+  await incomeOpsRoutesTest();
   await allArticleTranslationsTest();
   await passwordlessAnalyticsTests();
   await commonsTests();
@@ -116,6 +117,45 @@ async function allArticleTranslationsTest() {
   console.log('✓ all '+slugs.length+' Russian journal articles have indexable, content-complete English editions');
 }
 
+
+async function incomeOpsRoutesTest(){
+ const page=await get('/income-ops');
+ assert.equal(page.status,200);
+ assert.equal(page.headers.get('x-robots-tag'),'noindex, nofollow');
+ const html=await page.text();
+ assert.ok(html.includes('id="ops-login"')&&html.includes('id="ops-briefs"'),'operator console must exist');
+ for(const route of ['/assets/income-ops.js','/assets/income-ops.css'])assert.equal((await get(route)).status,200);
+ const created=await fetch(origin+'/api/income/briefs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+  name:'Pilot Company',email:'team@example.test',title:'Operator testing project',
+  description:'An example pilot that includes research, production, final delivery and approval milestones.',
+  budget:5000,currency:'EUR',consent:true
+ })});
+ assert.equal(created.status,201);
+ const {id,deletionToken}=await created.json();
+ const unauthorized=await fetch(origin+'/api/admin/income/briefs/'+id,{method:'POST',headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({status:'qualified'})});
+ assert.equal(unauthorized.status,401,'operator write must require password');
+ const invalid=await fetch(origin+'/api/admin/income/briefs/'+id,{method:'POST',
+ headers:{'Content-Type':'application/json','x-admin-password':PASSWORD},
+ body:JSON.stringify({status:'unreviewed',amountReceived:1000})});
+ assert.equal(invalid.status,400,'payment totals require paid status');
+ const qualified=await fetch(origin+'/api/admin/income/briefs/'+id,{method:'POST',
+ headers:{'Content-Type':'application/json','x-admin-password':PASSWORD},
+ body:JSON.stringify({status:'qualified',note:'Waiting for contract verification.'})});
+ assert.equal(qualified.status,200);
+ const paid=await fetch(origin+'/api/admin/income/briefs/'+id,{method:'POST',
+ headers:{'Content-Type':'application/json','x-admin-password':PASSWORD},
+ body:JSON.stringify({status:'paid',amountReceived:5000,directCosts:3700,note:'Reported payment; evidence not independently audited'})});
+ assert.equal(paid.status,200);
+ const queue=await fetch(origin+'/api/admin/income/briefs',{headers:{'x-admin-password':PASSWORD}});
+ const saved=(await queue.json()).briefs.find(row=>row.id===id);
+ assert.equal(saved.status,'paid');assert.equal(saved.amountReceived,5000);assert.equal(saved.directCosts,3700);
+ assert.equal(saved.outcomeEvidence,'operator_reported_not_independently_audited');
+ const removed=await fetch(origin+'/api/income/briefs/'+id,{method:'DELETE',headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({deletionToken})});
+ assert.equal(removed.status,200,'deletion token remains valid after operator updates');
+ console.log('✓ private income operations console and consented brief outcome accounting');
+}
 
 async function incomeDeskRoutesTest() {
  for(const [route,lang,alternate] of [
