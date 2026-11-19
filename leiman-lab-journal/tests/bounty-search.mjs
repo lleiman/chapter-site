@@ -22,8 +22,13 @@ export async function testCashPrizeDiscovery(){
  assert.equal(publishedCashAwards({records:[{...original.records[0],cashEvidence:'unverified_text'}]},{now}).length,0);
  assert.equal(publishedCashAwards({records:[{...original.records[0],cashAward:1000,cashCurrency:'CREDITS'}]},{now}).length,0);
  const html=renderCashAwards(awards,'en'),ru=renderCashAwards(awards,'ru');
- assert.ok(html.includes('CASH AWARD')&&html.includes('OFFICIAL RULES'));
- assert.ok(ru.includes('ДЕНЕЖНЫЙ ПРИЗ')&&ru.includes('ОФИЦИАЛЬНЫЕ ПРАВИЛА'));
+ assert.ok(html.includes('1ST CASH PRIZE')&&html.includes('OFFICIAL RULES'));
+ assert.ok(ru.includes('ДЕНЕЖНЫЙ ПРИЗ')&&ru.includes('ПРАВИЛА ОРГАНИЗАТОРА'));
+ assert.equal((html.match(/<details class="id-award-row">/g)||[]).length,5,'one compact native disclosure row per cash award');
+ assert.equal((html.match(/<summary class="id-award-summary">/g)||[]).length,5,'title, cash prize and deadline are visible before expansion');
+ assert.ok(!html.includes('<details class="id-award-row" open'),'initial cards are all collapsed');
+ assert.ok(html.includes('id-award-money')&&html.includes('id-award-date'),'critical comparison data visible at a glance');
+ assert.ok(html.includes('id-award-expanded'),'requirements and official links remain accessible');
  assert.ok(html.includes('HeyGen')&&!html.includes('AKOOL'));
  const opportunity={id:'us-grant-801',title:'Arts Innovation Programme',issuer:'Federal Arts Agency',
    source:'Grants.gov',sourceUrl:'https://www.grants.gov/search-results-detail/801',
