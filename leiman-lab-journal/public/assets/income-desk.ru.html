@@ -16,7 +16,20 @@
  </section>
 <p class="id-legal">Вакансии получены из Himalayas. Отклики направляются через предоставленную ссылку Himalayas. Данные обновляются по расписанию источника; объявления могут закрыться раньше. <a href="https://himalayas.app" target="_blank" rel="noopener noreferrer">Himalayas ↗</a></p>
  <p class="id-legal">Рейтинг показывает приблизительное соответствие, а не вероятность трудоустройства. Прямого подтверждения работодателя нет.</p></section>
- <section id="curator" class="id-section id-curator"><div class="id-section-code">02 / ФИНАНСОВЫЙ КУРАТОР</div><header><h2>Превратите задачу в план исполнения.</h2><p>Опишите проект и предполагаемый бюджет. Куратор определит человеческие специальности и допустимые роли ИИ, затем покажет условную смету. Договоры, оферты и сообщения не отправляются автоматически.</p></header>
+ <section class="id-section id-global" id="global-opportunities">
+ <div class="id-section-code">02 / МЕЖДУНАРОДНАЯ СЕТЬ ВОЗМОЖНОСТЕЙ</div>
+ <header><h2>Страны, гранты и закупки.</h2><p>Изучайте официальные источники разных стран. Наличие объявления, право участвовать и юридические требования — разные вещи. Для каждого источника указано, что доступно и что ещё нужно проверить.</p></header>
+ <div class="id-global-tools"><label>СТРАНА / РЕГИОН<select id="id-source-region"><option value="all">Все регионы</option><option value="global">Международные</option><option value="us">США</option><option value="uk">Великобритания</option><option value="eu">Европейский союз</option><option value="ca">Канада</option><option value="au">Австралия</option><option value="sg">Сингапур</option><option value="id">Индонезия</option></select></label>
+ <label>ВИД ВОЗМОЖНОСТИ<select id="id-source-kind"><option value="all">Все категории</option><option value="jobs">Работа</option><option value="grants">Гранты и финансирование</option><option value="tenders">Тендеры и контракты</option><option value="research">Исследования и стипендии</option></select></label></div>
+ <div class="id-global-status" id="id-source-status" role="status">Загрузка каталога официальных источников…</div><div id="id-source-results" class="id-source-grid"></div>
+ <p class="id-legal">«Официальный каталог» означает проверенный сайт органа власти или организации, а не автоматически импортированную ленту объявлений. Ограниченные API не подключаются без разрешения и лицензии. Наличие источника не подтверждает право иностранного заявителя на участие.</p>
+ <div class="id-grants-box"><div class="id-section-code">ЖИВОЙ ИСТОЧНИК / ФЕДЕРАЛЬНЫЕ ГРАНТЫ США</div><h3>Поиск по официальной базе Grants.gov.</h3>
+ <p>Поиск использует публичный API Grants.gov. Даже опубликованный конкурс может ограничивать участие по статусу организации, гражданству, стране, регистрации и правилам программы. Каждую заявку следует проверять отдельно.</p>
+ <form id="id-grant-search" class="id-search-form"><label>ТЕМА ГРАНТА / КЛЮЧЕВОЕ СЛОВО<input type="search" name="q" placeholder="например, artificial intelligence" required maxlength="100" value="artificial intelligence"></label><button class="id-action" type="submit">НАЙТИ ГРАНТЫ США →</button></form>
+ <div id="id-grant-status" class="id-results-head" role="status">Поиск по официальной базе.</div><div id="id-grant-results" class="id-grant-results"></div><p class="id-legal">Источник: <a href="https://www.grants.gov/search-grants" target="_blank" rel="noopener noreferrer">Grants.gov ↗</a> · Право участвовать нельзя определить только по стране текущего проживания.</p>
+ </div>
+</section>
+<section id="curator" class="id-section id-curator"><div class="id-section-code">03 / ФИНАНСОВЫЙ КУРАТОР</div><header><h2>Превратите задачу в план исполнения.</h2><p>Опишите проект и предполагаемый бюджет. Куратор определит человеческие специальности и допустимые роли ИИ, затем покажет условную смету. Договоры, оферты и сообщения не отправляются автоматически.</p></header>
  <div class="id-two-column"><form id="id-plan-form" class="id-form">
  <label>НАЗВАНИЕ ПРОЕКТА<input type="text" name="title" required minlength="4" maxlength="160" placeholder="например, интерактивная выставка"></label>
  <label>РЕЗУЛЬТАТ И ТРЕБОВАНИЯ<textarea name="brief" required minlength="25" maxlength="3000" rows="7" placeholder="Опишите результат, качество, ограничения и сценарий использования (не менее 25 символов)."></textarea></label>
@@ -24,7 +37,7 @@
  <button class="id-action" type="submit">ПОСТРОИТЬ ПЛАН →</button></form>
  <div class="id-plan-output" id="id-plan-output" role="region" aria-live="polite"><div class="id-empty-state"><span>02 / CURATOR</span><p>Введите задачу и бюджет, чтобы увидеть состав команды и этапы согласования.</p></div></div></div>
  <p class="id-legal">Все суммы являются условными долями бюджета, а не коммерческим предложением или подтверждённой себестоимостью.</p></section>
- <section id="request" class="id-section id-request"><div class="id-section-code">03 / ЗАЯВКА ОТ ЗАКАЗЧИКА</div><header><h2>Есть задача, которую нужно выполнить?</h2><p>Отправьте описание для частного рассмотрения командой Leiman Lab. Это не создаёт публичный заказ и не резервирует ресурсы. Возможность сотрудничества обсуждается отдельно.</p></header>
+ <section id="request" class="id-section id-request"><div class="id-section-code">04 / ЗАЯВКА ОТ ЗАКАЗЧИКА</div><header><h2>Есть задача, которую нужно выполнить?</h2><p>Отправьте описание для частного рассмотрения командой Leiman Lab. Это не создаёт публичный заказ и не резервирует ресурсы. Возможность сотрудничества обсуждается отдельно.</p></header>
  <form id="id-brief-form" class="id-form id-brief-form"><div class="id-inline"><label>КОНТАКТНОЕ ИМЯ<input type="text" autocomplete="name" maxlength="100" name="name" required></label>
  <label>EMAIL<input type="email" autocomplete="email" maxlength="180" name="email" required></label></div>
  <label>НАЗВАНИЕ ПРОЕКТА<input name="title" type="text" required minlength="5" maxlength="160"></label>
