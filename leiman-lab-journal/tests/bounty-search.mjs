@@ -67,6 +67,9 @@ export async function testBountySearch(){
  assert.equal(featured.body.results[0].editorial.paymentVerified,false);
  assert.equal(featured.body.candidatePool,2);
  assert.equal(topRequests,3,'three independent pages, not user-filtered search');
+ const anotherVisit=await topSearch.top('second-reader');
+ assert.equal(anotherVisit.body.sourceStatus,'cached');
+ assert.equal(topRequests,3,'featured picks shared between visitors without new provider calls');
  const emptyTop=await createBountySearch({fetcher:async()=>{throw Error('down')}}).top('offline');
  assert.equal(emptyTop.status,503);
  assert.deepEqual(emptyTop.body.results,[],'never fabricate featured issues');
