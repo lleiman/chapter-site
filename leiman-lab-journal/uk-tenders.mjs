@@ -44,6 +44,8 @@ export function createUkTenders({fetcher=globalThis.fetch}={}){
   const keyword=str(q,70).toLowerCase();
   const period=Math.min(7,Math.max(1,Number(days)||4));
   const end=new Date();
+  // Stable UTC-hour boundaries ensure real caching and a reproducible snapshot.
+  end.setUTCMinutes(0,0,0);
   const start=new Date(end.getTime()-period*86400000);
   const moment=d=>d.toISOString().slice(0,19);
   const qs=new URLSearchParams({updatedFrom:moment(start),updatedTo:moment(end),stages:'tender',limit:'100'});
