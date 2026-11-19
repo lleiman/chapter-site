@@ -36,6 +36,12 @@ export function testOpportunityV2(){
   assert.equal(evaluateEligibility(jobs[0],{residenceCountry:'DE'}).status,'ineligible','explicit location exclusion');
   assert.equal(evaluateEligibility(jobs[0],{residenceCountry:'US'}).status,'needs_review','location match is not legal eligibility');
   assert.equal(reopened.search({country:'GB'}).count,1);
+  assert.equal(reopened.search({country:'DE',type:'employment'}).count,0,
+   'explicitly US-restricted remote employment must not appear for German country filters');
+  assert.equal(reopened.search({country:'US',type:'employment'}).count,1,
+   'US-restricted employment can appear for US search');
+  assert.ok(reopened.search({type:'employment'}).records[0].sourceFreshnessHours>=0,
+   'indexed record freshness must be available for source audits');
   const analysis=reopened.assess(jobs[0].id,{residenceCountry:'DE',skills:'design,python'});
   assert.equal(analysis.eligibility.status,'ineligible');
   assert.equal(analysis.capabilityFit.matched.includes('design'),true);
