@@ -124,3 +124,17 @@
 .id-featured-home .id-bounty-featured-head h3{font-size:clamp(34px,5vw,64px)}
 .id-featured-home .id-bounty-featured-count{max-width:250px}
 @media(max-width:730px){.id-featured-home{padding:38px 18px 40px}.id-featured-home .id-bounty-featured-head{display:block}.id-featured-home .id-bounty-featured-count{margin-top:14px;text-align:left}}
+
+
+/* Publication-grade cash awards: verified prize amount, not credits or expected earnings. */
+.id-cash-pick .id-top-bounty-outcome strong{font-size:clamp(23px,3vw,37px);color:var(--accent);letter-spacing:-.065em}
+.id-cash-pick .id-top-bounty-outcome{min-width:145px}
+.id-cash-pool{display:block;font:10px/1.55 ui-monospace,Consolas,monospace;color:#595e56;max-width:175px}
+.id-cash-rules{display:inline-block;margin-left:18px;font-weight:400!important;font-size:10px!important}
+.id-funded-card{background:#f9f7f1}
+.id-funded-card .id-grant-detail strong{font-size:clamp(15px,2vw,23px);letter-spacing:-.03em;color:var(--accent)}
+.id-funded-agency{font:12px/1.5 ui-monospace,Consolas,monospace;color:#696d65}
+.id-funded-applicants{font:12px/1.55 Arial,sans-serif;color:#5e615c;padding-top:8px;border-top:1px solid var(--line)}
+.id-funded-grants .id-bounty-guide{margin-bottom:40px}
+.id-funded-grants .id-search-form{grid-template-columns:minmax(0,1fr) auto}
+@media(max-width:730px){.id-funded-grants .id-search-form{grid-template-columns:1fr}.id-funded-grants .id-search-form button{grid-column:1}.id-cash-rules{margin:12px 0 0;display:block}.id-cash-pick .id-top-bounty-outcome strong{font-size:24px}}
