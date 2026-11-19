@@ -1,0 +1,283 @@
+{
+  "version": "2026-11-19",
+  "method": "Editorial source-policy directory, not live availability claims.",
+  "sources": [
+    {
+      "id": "himalayas",
+      "name": "Himalayas",
+      "region": "global",
+      "countries": [
+        "GLOBAL"
+      ],
+      "kind": "jobs",
+      "access": "live",
+      "url": "https://himalayas.app/docs/remote-jobs-api",
+      "search": "https://himalayas.app/jobs",
+      "policy": "https://himalayas.app/docs/remote-jobs-api",
+      "en": "Remote job feed with country restrictions. Some adverts have unclear permitted locations. Source attribution and application links are required.",
+      "ru": "Удалённые вакансии с ограничениями по странам. Для некоторых объявлений географический допуск неясен. Обязательны указание источника и ссылка для отклика.",
+      "eligibility": "per_listing",
+      "readiness": "live"
+    },
+    {
+      "id": "grantsgov",
+      "name": "Grants.gov",
+      "region": "us",
+      "countries": [
+        "US"
+      ],
+      "kind": "grants",
+      "access": "live",
+      "url": "https://www.grants.gov/search-grants",
+      "search": "https://www.grants.gov/search-grants",
+      "policy": "https://grants.gov/learn-grants/grant-eligibility",
+      "en": "U.S. federal grants. Individual, organisation and foreign-applicant eligibility vary by programme. Organisation applications may require SAM.gov registration.",
+      "ru": "Федеральные гранты США. Допуск физических лиц, организаций и иностранных заявителей определяется программой. Организациям может понадобиться регистрация SAM.gov.",
+      "eligibility": "per_call",
+      "readiness": "live"
+    },
+    {
+      "id": "usajobs",
+      "name": "USAJOBS",
+      "region": "us",
+      "countries": [
+        "US"
+      ],
+      "kind": "jobs",
+      "access": "api_key",
+      "url": "https://www.usajobs.gov/",
+      "search": "https://www.usajobs.gov/Search/Results",
+      "policy": "https://developer.usajobs.gov/guides/authentication",
+      "en": "Federal U.S. job listings. API access requires a key; many roles require citizenship, clearance or residency.",
+      "ru": "Госвакансии США. Для API нужен ключ; многие позиции требуют гражданство, допуск или резидентство.",
+      "eligibility": "per_listing",
+      "readiness": "key_required"
+    },
+    {
+      "id": "ukfts",
+      "name": "UK Find a Tender",
+      "region": "uk",
+      "countries": [
+        "GB"
+      ],
+      "kind": "tenders",
+      "access": "official_api",
+      "url": "https://www.find-tender.service.gov.uk/Search",
+      "search": "https://www.find-tender.service.gov.uk/Search",
+      "policy": "https://www.gov.uk/government/publications/open-contracting",
+      "en": "UK procurement notices via official OCDS API. Verify live procedure, procurement stage, bidder eligibility, deadlines and buyer requirements.",
+      "ru": "Государственные закупки Великобритании, официальный OCDS API. Проверяйте стадию, требования к участнику, срок и заказчика.",
+      "eligibility": "per_notice",
+      "readiness": "directory"
+    },
+    {
+      "id": "ukcontracts",
+      "name": "UK Contracts Finder",
+      "region": "uk",
+      "countries": [
+        "GB"
+      ],
+      "kind": "tenders",
+      "access": "official_api",
+      "url": "https://www.contractsfinder.service.gov.uk/Search",
+      "search": "https://www.contractsfinder.service.gov.uk/Search",
+      "policy": "https://www.gov.uk/government/publications/open-contracting",
+      "en": "UK public contracting notices, including lower-value opportunities. Publication does not guarantee an open bidding window.",
+      "ru": "Государственные закупки Великобритании, включая небольшие контракты. Публикация не гарантирует, что приём заявок открыт.",
+      "eligibility": "per_notice",
+      "readiness": "directory"
+    },
+    {
+      "id": "ted",
+      "name": "TED Europa",
+      "region": "eu",
+      "countries": [
+        "EU"
+      ],
+      "kind": "tenders",
+      "access": "official_api",
+      "url": "https://ted.europa.eu/en/",
+      "search": "https://ted.europa.eu/en/search/result",
+      "policy": "https://docs.ted.europa.eu/api/latest/search.html",
+      "en": "EU procurement notices with an unauthenticated search API. Check specific nationality, establishment, language and tender conditions.",
+      "ru": "Закупки ЕС с открытым поисковым API. Проверяйте условия по юрисдикции, регистрации, языку и самому тендеру.",
+      "eligibility": "per_notice",
+      "readiness": "directory"
+    },
+    {
+      "id": "eufunding",
+      "name": "EU Funding & Tenders",
+      "region": "eu",
+      "countries": [
+        "EU"
+      ],
+      "kind": "grants",
+      "access": "official_api",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/home",
+      "search": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-search",
+      "policy": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/support/apis",
+      "en": "EU research and innovation funding. Country, applicant type, consortium, co-funding and submission rules vary by call.",
+      "ru": "Гранты ЕС на исследования и инновации. Допуск по стране, типу заявителя, консорциумам и софинансированию зависит от конкурса.",
+      "eligibility": "per_call",
+      "readiness": "directory"
+    },
+    {
+      "id": "euraxess",
+      "name": "EURAXESS",
+      "region": "eu",
+      "countries": [
+        "EU"
+      ],
+      "kind": "research",
+      "access": "official_directory",
+      "url": "https://euraxess.ec.europa.eu/jobs/search",
+      "search": "https://euraxess.ec.europa.eu/jobs/search",
+      "policy": "https://euraxess.ec.europa.eu/",
+      "en": "Research positions and fellowships. Funding, hosting agreements and mobility eligibility depend on the specific opportunity.",
+      "ru": "Научные вакансии и стипендии. Условия финансирования, принимающей организации и мобильности зависят от объявления.",
+      "eligibility": "per_call",
+      "readiness": "directory"
+    },
+    {
+      "id": "gebiz",
+      "name": "GeBIZ Singapore",
+      "region": "sg",
+      "countries": [
+        "SG"
+      ],
+      "kind": "tenders",
+      "access": "official_directory",
+      "url": "https://www.gebiz.gov.sg/",
+      "search": "https://www.gebiz.gov.sg/",
+      "policy": "https://www.gebiz.gov.sg/cmw/content/getstart.html",
+      "en": "Singapore public procurements. Supplier registration requirements vary; foreign companies can use a GeBIZ ID where applicable.",
+      "ru": "Госзакупки Сингапура. Требования к регистрации различаются; иностранные компании в предусмотренных случаях могут использовать GeBIZ ID.",
+      "eligibility": "per_notice",
+      "readiness": "directory"
+    },
+    {
+      "id": "inaproc",
+      "name": "INAPROC / LKPP",
+      "region": "id",
+      "countries": [
+        "ID"
+      ],
+      "kind": "tenders",
+      "access": "official_directory",
+      "url": "https://inaproc.id/",
+      "search": "https://inaproc.id/",
+      "policy": "https://bantuan.inaproc.id/hc/id-id",
+      "en": "Indonesia national procurement ecosystem. Supplier verification and participation depend on applicable tender and platform regulations; no unrestricted API has been verified.",
+      "ru": "Национальная система закупок Индонезии. Участие и проверка поставщиков регулируются правилами тендера и платформы; открытый API не подтверждён.",
+      "eligibility": "per_notice",
+      "readiness": "directory"
+    },
+    {
+      "id": "canadabuys",
+      "name": "CanadaBuys",
+      "region": "ca",
+      "countries": [
+        "CA"
+      ],
+      "kind": "tenders",
+      "access": "official_directory",
+      "url": "https://canadabuys.canada.ca/en/tender-opportunities",
+      "search": "https://canadabuys.canada.ca/en/tender-opportunities",
+      "policy": "https://canadabuys.canada.ca/en/getting-started/preparing-sell-government/how-register-your-business",
+      "en": "Canadian public procurement. Foreign firms may need non-resident business registration and specific tender qualifications.",
+      "ru": "Госзакупки Канады. Иностранным компаниям может понадобиться регистрация нерезидента и соблюдение условий конкретного тендера.",
+      "eligibility": "per_notice",
+      "readiness": "directory"
+    },
+    {
+      "id": "australiagrants",
+      "name": "business.gov.au Grants",
+      "region": "au",
+      "countries": [
+        "AU"
+      ],
+      "kind": "grants",
+      "access": "official_directory",
+      "url": "https://business.gov.au/grants-and-programs/",
+      "search": "https://business.gov.au/grants-and-programs/",
+      "policy": "https://business.gov.au/grants-and-programs/check-if-youre-ready-to-apply-for-a-grant",
+      "en": "Australian grants and business programmes. Many require Australian registration (ABN), location, co-funding or specific trading history.",
+      "ru": "Австралийские гранты и программы развития бизнеса. Часто требуются регистрация ABN, присутствие в стране, софинансирование или история деятельности.",
+      "eligibility": "per_call",
+      "readiness": "directory"
+    },
+    {
+      "id": "austender",
+      "name": "AusTender",
+      "region": "au",
+      "countries": [
+        "AU"
+      ],
+      "kind": "tenders",
+      "access": "official_directory",
+      "url": "https://www.tenders.gov.au/",
+      "search": "https://www.tenders.gov.au/",
+      "policy": "https://www.tenders.gov.au/",
+      "en": "Australian Commonwealth procurement portal. Supplier and local-participation requirements must be checked notice by notice.",
+      "ru": "Госзакупки Австралии. Требования к поставщикам и местному участию проверяются для каждого объявления.",
+      "eligibility": "per_notice",
+      "readiness": "directory"
+    },
+    {
+      "id": "ungm",
+      "name": "UN Global Marketplace",
+      "region": "global",
+      "countries": [
+        "GLOBAL"
+      ],
+      "kind": "tenders",
+      "access": "official_directory",
+      "url": "https://www.ungm.org/Public/Notice",
+      "search": "https://www.ungm.org/Public/Notice",
+      "policy": "https://www.undp.org/procurement/resources-suppliers",
+      "en": "UN and agency procurements. Vendor registration, nationality rules and compliance requirements differ between agencies and notices.",
+      "ru": "Закупки ООН и агентств. Регистрация поставщика, правила по странам и комплаенс зависят от организации и объявления.",
+      "eligibility": "per_notice",
+      "readiness": "directory"
+    },
+    {
+      "id": "worldbank",
+      "name": "World Bank Procurement",
+      "region": "global",
+      "countries": [
+        "GLOBAL"
+      ],
+      "kind": "tenders",
+      "access": "official_directory",
+      "url": "https://projects.worldbank.org/en/projects-operations/opportunities",
+      "search": "https://projects.worldbank.org/en/projects-operations/opportunities",
+      "policy": "https://www.worldbank.org/ext/en/what-we-do/project-procurement/for-suppliers",
+      "en": "Project procurement across countries. General notices may only announce future procurement; distinguish them from actionable requests.",
+      "ru": "Проектные закупки в разных странах. Общие уведомления могут сообщать лишь о будущих конкурсах; отличайте их от открытых запросов.",
+      "eligibility": "per_notice",
+      "readiness": "directory"
+    },
+    {
+      "id": "adzuna",
+      "name": "Adzuna",
+      "region": "global",
+      "countries": [
+        "GB",
+        "US",
+        "CA",
+        "AU",
+        "DE",
+        "FR"
+      ],
+      "kind": "jobs",
+      "access": "licensed",
+      "url": "https://developer.adzuna.com/",
+      "search": "https://developer.adzuna.com/",
+      "policy": "https://developer.adzuna.com/docs/terms_of_service",
+      "en": "Multi-country jobs API. Commercial analytics, lead generation and continuing revenue-generating use require a written agreement. Not integrated without one.",
+      "ru": "API вакансий разных стран. Коммерческая аналитика, лидогенерация и регулярное использование в платном продукте требуют письменного договора. Без него интеграция не включена.",
+      "eligibility": "per_listing",
+      "readiness": "license_required"
+    }
+  ]
+}
