@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process';
 import { organismUiTest } from './organism-ui.mjs';
 import { testIncomeEngine } from './income-engine.mjs';
 import { testInternationalSources } from './international-sources.mjs';
+import { testOpportunityV2 } from './opportunity-v2.mjs';
 import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync, readdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -66,6 +67,8 @@ async function main() {
   organismUiTest();
   await testIncomeEngine();
   await testInternationalSources();
+  testOpportunityV2();
+  await opportunityV2RoutesTest();
   await internationalRoutesTests();
   await incomeDeskRoutesTest();
   await incomeOpsRoutesTest();
@@ -158,6 +161,49 @@ async function incomeOpsRoutesTest(){
  body:JSON.stringify({deletionToken})});
  assert.equal(removed.status,200,'deletion token remains valid after operator updates');
  console.log('✓ private income operations console and consented brief outcome accounting');
+}
+
+async function opportunityV2RoutesTest(){
+ const indexResponse=await get('/api/income/index');
+ assert.equal(indexResponse.status,200);
+ let body=await indexResponse.json();
+ assert.ok(Array.isArray(body.records),'index must return typed records');
+ assert.ok(body.stats&&typeof body.stats.total==='number');
+ assert.ok(body.disclaimer.includes('No applicant'),'must warn about unknown eligibility');
+ const assess=await fetch(origin+'/api/income/assess',{method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({id:'invalid',profile:{residenceCountry:'US'}})});
+ assert.equal(assess.status,404,'unknown indexed IDs must fail closed');
+ const badAssessment=await fetch(origin+'/api/income/assess',{method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({id:'invalid',profile:[]})});
+ assert.equal(badAssessment.status,400,'array is not a supported applicant profile');
+ for(const locale of ['','/en']){
+  const html=(await (await get(locale+'/income-desk')).text());
+  assert.ok(html.includes('id="id-v2-form"'), 'cross-source search');
+  assert.ok(html.includes('id="id-v2-assess"'),'eligibility check');
+  assert.ok(html.includes('/assets/income-v2.js'),'interactive v0.2');
+ }
+ assert.equal((await get('/assets/income-v2.js')).status,200,'v0.2 client code');
+ assert.equal((await get('/api/admin/income/memory')).status,401,'financial memory must not be public');
+ const post=async(payload,pass=PASSWORD)=>fetch(origin+'/api/admin/income/memory',{
+  method:'POST',headers:{'Content-Type':'application/json','x-admin-password':pass},
+  body:JSON.stringify(payload)});
+ const data={category:'software',outcome:'paid',currency:'USD',amountReceived:5000,
+  directCosts:3000,hours:50,period:'2026-11',nonPersonalConfirmation:true};
+ assert.equal((await post(data,'wrong')).status,401,'memory write requires admin authentication');
+ assert.equal((await post({...data,nonPersonalConfirmation:false})).status,400,'privacy confirmation mandatory');
+ const added=await post(data);
+ assert.equal(added.status,201,'structured financial observation can be recorded');
+ const {id}=await added.json();
+ const read=await fetch(origin+'/api/admin/income/memory',{headers:{'x-admin-password':PASSWORD}});
+ assert.equal(read.status,200);
+ const record=await read.json();
+ assert.ok(record.observations.some(x=>x.id===id),'record in authenticated memory');
+ assert.equal(record.summary.byCurrency.USD.netBeforeOverhead,2000,'direct cost arithmetic');
+ const removed=await fetch(origin+'/api/admin/income/memory/'+id,{
+  method:'DELETE',headers:{'x-admin-password':PASSWORD}});
+ assert.equal(removed.status,200);
+ assert.equal((await (await fetch(origin+'/api/admin/income/memory',{headers:{'x-admin-password':PASSWORD}})).json()).observations.length,0);
+ console.log('✓ v0.2 index, private on-demand eligibility, persistent operations memory, authenticated deletion and EN/RU UI');
 }
 
 async function internationalRoutesTests() {
