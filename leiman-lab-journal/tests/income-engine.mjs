@@ -23,6 +23,13 @@ export async function testIncomeEngine(){
  assert.equal(job.locationRestrictions[0],'US');
  assert.equal(normaliseJob({...sampleJob,applicationLink:'https://malicious.example/steal'}),null,'outbound URL must be trusted');
  assert.equal(normaliseJob({...sampleJob,expiryDate:Math.floor(Date.now()/1000)-60}),null,'expired jobs must be omitted');
+ assert.equal(normaliseJob({...sampleJob,excerpt:"While we don't currently have any open roles, we are scouting talent."}),null,'evergreen talent pipelines are not open roles');
+ const unknown=normaliseJob({...sampleJob,locationRestrictions:[{alpha2:'',name:''}]});
+ assert.equal(unknown.worldwide,false,'unknown location must not be labelled worldwide');
+ assert.equal(unknown.locationUnclear,true);
+ const uncertain=opportunityFit(unknown,{q:'designer',country:'DE'});
+ assert.equal(uncertain.eligible,true,'unknown eligibility must be flagged, not silently excluded');
+ assert.ok(uncertain.limitations.some(x=>x.includes('unknown')),'unknown location must be explained');
  const good=opportunityFit(job,{q:'designer',skills:'Figma UX',country:'US'});
  const bad=opportunityFit(job,{q:'designer',country:'DE'});
  assert.equal(good.eligible,true);
