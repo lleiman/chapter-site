@@ -22,6 +22,60 @@ if(desk){
  };
  const money=(n,c)=>Number(n).toLocaleString(en?'en-US':'ru-RU',{style:'currency',currency:/^(USD|EUR|GBP|RUB|IDR)$/.test(c)?c:'USD',maximumFractionDigits:0});
  const status=$('id-job-status'),count=$('id-job-count'),list=$('id-job-results'),search=$('id-job-search');
+ const trackerKey='leiman-income-pipeline-v1';
+ const stages=['saved','contacted','applied','interview','offer','paid','closed'];
+ const stageLabels=en?['Saved','Contacted','Applied','Interview','Offer','Paid','Closed']:['Сохранено','Связался','Отклик','Интервью','Офер','Оплачено','Закрыто'];
+ const trustedLink=x=>{try{const url=new URL(x);return url.protocol==='https:'&&url.hostname==='himalayas.app'?url.href:'#'}catch{return '#'}};
+ let jobMap=new Map();
+ function loadPipeline(){
+   try{
+     const a=JSON.parse(localStorage.getItem(trackerKey)||'[]');
+     return Array.isArray(a)?a.filter(x=>typeof x.id==='string'&&x.id.length<80).slice(0,100):[];
+   }catch{return []}
+ }
+ let pipeline=loadPipeline();
+ function storePipeline(){try{localStorage.setItem(trackerKey,JSON.stringify(pipeline))}catch{}}
+ function drawTracker(){
+   const target=$('id-tracker-items'),empty=$('id-tracker-empty');
+   empty.hidden=pipeline.length>0;
+   target.innerHTML=pipeline.map(j=>`<article class="id-saved-row"><div><span class="id-saved-label">${esc(j.company||'HIMALAYAS')}</span><strong>${esc(j.title)}</strong>
+     <small>${esc((j.savedAt||'').slice(0,10))}</small></div>
+     <label>${en?'PROGRESS':'СТАТУС'}<select data-progress="${esc(j.id)}">${stages.map((s,i)=>`<option value="${s}"${j.stage===s?' selected':''}>${stageLabels[i]}</option>`).join('')}</select></label>
+     <a href="${esc(trustedLink(j.url))}" target="_blank" rel="noopener noreferrer">${en?'ORIGINAL':'ИСТОЧНИК'} ↗</a>
+     <button type="button" data-untrack="${esc(j.id)}" aria-label="${en?'Remove':'Удалить'}">×</button></article>`).join('');
+   const counts=stages.map(s=>pipeline.filter(j=>j.stage===s).length);
+   const metrics=document.createElement('p');metrics.className='id-pipeline-metrics';
+   metrics.textContent=stageLabels.map((x,i)=>x+': '+counts[i]).join('   /   ');
+   target.appendChild(metrics);
+ }
+ function saveLead(id){
+   const item=jobMap.get(id);
+   if(!item||pipeline.some(j=>j.id===id))return;
+   pipeline.unshift({id:item.id,title:item.title,company:item.company,url:item.applicationLink,stage:'saved',savedAt:new Date().toISOString()});
+   pipeline=pipeline.slice(0,100);storePipeline();drawTracker();
+   const btn=list.querySelector('[data-save="'+CSS.escape(id)+'"]');
+   if(btn){btn.disabled=true;btn.textContent=en?'SAVED ✓':'СОХРАНЕНО ✓'}
+ }
+ list.addEventListener('click',e=>{
+   const btn=e.target.closest('[data-save]');if(btn)saveLead(btn.dataset.save);
+ });
+ $('id-tracker-items').addEventListener('change',e=>{
+   const sel=e.target.closest('[data-progress]');if(!sel)return;
+   const row=pipeline.find(x=>x.id===sel.dataset.progress);
+   if(!row||!stages.includes(sel.value))return;
+   row.stage=sel.value;row.updatedAt=new Date().toISOString();storePipeline();drawTracker();
+ });
+ $('id-tracker-items').addEventListener('click',e=>{
+   const btn=e.target.closest('[data-untrack]');if(!btn)return;
+   pipeline=pipeline.filter(x=>x.id!==btn.dataset.untrack);storePipeline();drawTracker();
+ });
+ $('id-export-tracker').addEventListener('click',()=>{
+   const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),source:'Income Intelligence local pipeline',records:pipeline},null,2)],{type:'application/json'});
+   const url=URL.createObjectURL(blob);
+   const a=document.createElement('a');a.href=url;a.download='income-intelligence-pipeline.json';a.click();
+   setTimeout(()=>URL.revokeObjectURL(url),1500);
+ });
+ drawTracker();
  function renderJob(item){
   const loc=item.worldwide?tr.global:item.locationRestrictions.join(', ');
   const salary=item.salary?.min!=null?
@@ -35,7 +89,7 @@ if(desk){
    <div class="id-job-data"><div><small>${tr.score}</small><strong>${Number(item.fit.score)}/100</strong></div><div><small>PAY</small><strong>${salary}</strong></div><div><small>LOCATION</small><strong>${esc(loc)}</strong></div></div>
    ${restrictions}<div class="id-job-meta id-job-bottom">
    <span>${esc(item.publishedAt?.slice(0,10)||'')} · ${esc(item.source)} · ${tr.needsCheck}</span>
-   <a href="${esc(item.applicationLink)}" target="_blank" rel="noopener noreferrer">${tr.apply} ↗</a></div>
+   <div class="id-job-actions"><button type="button" class="id-save" data-save="${esc(item.id)}" ${pipeline.some(j=>j.id===item.id)?'disabled':''}>${pipeline.some(j=>j.id===item.id)?(en?'SAVED ✓':'СОХРАНЕНО ✓'):(en?'SAVE +':'СОХРАНИТЬ +')}</button><a href="${esc(item.applicationLink)}" target="_blank" rel="noopener noreferrer">${tr.apply} ↗</a></div></div>
    <details><summary>${en?'WHY THIS FIT SCORE?':'ПОЧЕМУ ТАКОЙ РЕЙТИНГ?'}</summary><p>${en?'Keyword matches':'Совпадение навыков'}: ${esc(skillMatch)}</p>
    <p>${Object.entries(item.fit.explanation).map(([k,v])=>esc(k)+': '+Number(v)).join(' · ')}</p>
    <p>${item.fit.limitations.map(esc).join(' ')}</p>
@@ -54,11 +108,14 @@ if(desk){
    status.textContent=d.results.length?tr.found:tr.none;
    count.textContent=d.results.length?' / '+d.results.length:'';
    $('id-job-age').textContent=(d.sourceStatus||'').toUpperCase()+' · '+(d.providerUpdatedAt?.slice(0,10)||'');
+   jobMap=new Map(d.results.map(j=>[j.id,j]));
    list.innerHTML=d.results.map(renderJob).join('');
   }catch(error){status.textContent=error.message||tr.unavailable;list.replaceChildren()}
   finally{btn.disabled=false}
  };
  search.addEventListener('submit',e=>{e.preventDefault();runJobs()});
+ // Show source-backed opportunities on arrival, rather than an empty landing page.
+ if(search.elements.q.value.trim().length>1)runJobs();
  const form=$('id-plan-form'),out=$('id-plan-output');
  form.addEventListener('submit',async e=>{
   e.preventDefault();if(!form.reportValidity())return;
