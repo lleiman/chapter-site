@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createGrantSearch,normalizeGrant} from '../grant-search.mjs';
+import {createUkTenders,normalizeTender} from '../uk-tenders.mjs';
 
 export async function testInternationalSources(){
  const registry=JSON.parse(readFileSync('content/income-sources.json','utf8'));
@@ -39,5 +40,34 @@ export async function testInternationalSources(){
  const fail=await outage.search({q:'distinct topic'},'test-fail');
  assert.equal(fail.status,503);
  assert.deepEqual(fail.body.results,[],'no fabricated grants on outage');
+
+ const ukSource={
+  id:'109437-2026',ocid:'ocds-h6vhtk-07beed',date:new Date().toISOString(),tag:['tender'],
+  tender:{title:'Digital Design and Research Services',status:'active',
+    description:'Open procurement for digital design and research services.',tenderPeriod:{endDate:'2027-01-14'},
+    value:{amount:120000,currency:'GBP'},procurementMethod:'open'},
+  parties:[{name:'Test Procurement Authority',roles:['buyer']}]
+ };
+ const uk=normalizeTender(ukSource);
+ assert.equal(uk.source,'UK Find a Tender');
+ assert.equal(uk.issuer,'Test Procurement Authority');
+ assert.equal(uk.sourceUrl,'https://www.find-tender.service.gov.uk/Notice/109437-2026');
+ assert.equal(normalizeTender({...ukSource,tag:['award']}),null,'award notice is not an open tender');
+ assert.equal(normalizeTender({...ukSource,tender:{...ukSource.tender,tenderPeriod:{endDate:'2020-01-01'}}}),null,'expired tender must not be shown');
+ let ukCalls=0;
+ const ukEngine=createUkTenders({fetcher:async(url,opts)=>{
+   ukCalls++;assert.ok(url.startsWith('https://www.find-tender.service.gov.uk/api/1.0/ocdsReleasePackages?'));
+   assert.ok(url.includes('stages=tender'),'procurement stage filtered');
+   return {ok:true,json:async()=>({releases:[ukSource],links:{}})};
+ }});
+ const ukFirst=await ukEngine.search({q:'digital'},'uk-tester');
+ assert.equal(ukFirst.status,200);assert.equal(ukFirst.body.results.length,1);
+ assert.equal(ukFirst.body.limitedSample,true);
+ const ukAgain=await ukEngine.search({q:'research'},'uk-tester');
+ assert.equal(ukCalls,1,'UK snapshot cache is shared across keywords');
+ assert.equal(ukAgain.body.sourceStatus,'cached');
+ const ukUnavailable=await createUkTenders({fetcher:async()=>{throw Error('unavailable')}}).search({q:'finance'},'uk-outage');
+ assert.equal(ukUnavailable.status,503);assert.deepEqual(ukUnavailable.body.results,[]);
+
  console.log('✓ verified international source policy registry, grant search, eligibility caveats and outage handling');
 }
