@@ -1,6 +1,7 @@
 /** Run: npm test. Zero dependencies. */
 import { spawn } from 'node:child_process';
 import { organismUiTest } from './organism-ui.mjs';
+import { testIncomeEngine } from './income-engine.mjs';
 import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync, readdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -62,6 +63,8 @@ async function main() {
   await incomeBilingualTests();
   await organismTests();
   organismUiTest();
+  await testIncomeEngine();
+  await incomeDeskRoutesTest();
   await allArticleTranslationsTest();
   await passwordlessAnalyticsTests();
   await commonsTests();
@@ -113,6 +116,50 @@ async function allArticleTranslationsTest() {
   console.log('✓ all '+slugs.length+' Russian journal articles have indexable, content-complete English editions');
 }
 
+
+async function incomeDeskRoutesTest() {
+ for(const [route,lang,alternate] of [
+   ['/income-desk','ru','/en/income-desk'],
+   ['/en/income-desk','en','/income-desk']
+ ]) {
+  const res=await get(route);assert.equal(res.status,200,route);
+  const page=await res.text();
+  assert.ok(page.includes('<html lang="'+lang+'">'),route+' html lang');
+  assert.ok(page.includes('<link rel="canonical" href="'+origin+route+'">'),route+' canonical');
+  assert.ok(page.includes('hreflang="'+(lang==='en'?'ru':'en')+'" href="'+origin+alternate+'"'),route+' hreflang');
+  assert.ok(page.includes('id="id-job-search"'),route+' real job search form');
+  assert.ok(page.includes('id="id-plan-form"'),route+' curator planning form');
+  assert.ok(page.includes('id="id-brief-form"'),route+' private client intake');
+  assert.ok(page.includes('/assets/income-desk.js'),route+' UI logic');
+ }
+ for(const url of ['/assets/income-desk.js','/assets/income-desk.css'])assert.equal((await get(url)).status,200,url);
+ const r=await fetch(origin+'/api/income/plan',{method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({title:'Research pilot',brief:'Provide structured research and user interviews on a new digital product.',budget:10000,currency:'USD'})});
+ assert.equal(r.status,200,'public planning endpoint should work without accounts');
+ const plan=await r.json();assert.equal(plan.scenarioOnly,true);
+ assert.equal(plan.qualityAssurance.amount,1000);
+ assert.equal(plan.grossMargin,'unknown');
+ const invalid=await fetch(origin+'/api/income/briefs',{method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({name:'Editor',email:'editor@example.test',title:'Testing new work',description:'An example private brief for secure submission and review.',budget:5000,consent:false})});
+ assert.equal(invalid.status,400,'business brief requires consent');
+ const created=await fetch(origin+'/api/income/briefs',{method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({name:'Editor',email:'editor@example.test',title:'Testing new work',description:'An example private brief for secure submission and review with financial estimates.',budget:5000,consent:true})});
+ assert.equal(created.status,201,'brief consent submission');
+ const saved=await created.json();
+ const publicAccess=await get('/api/admin/income/briefs');
+ assert.equal(publicAccess.status,401,'briefs not accessible publicly');
+ const admin=await fetch(origin+'/api/admin/income/briefs',{headers:{'x-admin-password':PASSWORD}});
+ assert.equal(admin.status,200);
+ assert.ok((await admin.json()).briefs.some(x=>x.id===saved.id),'admin review queue should hold brief');
+ const removed=await fetch(origin+'/api/income/briefs/'+saved.id,{method:'DELETE',headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({deletionToken:saved.deletionToken})});
+ assert.equal(removed.status,200,'self-service deletion');
+ const map=await html('/sitemap.xml');
+ assert.ok(map.includes(origin+'/income-desk')&&map.includes(origin+'/en/income-desk'),'SEO sitemap includes both locales');
+ const intake=await html('/en/opportunities');
+ assert.ok(intake.includes('/en/income-desk'),'directory should link to operational workspace');
+ console.log('✓ bilingual income desk, curator API, consent-based buyer intake, admin auth, self-delete and SEO');
+}
 
 async function organismTests() {
   for (const [url,lang,alternate,marker] of [
