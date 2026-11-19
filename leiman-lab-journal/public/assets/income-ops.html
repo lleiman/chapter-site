@@ -1,0 +1,11 @@
+<main class="ops" id="income-ops">
+<header><span>LEIMAN LAB / PRIVATE</span><h1>INCOME<br>OPERATIONS<span>.</span></h1>
+<p>Internal pilot queue. Applicant CVs and customer briefs are private. Statuses and any monetary outcomes are human-entered and not independently verified.</p></header>
+<section class="ops-auth" id="ops-auth"><h2>Operator access</h2><p>Enter the existing Leiman Lab editor password. It will remain in memory in this tab only.</p>
+<form id="ops-login"><label>EDITOR PASSWORD<input name="password" type="password" autocomplete="off" required></label><button type="submit">OPEN PRIVATE QUEUE →</button></form>
+<p id="ops-message" role="status" aria-live="polite"></p></section>
+<section id="ops-content" hidden><div class="ops-top"><span>LIVE INTERNAL REVIEW</span><button type="button" id="ops-refresh">REFRESH ↻</button><button type="button" id="ops-lock">LOCK</button></div>
+<div class="ops-metrics" id="ops-metrics"></div><section><h2>Client briefs <small id="ops-brief-count"></small></h2><div id="ops-briefs" class="ops-list"></div></section>
+<section><h2>Candidate profiles <small id="ops-cv-count"></small></h2><p>CV records are available only with applicant consent and expire automatically after 30 days. Do not forward profiles without separate permission.</p><div id="ops-cvs" class="ops-list"></div></section>
+<p class="ops-foot">No automated offers, contracts or transfers. Accepted projects require independent written agreements. Revenue and cost fields are operator-reported pilot measurements.</p></section>
+<script type="module" src="/assets/income-ops.js"></script></main>
