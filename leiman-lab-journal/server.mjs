@@ -519,7 +519,7 @@ function articleView(a, origin, lang = 'ru') {
   if (english) body = translateArticleChrome(body);
   const description = a.description || a.summary;
   const alternates = hasEnglish(a) ? [{lang:'ru',href:origin+'/articles/'+a.slug},{lang:'en',href:origin+'/en/articles/'+a.slug}] : [];
-  return page({lang,alternates,content:body,title:`${a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${socialCover(a)}`,type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,extraStylesheet:['period-poluraspada-novogo','ai-film-competitions-2026'].includes(a.slug)?'/assets/period-poluraspada-light.css':['ai-index-2026','attention-economy-ai-2026'].includes(a.slug)?'/assets/ai-index-article.css':'',bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@graph':[makeSocialSchema(a,origin,lang),{'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:english?'Journal':'Журнал',item:origin+(english?'/en/':'/')},{'@type':'ListItem',position:2,name:a.title,item:pageUrl}]}]}});
+  return page({lang,alternates,content:body,title:`${a.seoTitle || a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${socialCover(a)}`,type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,extraStylesheet:['period-poluraspada-novogo','ai-film-competitions-2026'].includes(a.slug)?'/assets/period-poluraspada-light.css':['ai-index-2026','attention-economy-ai-2026'].includes(a.slug)?'/assets/ai-index-article.css':'',bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@graph':[makeSocialSchema(a,origin,lang),{'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:english?'Journal':'Журнал',item:origin+(english?'/en/':'/')},{'@type':'ListItem',position:2,name:a.title,item:pageUrl}]}]}});
 }
 
 function translateArticleChrome(html) {
@@ -987,8 +987,8 @@ const server = http.createServer((req,res)=>{
     const pagePath=lang==='en'?'/en/income-desk':'/income-desk';
     const content=readFileSync(path.join(PUBLIC,'assets','income-desk.'+lang+'.html'),'utf8').replace('<!-- CASH_AWARDS_SSR -->',renderCashAwards(loadCashAwards(DIR),lang));
     return write(res,200,page({content,lang,
-      title:lang==='en'?'Income Intelligence — Live Jobs & Finance Curator':'Income Intelligence — вакансии и финансовый куратор',
-      description:lang==='en'?'Search live remote opportunities, create explainable capability plans, and privately submit a business brief for human review.':'Ищите реальные удалённые вакансии, собирайте план исполнения задач и отправляйте приватные заявки на рассмотрение.',
+      title:lang==='en'?'Cash Prizes, Grants and Paid Jobs — Income Intelligence':'Денежные конкурсы, гранты и работа — Income Intelligence',
+      description:lang==='en'?'Find cash-prize competitions, project grants with published funding amounts and jobs with disclosed salaries. Browse official sources and check eligibility.':'Денежные конкурсы, гранты с опубликованными суммами и вакансии с указанной зарплатой. Первичные источники, сроки и условия участия.',
       canonical:origin+pagePath,cover:origin+'/og/ai-income-opportunities.png',
       extraStylesheet:'/assets/income-desk.css',bodyData:' data-page="income-desk"',
       alternates:[{lang:'ru',href:origin+'/income-desk'},{lang:'en',href:origin+'/en/income-desk'}],
