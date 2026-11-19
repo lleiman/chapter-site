@@ -1,107 +1,55 @@
-const root=document.querySelector('#income-desk');
-if(root){
- const en=root.dataset.lang==='en';
- const el=id=>root.querySelector('#'+id);
- const esc=v=>String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
- const labels=en?{
-  live:'LIVE IMPORT',directory:'OFFICIAL DIRECTORY',locked:'ACCESS REQUIRED',licensed:'LICENCE REQUIRED',
-  other:'SOURCE',policy:'POLICY / REQUIREMENTS',open:'OPEN ORIGINAL ↗',docs:'REVIEW RULES ↗',
-  ready:'official sources',none:'No sources match these filters.',error:'Source registry temporarily unavailable.',
-  grantWait:'Querying official Grants.gov search…',grantEmpty:'No posted grant records returned for this topic. Try another keyword.',
-  grantError:'Grants.gov search unavailable. No synthetic results have been added.',
-  grantOpen:'VIEW OFFICIAL NOTICE ↗',grantDeadline:'DEADLINE',grantNotProvided:'NOT LISTED',grantAgency:'ISSUER',
-  grantWarn:'ELIGIBILITY NOT VERIFIED · Check country, organisation status, registration, co-funding and full funding notice.',
-  latest:'RETRIEVED',posted:'POSTED · EXTERNAL SOURCE'
- }:{
-  live:'ЖИВОЙ ИМПОРТ',directory:'ОФИЦИАЛЬНЫЙ КАТАЛОГ',locked:'НУЖЕН ДОСТУП',licensed:'НУЖНА ЛИЦЕНЗИЯ',
-  other:'ИСТОЧНИК',policy:'ПРАВИЛА / ОГРАНИЧЕНИЯ',open:'ОТКРЫТЬ ИСТОЧНИК ↗',docs:'ИЗУЧИТЬ УСЛОВИЯ ↗',
-  ready:'официальных источников',none:'Для выбранных фильтров нет источников.',error:'Каталог источников временно недоступен.',
-  grantWait:'Запрашиваем официальную базу Grants.gov…',grantEmpty:'По запросу не найдены опубликованные записи. Попробуйте другую тему.',
-  grantError:'Источник Grants.gov недоступен. Вымышленные результаты не подставляются.',
-  grantOpen:'ОТКРЫТЬ КОНКУРС ↗',grantDeadline:'СРОК',grantNotProvided:'НЕ УКАЗАН',grantAgency:'ОРГАНИЗАТОР',
-  grantWarn:'ДОПУСК НЕ ПРОВЕРЕН · Проверяйте страну, статус организации, регистрацию, софинансирование и полные условия.',
-  latest:'ЗАГРУЖЕНО',posted:'ОПУБЛИКОВАНО · ВНЕШНИЙ ИСТОЧНИК'
+const globalRoot=document.querySelector('#income-desk');
+if(globalRoot){
+ const en=globalRoot.dataset.lang==='en',el=id=>globalRoot.querySelector('#'+id);
+ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const t=en?{live:'LIVE IMPORT',directory:'OFFICIAL DIRECTORY',locked:'ACCESS REQUIRED',licensed:'LICENCE REQUIRED',
+  open:'OPEN ORIGINAL ↗',rules:'REVIEW REQUIREMENTS ↗',sources:'official sources',none:'No matching sources.',
+  loading:'Checking official UK contracts with stated monetary values…',
+  empty:'No active contracts with published values in the recent provider sample. Broaden the term or consult the original portal.',
+  unavailable:'UK public procurement API unavailable. No synthetic contracts have been added.',
+  value:'PUBLISHED CONTRACT VALUE',buyer:'BUYER',deadline:'DEADLINE',action:'READ OFFICIAL TENDER ↗',
+  status:'Officially published contract value is not a guaranteed payment or confirmed bidder eligibility.'
+ }:{live:'ЖИВОЙ ИМПОРТ',directory:'ОФИЦИАЛЬНЫЙ КАТАЛОГ',locked:'НУЖЕН ДОСТУП',licensed:'НУЖНА ЛИЦЕНЗИЯ',
+  open:'ОТКРЫТЬ ИСТОЧНИК ↗',rules:'ПРОВЕРИТЬ ПРАВИЛА ↗',sources:'официальных источников',none:'Нет совпадений.',
+  loading:'Проверяем официальные британские тендеры с заявленными суммами…',
+  empty:'В выборке нет действующих тендеров с опубликованной стоимостью. Расширьте запрос или откройте первоисточник.',
+  unavailable:'API британских закупок недоступен. Вымышленные контракты не добавляются.',
+  value:'ОПУБЛИКОВАННАЯ СТОИМОСТЬ',buyer:'ЗАКАЗЧИК',deadline:'СРОК',action:'ОТКРЫТЬ ТЕНДЕР ↗',
+  status:'Опубликованная стоимость контракта не означает гарантированную выплату или право участвовать.'
  };
- const access={live:labels.live,official_api:labels.directory,official_directory:labels.directory,
-  api_key:labels.locked,licensed:labels.licensed};
+ const status=el('id-source-status'),list=el('id-source-results'),region=el('id-source-region'),kind=el('id-source-kind');
  let sources=[];
- function sourceCard(s){
-  const code=access[s.access]||labels.other,kind=(s.kind||'').toUpperCase();
-  return `<article class="id-source-card">
-   <div class="id-source-top"><span>${esc(s.region.toUpperCase())} / ${esc(kind)}</span><strong class="id-source-access${s.readiness==='live'?' is-live':''}">${esc(code)}</strong></div>
-   <h3>${esc(s.name)}</h3><p>${esc(s[en?'en':'ru'])}</p>
-   <div class="id-source-bottom"><a target="_blank" rel="noopener noreferrer" href="${esc(s.search)}">${labels.open}</a>
-   <a target="_blank" rel="noopener noreferrer" href="${esc(s.policy)}">${labels.docs}</a></div></article>`;
- }
- function renderSources(){
-  const region=el('id-source-region').value,kind=el('id-source-kind').value;
-  const visible=sources.filter(s=>(region==='all'||s.region===region||(region==='global'&&s.region==='global'))&&(kind==='all'||s.kind===kind));
-  el('id-source-status').textContent=visible.length+' / '+sources.length+' '+labels.ready;
-  el('id-source-results').innerHTML=visible.length?visible.map(sourceCard).join(''):'<p>'+labels.none+'</p>';
- }
- const sourceFilter=e=>renderSources();
- el('id-source-region').addEventListener('change',sourceFilter);
- el('id-source-kind').addEventListener('change',sourceFilter);
- fetch('/api/income/sources',{headers:{Accept:'application/json'}}).then(async r=>{
-  if(!r.ok)throw Error();const body=await r.json();
-  if(!Array.isArray(body.sources))throw Error();
-  sources=body.sources.filter(s=>['global','us','uk','eu','ca','au','sg','id'].includes(s.region));
-  renderSources();
- }).catch(()=>{el('id-source-status').textContent=labels.error});
- const grantForm=el('id-grant-search'),grantList=el('id-grant-results'),status=el('id-grant-status');
- function renderGrant(g){
-  return `<article class="id-grant-card"><div class="id-job-meta"><span>U.S. / GRANT / ${labels.posted}</span><span>${esc(g.reference)}</span></div>
-  <h4>${esc(g.title)}</h4><div class="id-grant-detail"><div><small>${labels.grantAgency}</small><strong>${esc(g.issuer)}</strong></div>
-  <div><small>${labels.grantDeadline}</small><strong>${esc(g.deadline||labels.grantNotProvided)}</strong></div></div>
-  <p class="id-grant-warning">${labels.grantWarn}</p>
-  <a href="${esc(g.sourceUrl)}" target="_blank" rel="noopener noreferrer">${labels.grantOpen}</a></article>`;
- }
- const ukForm=el('id-uk-search'),ukStatus=el('id-uk-status'),ukResults=el('id-uk-results');
- const ukText=en?{
-   loading:'Reading the official UK tender feed…',empty:'No matching active tender-stage notices in the limited recent sample. Try a broader term or search the official portal.',
-   error:'UK official API is unavailable. No synthetic results have been generated.',
-   agency:'BUYER',deadline:'DEADLINE',notProvided:'NOT LISTED',open:'READ NOTICE ↗',
-   sample:'RECENT-SAMPLE ONLY',eligibility:'BIDDER ELIGIBILITY UNVERIFIED. Verify nationality, registration, documents and live status.'
- }:{
-   loading:'Читаем официальные данные о тендерах Великобритании…',
-   empty:'В ограниченной выборке недавних уведомлений совпадений нет. Попробуйте другой термин или официальный портал.',
-   error:'Британский API недоступен. Вымышленные тендеры не добавляются.',
-   agency:'ЗАКАЗЧИК',deadline:'СРОК',notProvided:'НЕ УКАЗАН',open:'ОТКРЫТЬ УВЕДОМЛЕНИЕ ↗',
-   sample:'НЕПОЛНАЯ ВЫБОРКА',eligibility:'ДОПУСК НЕ ПРОВЕРЕН. Уточняйте гражданство или юрисдикцию, регистрацию, документы и текущий статус.'
+ const sourcesView=()=>{
+  const visible=sources.filter(x=>(region.value==='all'||x.region===region.value)&&(kind.value==='all'||x.kind===kind.value));
+  status.textContent=visible.length+' / '+sources.length+' '+t.sources;
+  list.innerHTML=visible.length?visible.map(x=>{
+   const access={live:t.live,official_api:t.directory,official_directory:t.directory,api_key:t.locked,licensed:t.licensed};
+   return '<article class="id-source-card"><div class="id-source-top"><span>'+esc(x.region.toUpperCase())+' / '+esc(x.kind.toUpperCase())+
+    '</span><strong class="id-source-access">'+esc(access[x.access]||t.directory)+'</strong></div><h3>'+esc(x.name)+
+    '</h3><p>'+esc(x[en?'en':'ru'])+'</p><div class="id-source-bottom"><a target="_blank" rel="noopener noreferrer" href="'+esc(x.search)+'">'+t.open+
+    '</a><a target="_blank" rel="noopener noreferrer" href="'+esc(x.policy)+'">'+t.rules+'</a></div></article>';
+  }).join(''):'<p class="id-legal">'+t.none+'</p>';
  };
- function ukCard(t){
-  return `<article class="id-grant-card"><div class="id-job-meta"><span>UK / TENDER / ${esc(t.status)}</span><span>${esc(t.id)}</span></div>
-   <h4>${esc(t.title)}</h4><p>${esc(t.excerpt||'')}</p>
-   <div class="id-grant-detail"><div><small>${ukText.agency}</small><strong>${esc(t.issuer)}</strong></div>
-   <div><small>${ukText.deadline}</small><strong>${esc(t.deadline||ukText.notProvided)}</strong></div></div>
-   <p class="id-grant-warning">${ukText.eligibility}</p>
-   <a href="${esc(t.sourceUrl)}" target="_blank" rel="noopener noreferrer">${ukText.open}</a></article>`;
- }
- ukForm.addEventListener('submit',async event=>{
-  event.preventDefault();if(!ukForm.reportValidity())return;
-  const q=String(new FormData(ukForm).get('q')||'').trim(),button=ukForm.querySelector('button');
-  ukStatus.textContent=ukText.loading;ukResults.replaceChildren();button.disabled=true;
+ region.addEventListener('change',sourcesView);kind.addEventListener('change',sourcesView);
+ fetch('/api/income/sources',{headers:{Accept:'application/json'}}).then(async r=>{
+  if(!r.ok)throw Error();const data=await r.json();sources=Array.isArray(data.sources)?data.sources:[];sourcesView();
+ }).catch(()=>{status.textContent=en?'Official directory unavailable.':'Каталог временно недоступен.'});
+ const form=el('id-uk-search'),statusEl=el('id-uk-status'),items=el('id-uk-results');
+ form.addEventListener('submit',async event=>{
+  event.preventDefault();if(!form.reportValidity())return;
+  const query=String(new FormData(form).get('q')||'').trim(),button=form.querySelector('button');
+  statusEl.textContent=t.loading;items.replaceChildren();button.disabled=true;
   try{
-   const r=await fetch('/api/income/uk-tenders?'+new URLSearchParams({q}),{headers:{Accept:'application/json'}});
-   const data=await r.json();if(!r.ok)throw Error(data.error||ukText.error);
-   ukStatus.textContent=data.results.length+' / '+data.inspectedNotices+' · '+ukText.sample+' · '+data.sourceStatus.toUpperCase();
-   ukResults.innerHTML=data.results.length?data.results.map(ukCard).join(''):'<p>'+ukText.empty+'</p>';
-  }catch(err){ukStatus.textContent=err.message||ukText.error}
-  finally{button.disabled=false}
- });
- grantForm.addEventListener('submit',async event=>{
-  event.preventDefault();if(!grantForm.reportValidity())return;
-  const fd=new FormData(grantForm),q=String(fd.get('q')||'').trim();
-  if(q.length<2){status.textContent=en?'Enter two or more letters.':'Введите хотя бы два символа.';return}
-  const button=grantForm.querySelector('button[type=submit]');
-  button.disabled=true;status.textContent=labels.grantWait;grantList.replaceChildren();
-  try{
-   const response=await fetch('/api/income/grants?'+new URLSearchParams({q}),{headers:{Accept:'application/json'}});
-   const data=await response.json();
-   if(!response.ok)throw Error(data.error||labels.grantError);
-   status.textContent=data.results.length+' '+labels.ready+' · '+data.sourceStatus.toUpperCase()+' · '+labels.latest+': '+data.retrievedAt.slice(0,10);
-   grantList.innerHTML=data.results.length?data.results.map(renderGrant).join(''):'<p>'+labels.grantEmpty+'</p>';
-  }catch(error){status.textContent=error.message||labels.grantError;grantList.replaceChildren()}
-  finally{button.disabled=false}
+   const r=await fetch('/api/income/uk-tenders?'+new URLSearchParams({q:query}),{headers:{Accept:'application/json'}});
+   const data=await r.json();if(!r.ok)throw Error(data.error||t.unavailable);
+   const matching=(data.results||[]).filter(v=>v.status==='active'&&Number.isFinite(v.value)&&v.value>0&&v.currency==='GBP');
+   statusEl.textContent=matching.length+' / '+Number(data.inspectedNotices||0)+' '+(en?'recent notices':'недавних объявлений');
+   items.innerHTML=matching.length?matching.map(v=>
+    '<article class="id-grant-card"><div class="id-job-meta"><span>UK / PUBLIC CONTRACT</span><span>'+esc(v.deadline||'')+'</span></div>'+
+    '<h4>'+esc(v.title)+'</h4><div class="id-grant-detail"><div><small>'+t.buyer+'</small><strong>'+esc(v.issuer)+'</strong></div>'+
+    '<div><small>'+t.value+'</small><strong>£'+Number(v.value).toLocaleString(en?'en-GB':'ru-RU')+'</strong></div></div>'+
+    '<p class="id-grant-warning">'+t.status+'</p><a href="'+esc(v.sourceUrl)+'" target="_blank" rel="noopener noreferrer">'+t.action+'</a></article>'
+   ).join(''):'<p class="id-legal">'+t.empty+'</p>';
+  }catch(err){statusEl.textContent=err.message||t.unavailable}finally{button.disabled=false}
  });
 }
