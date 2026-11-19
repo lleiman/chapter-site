@@ -16,11 +16,26 @@
  </section>
 <p class="id-legal">Jobs sourced from Himalayas. Apply through the provided Himalayas link. Results refresh at the provider's cadence and may close sooner. <a href="https://himalayas.app" target="_blank" rel="noopener noreferrer">Himalayas ↗</a></p>
  <p class="id-legal">Fit is a transparent relevance heuristic, not the probability of getting hired. The source has not been independently contacted.</p></section>
- <section class="id-section id-v2" id="opportunity-engine"><div class="id-section-code">v0.2 / UNIFIED OPPORTUNITY ENGINE</div>
+ <section class="id-section id-bounty" id="bounties"><div class="id-section-code">02 / CASH TASKS • BOUNTIES • PRIZES</div>
+<header><h2>Find a task worth doing.</h2><p>Unlike jobs, bounties can pay for a specific result. Discover GitHub issue rewards and browse independent challenge programmes. A posted reward is not proof of escrow or payment, and a hackathon prize pool is not a guaranteed individual payout.</p></header>
+<div class="id-bounty-guide"><div><strong>01 / FIXED-REWARD TASKS</strong><p>Code fixes, small features, technical documentation. Verify the actual issuer, reward funding, claim rules and acceptance tests.</p></div>
+<div><strong>02 / CHALLENGES & PRIZES</strong><p>Hackathons and design competitions. Cash is conditional on winning, often against many entrants. Prize pool ≠ expected earnings.</p></div>
+<div><strong>03 / SECURITY BOUNTIES</strong><p>Potentially high payouts, but difficult, uncertain and tightly scoped. Work only on explicitly authorised targets.</p></div></div>
+<div class="id-bounty-search">
+<form class="id-search-form" id="id-bounty-form"><label>GITHUB BOUNTY KEYWORD <input name="q" type="search" maxlength="60" placeholder="e.g. docs, website, UI, Python"></label>
+<button class="id-action" type="submit">FIND BOUNTY ISSUES →</button></form>
+<div class="id-bounty-toolbar"><label>REWARD FILTER<select id="id-bounty-reward"><option value="all">All (including undisclosed)</option><option value="100">Text mentions ≥ $100</option><option value="500">Text mentions ≥ $500</option><option value="1000">Text mentions ≥ $1,000</option></select></label>
+<label>ORDER BY<select id="id-bounty-order"><option value="recent">Recently updated</option><option value="reward">Mentioned reward (unverified)</option></select></label></div>
+<div class="id-results-head"><span id="id-bounty-status" role="status" aria-live="polite">Searching publicly bounty-labelled GitHub issues. No payout is verified until reviewed at the original source.</span><span id="id-bounty-count"></span></div>
+<div id="id-bounty-results" class="id-grant-results"></div><p class="id-legal">GitHub issue search is a lead generator. A text-quoted amount is unverified, may be outdated or claimed, and is not your expected earnings. Confirm reward terms with the issue owner before any work.</p></div>
+<div class="id-bounty-links"><h3>Other bounty and challenge platforms</h3><p>Use the official directories below for broader coverage. These links do not imply live import or confirmed payouts.</p>
+<div class="id-bounty-directories" id="id-bounty-directories"></div></div>
+</section>
+<section class="id-section id-v2" id="opportunity-engine"><div class="id-section-code">v0.2 / UNIFIED OPPORTUNITY ENGINE</div>
 <header><h2>One index. Different economies.</h2><p>Jobs, grants and procurement notices now share a persistent, source-attributed index. Search the records actually imported so far, then check potential eligibility. The system does not claim comprehensive coverage.</p></header>
 <div class="id-v2-summary" id="id-v2-summary">Loading indexed opportunities…</div>
 <form id="id-v2-form" class="id-search-form"><label>SEARCH INDEX<input type="search" name="q" maxlength="100" placeholder="e.g. design, research"></label>
-<label>TYPE<select name="type"><option value="all">All types</option><option value="employment">Employment</option><option value="grant">Grant</option><option value="tender">Procurement</option></select></label>
+<label>TYPE<select name="type"><option value="all">All types</option><option value="employment">Employment</option><option value="grant">Grant</option><option value="tender">Procurement</option><option value="bounty">Bounty tasks</option></select></label>
 <label>COUNTRY<select name="country"><option value="">Any jurisdiction</option><option value="US">United States</option><option value="GB">United Kingdom</option></select></label>
 <button class="id-action" type="submit">SEARCH INDEX →</button></form>
 <p class="id-legal">The index stores non-personal source records on the server. Results are refreshed from connected providers; expired notices are hidden by default. Your eligibility inputs are used only for an on-demand assessment and are not saved to your profile.</p>
@@ -37,7 +52,7 @@
  <div class="id-section-code">02 / INTERNATIONAL OPPORTUNITY NETWORK</div>
  <header><h2>Countries, funding and procurement.</h2><p>Explore official sources across regions. Availability, eligibility and legal requirements are different questions. Each source states what can be accessed and what still needs verification.</p></header>
  <div class="id-global-tools"><label>COUNTRY / REGION<select id="id-source-region"><option value="all">All regions</option><option value="global">International</option><option value="us">United States</option><option value="uk">United Kingdom</option><option value="eu">European Union</option><option value="ca">Canada</option><option value="au">Australia</option><option value="sg">Singapore</option><option value="id">Indonesia</option></select></label>
- <label>OPPORTUNITY TYPE<select id="id-source-kind"><option value="all">All types</option><option value="jobs">Employment</option><option value="grants">Grants & funding</option><option value="tenders">Tenders & contracts</option><option value="research">Research / fellowships</option></select></label></div>
+ <label>OPPORTUNITY TYPE<select id="id-source-kind"><option value="all">All types</option><option value="jobs">Employment</option><option value="grants">Grants & funding</option><option value="tenders">Tenders & contracts</option><option value="research">Research / fellowships</option><option value="bounties">Paid bounties</option><option value="competitions">Prize competitions</option><option value="security_bounties">Security rewards</option></select></label></div>
  <div class="id-global-status" id="id-source-status" role="status">Loading official source registry…</div><div id="id-source-results" class="id-source-grid"></div>
  <p class="id-legal">"Official directory" means a verified government or organisation website, not a live imported listing. Restricted APIs remain disabled until access and licensing are settled. No source grants automatic international eligibility.</p>
  <div class="id-grants-box"><div class="id-section-code">LIVE SOURCE / U.S. FEDERAL GRANTS</div><h3>Search official Grants.gov opportunities.</h3>
@@ -69,6 +84,7 @@
  <div id="id-delete-panel" class="id-delete-panel" hidden><p>Brief received for private review. Save your deletion token:</p><code id="id-delete-token"></code><button id="id-delete-brief" type="button">DELETE MY BRIEF</button></div>
  <p class="id-legal">No AI provider or external marketplace receives this brief. Keep the deletion token after submission.</p></section>
  <section class="id-outro"><small>LEIMAN LAB / 2026</small><h2>THE FIRST REAL TRANSACTION IS THE TEST.</h2><p>Success is measured by qualified opportunities, executed work, invoices paid and net contribution, rather than impressive agent counts.</p><div><a href="/en/organism">VIEW THE ORGANISM MODEL ↗</a><a href="/en/articles/ai-income-opportunities">READ THE RESEARCH ↗</a></div></section>
+ <script type="module" src="/assets/income-bounties.js"></script>
  <script type="module" src="/assets/income-v2.js"></script>
  <script type="module" src="/assets/income-global.js"></script>
  <script type="module" src="/assets/income-desk.js"></script></main>
