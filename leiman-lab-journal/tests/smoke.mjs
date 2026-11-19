@@ -180,6 +180,12 @@ async function cashPrizeRoutesTest(){
   assert.ok(page.includes('id="editors-picks"'),'featured list exists');
   assert.ok(page.indexOf('id="editors-picks"')<page.indexOf('id="radar"'),'awards render first');
   assert.ok(page.includes('id="id-top-bounty-results"'),'cash award area present');
+  assert.equal((page.match(/<details class="id-award-row">/g)||[]).length,5,
+    'five compact editable prize details rows should render before JS');
+  assert.equal((page.match(/<summary class="id-award-summary">/g)||[]).length,5,
+    'amounts, deadlines and organisers should be scannable without expansion');
+  assert.ok(page.includes('id-awards-footnote'),'conditional payout caveat should appear once beneath list');
+
   assert.ok(page.includes('HeyGen')&&page.includes('Higgsfield')&&page.includes('Runway'),'server renders real organiser prizes on first paint');
   assert.ok(page.includes('id="id-funded-grant-form"'),'official monetary grant search');
   assert.ok(page.includes('/assets/income-bounties.js'),'money grant browser logic');
