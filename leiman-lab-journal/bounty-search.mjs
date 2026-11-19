@@ -57,27 +57,27 @@ export function scoreBountyCandidate(item,{now=Date.now()}={}){
   reasons.push('stated_reward');
  }else reasons.push('reward_not_disclosed');
  const focus=[
-  {test:/\\b(?:documentation|readme|docs|typo|copywriting|spelling|examples?)\\b/i,key:'documentation_scope',points:22},
-  {test:/\\b(?:ui|frontend|css|styling|layout|visual|landing page|website|responsive)\\b/i,key:'visual_scope',points:17},
-  {test:/\\b(?:small|simple|minor|single|one[- ]page|one[- ]file|quick fix)\\b/i,key:'narrow_scope_hint',points:9},
-  {test:/\\b(?:test|tests|unit test|lint|build|fix a bug|bugfix)\\b/i,key:'concrete_test_scope',points:8},
-  {test:/\\b(?:agent|automation|workflow|integration)\\b/i,key:'automation_scope',points:8}
+  {test:/\b(?:documentation|readme|docs|typo|copywriting|spelling|examples?)\b/i,key:'documentation_scope',points:22},
+  {test:/\b(?:ui|frontend|css|styling|layout|visual|landing page|website|responsive)\b/i,key:'visual_scope',points:17},
+  {test:/\b(?:small|simple|minor|single|one[- ]page|one[- ]file|quick fix)\b/i,key:'narrow_scope_hint',points:9},
+  {test:/\b(?:test|tests|unit test|lint|build|fix a bug|bugfix)\b/i,key:'concrete_test_scope',points:8},
+  {test:/\b(?:agent|automation|workflow|integration)\b/i,key:'automation_scope',points:8}
  ];
  let matched=0;
  for(const f of focus)if(f.test.test(description)){
   score+=f.points;reasons.push(f.key);matched++;
  }
  if(!matched)score+=2;
- if(/\\b(?:acceptance criteria|deliverables|requirements|steps to reproduce|definition of done|expected behavior)\\b/i.test(description)){
+ if(/\b(?:acceptance criteria|deliverables|requirements|steps to reproduce|definition of done|expected behavior)\b/i.test(description)){
   score+=9;reasons.push('criteria_mentioned');
  }
- if(/\\b(?:in progress|already claimed|assigned|claimed by|closed for submissions|do not apply)\\b/i.test(description)){
+ if(/\b(?:in progress|already claimed|assigned|claimed by|closed for submissions|do not apply)\b/i.test(description)){
   score-=25;reasons.push('possible_claim_conflict');
  }
- if(/\\b(?:exploit|critical vulnerability|audit entire|complete rewrite|entire framework|production infrastructure|kernel|cryptography|zk[- ]?proof|zero knowledge)\\b/i.test(description)){
+ if(/\b(?:exploit|critical vulnerability|audit entire|complete rewrite|entire framework|production infrastructure|kernel|cryptography|zk[- ]?proof|zero knowledge)\b/i.test(description)){
   score-=20;reasons.push('specialist_or_complex_scope');
  }
- if(/\\b(?:guaranteed|instant money|no work|easy profit|free cash)\\b/i.test(description)){
+ if(/\b(?:guaranteed|instant money|no work|easy profit|free cash)\b/i.test(description)){
   score-=18;reasons.push('promotional_claim_warning');
  }
  if((item.claimCount||0)>=20){score-=7;reasons.push('many_issue_comments')}
