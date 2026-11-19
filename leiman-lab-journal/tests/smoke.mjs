@@ -194,6 +194,9 @@ async function cashPrizeRoutesTest(){
  const sources=(await (await get('/api/income/sources')).json()).sources;
  assert.ok(sources.some(s=>s.id==='heygen2026'));
  assert.ok(!sources.some(s=>['githubbounties','opire','algora','immunefi','hackerone','akool2026'].includes(s.id)));
+ const legacyGrant=await get('/api/income/grants?q=arts');
+ assert.equal(legacyGrant.status,410,'unpriced grants endpoint must be disabled');
+ assert.deepEqual((await legacyGrant.json()).results,[]);
  for(const old of ['/api/income/bounties','/api/income/bounties/top']){
   const response=await get(old);assert.equal(response.status,410,'legacy unverified bounties retired');
   assert.deepEqual((await response.json()).results,[]);
