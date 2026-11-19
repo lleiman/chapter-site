@@ -33,20 +33,21 @@ export function opportunityFit(job,{q='',skills='',country=''}={}) {
   const matched = terms.filter(term=>haystack.includes(term));
   const coverage = terms.length ? matched.length/terms.length : 0;
   const explicitTitle = tokens(q).some(term=>job.title.toLowerCase().includes(term));
-  const eligible = !country || !job.locationRestrictions?.length ||
+  const eligible = !country || job.worldwide || job.locationUnclear ||
     job.locationRestrictions.some(x=>x.toLowerCase()===country.toLowerCase());
   // This is a fit estimate only: 0–100, not a hiring probability.
   const skillScore = terms.length ? Math.round(coverage*45) : 20;
   const recencyHours = Math.max(0,(Date.now()-new Date(job.publishedAt).getTime())/3600000);
   const freshness = Math.max(0,Math.round(15-Math.min(15,recencyHours/72)));
   const payTransparency = job.salary.min != null ? 10 : 0;
-  const eligibility = eligible ? 25 : 0;
+  const eligibility = !eligible ? 0 : job.locationUnclear ? 5 : !country ? 12 : 25;
   const titleBonus = explicitTitle ? 5 : 0;
   const score = Math.min(100,skillScore+freshness+payTransparency+eligibility+titleBonus);
   return {score,eligible,matchedSkills:matched,explanation:{
     skills:skillScore, eligibility, freshness, salaryTransparency:payTransparency, titleMatch:titleBonus
   },limitations:[
     ...(eligible?[]:['Location restrictions appear incompatible with the selected country.']),
+    ...(job.locationUnclear?['Location eligibility is unknown. Check the employer’s exact restrictions.']:[]),
     ...(job.salary.min==null?['Compensation is not disclosed.']:[]),
     'This is a rules-based relevance score, not a probability of hiring.',
     'Apply and confirm current eligibility on the original source.'
@@ -56,6 +57,12 @@ export function normaliseJob(j){
   if(!j||typeof j!=='object')return null;
   const apply=validUrl(j.applicationLink),link=validUrl(j.guid);
   if(!apply||!link||!j.title)return null;
+  const descriptiveText=String(j.excerpt||'')+' '+String(j.description||'').slice(0,1000);
+  if(/(?:we (?:do not|don't)(?: currently)? have any open (?:roles|positions)|no (?:current|open) (?:roles|positions)|general (?:interest|application)|join our talent pool)/i.test(descriptiveText))return null;
+  const rawLocations=Array.isArray(j.locationRestrictions)?j.locationRestrictions:null;
+  const locations=(rawLocations||[]).map(x=>safeString(x?.alpha2||x?.name||'',60)).filter(Boolean);
+  const worldwide=Array.isArray(rawLocations)&&rawLocations.length===0;
+  const locationUnclear=!Array.isArray(rawLocations)||(rawLocations.length>0&&locations.length===0);
   const expires=Number(j.expiryDate);
   if(Number.isFinite(expires)&&expires>0&&expires*1000<Date.now())return null;
   const id=createHash('sha256').update(String(j.guid)).digest('hex').slice(0,20);
@@ -64,8 +71,8 @@ export function normaliseJob(j){
   return {id,type:'employment',title:safeString(j.title,180),company:safeString(j.companyName,100),
     excerpt:safeString(j.excerpt,550),employmentType:safeString(j.employmentType,35),seniority:Array.isArray(j.seniority)?j.seniority.map(x=>safeString(x,32)):[],
     categories:Array.isArray(j.categories)?j.categories.map(x=>safeString(x,50)).slice(0,10):[],
-    locationRestrictions:Array.isArray(j.locationRestrictions)?j.locationRestrictions.map(x=>safeString(x.alpha2||x.name,60)):[],
-    worldwide:!Array.isArray(j.locationRestrictions)||!j.locationRestrictions.length,
+    locationRestrictions:locations,
+    worldwide,locationUnclear,
     salary,source:'Himalayas',sourceUrl:link,applicationLink:apply,
     publishedAt:Number.isFinite(j.pubDate)?new Date(j.pubDate*1000).toISOString():null,
     expiresAt:expires>0?new Date(expires*1000).toISOString():null,
