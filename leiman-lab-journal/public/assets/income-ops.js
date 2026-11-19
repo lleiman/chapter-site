@@ -38,11 +38,15 @@ if(ops){
   $('ops-cv-count').textContent=String(cvs.length);
   const counts=statuses.map(s=>({status:s,n:briefs.filter(b=>b.status===s).length}));
   const paid=briefs.filter(b=>b.status==='paid');
-  const revenue=paid.reduce((n,b)=>n+Number(b.amountReceived||0),0);
-  const costs=paid.reduce((n,b)=>n+Number(b.directCosts||0),0);
+  const netByCurrency=new Map();
+  for(const record of paid){
+   const code=String(record.currency||'USD');
+   netByCurrency.set(code,(netByCurrency.get(code)||0)+Number(record.amountReceived||0)-Number(record.directCosts||0));
+  }
+  const netLabel=[...netByCurrency.entries()].map(([code,value])=>code+' '+value.toLocaleString('en-US')).join(' / ')||'NO PAYMENTS';
   $('ops-metrics').innerHTML=`<article><span>BRIEFS</span><strong>${briefs.length}</strong></article><article><span>ACTIVE (NOT DECLINED)</span><strong>${briefs.filter(b=>!['declined','paid'].includes(b.status)).length}</strong></article>
-   <article><span>PAID / SELF-REPORTED</span><strong>${paid.length}</strong></article><article><span>REPORTED NET / UNVERIFIED</span><strong>${(revenue-costs).toLocaleString('en-US')}*</strong></article>`+
-   '<p class="ops-small">* Monetary figures can use different currencies. The combined total is not FX-adjusted and must not be interpreted as a financial report. Status counts: '+counts.map(x=>x.status+' '+x.n).join(' · ')+'</p>';
+   <article><span>PAID / SELF-REPORTED</span><strong>${paid.length}</strong></article><article><span>REPORTED NET / UNVERIFIED</span><strong>${escape(netLabel)}*</strong></article>`+
+   '<p class="ops-small">* Figures are grouped by currency and operator-reported; they are not independently audited or a financial statement. Status counts: '+counts.map(x=>x.status+' '+x.n).join(' · ')+'</p>';
  }
  $('ops-login').addEventListener('submit',async e=>{
   e.preventDefault();secret=new FormData(e.target).get('password')||'';
