@@ -120,5 +120,5 @@ if(bountiesRoot){
   ).join('');
  }).catch(()=>{directory.textContent=en?'Official directories unavailable.':'Каталоги временно недоступны.'});
  loadFeatured();
- form.requestSubmit();
+ // The landing auto-loads Editor’s Picks only; deeper bounty search is optional.
 }
