@@ -170,6 +170,9 @@ async function bountyRoutesTest(){
  for(const locale of ['/en/income-desk','/income-desk']){
   const page=await (await get(locale)).text();
   assert.ok(page.includes('id="id-bounty-form"'),locale+' paid task search');
+  assert.ok(page.includes('id="id-top-bounty-results"'),locale+' featured list before filters');
+  assert.ok(page.indexOf('id="id-top-bounty-results"')<page.indexOf('id="id-bounty-form"'),
+   locale+' featured items must precede user search and controls');
   assert.ok(page.includes('id="id-bounty-directories"'),locale+' verified directory links');
   assert.ok(page.includes('option value="bounty"'),locale+' unified index type filter');
   assert.ok(page.includes('/assets/income-bounties.js'),locale+' interactive bounty client');
