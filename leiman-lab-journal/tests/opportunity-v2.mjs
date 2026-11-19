@@ -14,7 +14,7 @@ export function testOpportunityV2(){
    salary:{min:90000,max:120000,currency:'USD'}};
   const grant={source:'Grants.gov',id:'us-grant-101',sourceUrl:'https://www.grants.gov/search-results-detail/101',
    type:'grant',title:'Science Innovation Grant',issuer:'Science Funding',status:'posted',country:'US',
-   deadline:'2027-10-01'};
+   deadline:'2027-10-01',fundingCeiling:75000,fundingFloor:5000,cashEvidence:'official_grant_synopsis'};
   const tender={source:'UK Find a Tender',id:'uk-tender-123456-2026',sourceUrl:'https://www.find-tender.service.gov.uk/Notice/123456-2026',
    type:'tender',title:'Museum Film Production',issuer:'Museum Board',status:'active',country:'GB',
    value:100000,currency:'GBP',deadline:'2027-04-20'};
@@ -24,6 +24,12 @@ export function testOpportunityV2(){
   assert.equal(index.ingest([grant],'Grants.gov').inserted,1);
   assert.equal(index.ingest([tender],'UK Find a Tender').inserted,1);
   assert.equal(index.stats().total,3);
+  const rawUnpricedGrant={...grant,id:'us-grant-no-money',sourceUrl:'https://www.grants.gov/search-results-detail/993',
+   fundingCeiling:null,fundingFloor:null,cashEvidence:null};
+  assert.equal(index.ingest([rawUnpricedGrant],'Grants.gov').inserted,1);
+  assert.equal(index.search({type:'grant'}).count,1,'unpriced grant not published in the opportunity index');
+  assert.equal(index.stats().storedRecords,4);
+  assert.equal(index.stats().total,3,'unpriced grants omitted from visible opportunity totals');
   assert.equal(index.ingest([job],'Himalayas').updated,1,'updates do not duplicate');
   assert.equal(index.stats().total,3);
   const reopened=createOpportunityIndex(temp);
