@@ -16,6 +16,8 @@ import { createOpportunityIntake } from './opportunities.mjs';
 import { createIncomeEngine } from './income-engine.mjs';
 import { createGrantSearch } from './grant-search.mjs';
 import { createUkTenders } from './uk-tenders.mjs';
+import { createOpportunityIndex } from './opportunity-index.mjs';
+import { createEconomicMemory } from './economic-memory.mjs';
 import { createBriefIntake } from './brief-intake.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -38,6 +40,30 @@ const briefs = createBriefIntake(DATA_DIR);
 const incomeEngine = createIncomeEngine();
 const grantSearch = createGrantSearch();
 const ukTenders = createUkTenders();
+const opportunityIndex = createOpportunityIndex(DATA_DIR);
+const economicMemory = createEconomicMemory(DATA_DIR);
+// Persist provider-originated, non-personal search results; never transfer CVs or profiles.
+function retainSourceResponse(out,provider){
+ if(out.status===200&&Array.isArray(out.body?.results)){
+  try{opportunityIndex.ingest(out.body.results,provider)}
+  catch(err){console.error('Index ingest failed:',err.message)}
+ }
+ return out;
+}
+// Bounded refresh: indexed results survive application restarts on the Railway volume.
+async function refreshOpportunityIndex(){
+ try{
+  await Promise.allSettled([
+   ...['designer','engineer','research'].map(q=>incomeEngine.findJobs({q},'system-ingest').then(r=>retainSourceResponse(r,'Himalayas'))),
+   grantSearch.search({q:'artificial intelligence'},'system-ingest').then(r=>retainSourceResponse(r,'Grants.gov')),
+   ukTenders.search({q:''},'system-ingest').then(r=>retainSourceResponse(r,'UK Find a Tender'))
+  ]);
+ }catch(err){console.error('Scheduled opportunity ingestion:',err.message)}
+}
+if(process.env.NODE_ENV!=='test'){
+ const firstRefresh=setTimeout(refreshOpportunityIndex,12000);firstRefresh.unref?.();
+ const periodicRefresh=setInterval(refreshOpportunityIndex,6*3600000);periodicRefresh.unref?.();
+}
 const incomeSources = JSON.parse(readFileSync(path.join(DIR,'income-sources.json'),'utf8'));
 
 const plural = (n, [one, few, many]) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many; };
@@ -657,6 +683,19 @@ async function adminApi(req, res, pathname) {
   if (pathname === '/api/admin/login' && req.method === 'POST') return sendJson(res, 200, { ok: true });
   if (pathname === '/api/admin/opportunities/submissions' && req.method === 'GET') return sendJson(res, 200, { retentionDays: 30, submissions: intake.list() });
   if (pathname === '/api/admin/income/briefs' && req.method === 'GET') return sendJson(res, 200, { retentionDays: 30, briefs: briefs.list() });
+  if(pathname==='/api/admin/income/memory' && req.method==='GET')
+    return sendJson(res,200,{observations:economicMemory.list(),summary:economicMemory.summary()});
+  if(pathname==='/api/admin/income/memory' && req.method==='POST'){
+    if(!String(req.headers['content-type']||'').startsWith('application/json'))return sendJson(res,415,{error:'JSON required'});
+    const incomingOrigin=req.headers.origin;
+    if(req.headers['sec-fetch-site']==='cross-site'||(incomingOrigin&&new URL(incomingOrigin).host!==requestHost(req)))
+      return sendJson(res,403,{error:'Cross-site write blocked'});
+    const result=economicMemory.create(await readBody(req,5500));
+    return sendJson(res,result.status,result.body);
+  }
+  const memoryDelete=pathname.match(/^\/api\/admin\/income\/memory\/([0-9a-f-]{36})$/);
+  if(memoryDelete&&req.method==='DELETE')
+    return sendJson(res,economicMemory.remove(memoryDelete[1])?200:404,{ok:true});
   const briefUpdate = pathname.match(/^\/api\/admin\/income\/briefs\/([a-f0-9]{32})$/);
   if(briefUpdate && req.method==='POST'){
     if(!String(req.headers['content-type']||'').startsWith('application/json'))return sendJson(res,415,{error:'JSON required'});
@@ -748,6 +787,24 @@ async function publicApi(req, res, pathname) {
 
 const server = http.createServer((req,res)=>{
   const apiPath = (req.url || '').split('?')[0];
+  if(apiPath==='/api/income/index' && req.method==='GET'){
+    const query=new URL(req.url,'http://localhost');
+    const input=Object.fromEntries(query.searchParams);
+    // Public index never accepts or persists applicant profile data.
+    delete input.skills;delete input.applicantType;delete input.residenceCountry;delete input.registrationCountry;
+    return sendJson(res,200,{...opportunityIndex.search(input),stats:opportunityIndex.stats()});
+  }
+  if(apiPath==='/api/income/assess' && req.method==='POST'){
+    return (async()=>{
+      if(!String(req.headers['content-type']||'').startsWith('application/json'))return sendJson(res,415,{error:'JSON required'});
+      if(req.headers['sec-fetch-site']==='cross-site')return sendJson(res,403,{error:'Cross-site request blocked'});
+      if(req.headers.origin&&new URL(req.headers.origin).host!==requestHost(req))return sendJson(res,403,{error:'Origin mismatch'});
+      const input=await readBody(req,3000),id=String(input.id||''),profile=input.profile||{};
+      if(!profile||typeof profile!=='object'||Array.isArray(profile))return sendJson(res,400,{error:'Invalid profile'});
+      const out=opportunityIndex.assess(id,profile);
+      return sendJson(res,out?200:404,out||{error:'Opportunity not indexed'});
+    })().catch(()=>sendJson(res,400,{error:'Invalid assessment request'}));
+  }
   if (apiPath === '/api/income/sources' && req.method === 'GET') {
     return sendJson(res,200,{...incomeSources,sourceStatus:'editorial_directory',
       warning:'An official source is not proof that a specific opportunity is open or that a foreign applicant qualifies.'});
@@ -755,19 +812,19 @@ const server = http.createServer((req,res)=>{
   if (apiPath === '/api/income/uk-tenders' && req.method === 'GET') {
     const url=new URL(req.url,'http://localhost');
     return ukTenders.search(Object.fromEntries(url.searchParams),clientKey(req))
-      .then(out=>sendJson(res,out.status,out.body))
+      .then(out=>{retainSourceResponse(out,'UK Find a Tender');return sendJson(res,out.status,out.body)})
       .catch(()=>sendJson(res,503,{provider:'UK Find a Tender',results:[],error:'UK tender provider unavailable'}));
   }
   if (apiPath === '/api/income/grants' && req.method === 'GET') {
     const url=new URL(req.url,'http://localhost');
     return grantSearch.search(Object.fromEntries(url.searchParams),clientKey(req))
-     .then(out=>sendJson(res,out.status,out.body))
+     .then(out=>{retainSourceResponse(out,'Grants.gov');return sendJson(res,out.status,out.body)})
      .catch(()=>sendJson(res,503,{provider:'Grants.gov',results:[],error:'Official grants search unavailable'}));
   }
   if (apiPath === '/api/income/jobs' && req.method === 'GET') {
     const url=new URL(req.url,'http://localhost');
     return incomeEngine.findJobs(Object.fromEntries(url.searchParams),clientKey(req))
-      .then(out=>sendJson(res,out.status,out.body))
+       .then(out=>{retainSourceResponse(out,'Himalayas');return sendJson(res,out.status,out.body)})
       .catch(()=>sendJson(res,503,{error:'Opportunity provider unavailable',results:[]}));
   }
   if (apiPath === '/api/income/plan' || apiPath === '/api/income/briefs' || /^\/api\/income\/briefs\/[a-f0-9]{32}$/.test(apiPath)) {
