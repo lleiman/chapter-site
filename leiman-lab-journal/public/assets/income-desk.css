@@ -206,3 +206,23 @@
  .id-featured-home .id-bounty-featured-head h3{font-size:30px}
  .id-featured-home .id-bounty-featured-count{margin-top:10px}
 }
+
+
+/* Compact featured opportunity switch. Hide items beyond two until See more. */
+.id-featured-home:not(.id-show-all) #id-top-bounty-results > .id-award-row:nth-child(n+3),
+.id-featured-home:not(.id-show-all) #id-feature-grants-results > .id-award-row:nth-child(n+3){display:none}
+.id-featured-switch{display:inline-flex;gap:0;border:1px solid var(--ink);margin:0 0 16px}
+.id-featured-switch button{appearance:none;cursor:pointer;border:0;background:transparent;color:var(--ink);padding:11px 25px;font:700 12px/1.1 ui-monospace,Consolas,monospace;letter-spacing:.04em}
+.id-featured-switch button+button{border-left:1px solid var(--ink)}
+.id-featured-switch button.is-active{background:var(--ink);color:var(--paper)}
+.id-featured-switch button:not(.is-active):hover{background:#e5e1d8}
+.id-featured-switch button:focus-visible,.id-feature-see-more:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+#id-feature-prizes-panel[hidden],#id-feature-grants-panel[hidden]{display:none!important}
+#id-feature-grants-status{font:11px/1.45 ui-monospace,Consolas,monospace;color:#646961;padding:9px 0 13px}
+#id-feature-grants-status:empty{display:none}
+.id-feature-see-more{display:block;width:100%;border:1px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer;font:700 11px/1.5 ui-monospace,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase;text-align:center;padding:14px;margin-top:17px}
+.id-feature-see-more:hover{background:var(--ink);color:var(--paper)}
+.id-feature-see-more[hidden]{display:none}
+.id-featured-browse-link{display:inline-block;margin-top:15px;font:700 11px ui-monospace,Consolas,monospace;text-decoration:none;color:var(--accent)}
+.id-featured-browse-link:hover{text-decoration:underline}
+@media(max-width:730px){.id-featured-switch{display:flex;width:100%}.id-featured-switch button{flex:1;padding:13px 12px}.id-feature-see-more{margin-top:12px}}
