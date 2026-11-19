@@ -14,6 +14,7 @@ import { createEngagement, EngagementError } from './engagement.mjs';
 import { createCommons, CommonsError } from './commons.mjs';
 import { createOpportunityIntake } from './opportunities.mjs';
 import { createIncomeEngine } from './income-engine.mjs';
+import { createGrantSearch } from './grant-search.mjs';
 import { createBriefIntake } from './brief-intake.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -34,6 +35,9 @@ const commons = createCommons(DATA_DIR);
 const intake = createOpportunityIntake(DATA_DIR);
 const briefs = createBriefIntake(DATA_DIR);
 const incomeEngine = createIncomeEngine();
+const grantSearch = createGrantSearch();
+const incomeSources = JSON.parse(readFileSync(path.join(DIR,'income-sources.json'),'utf8'));
+
 const plural = (n, [one, few, many]) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many; };
 const fmt = n => n.toLocaleString('ru-RU');
 // Person key for de-duplication and rate limits: first X-Forwarded-For hop (Railway edge) + User-Agent. Only hashes are stored.
@@ -742,6 +746,16 @@ async function publicApi(req, res, pathname) {
 
 const server = http.createServer((req,res)=>{
   const apiPath = (req.url || '').split('?')[0];
+  if (apiPath === '/api/income/sources' && req.method === 'GET') {
+    return sendJson(res,200,{...incomeSources,sourceStatus:'editorial_directory',
+      warning:'An official source is not proof that a specific opportunity is open or that a foreign applicant qualifies.'});
+  }
+  if (apiPath === '/api/income/grants' && req.method === 'GET') {
+    const url=new URL(req.url,'http://localhost');
+    return grantSearch.search(Object.fromEntries(url.searchParams),clientKey(req))
+     .then(out=>sendJson(res,out.status,out.body))
+     .catch(()=>sendJson(res,503,{provider:'Grants.gov',results:[],error:'Official grants search unavailable'}));
+  }
   if (apiPath === '/api/income/jobs' && req.method === 'GET') {
     const url=new URL(req.url,'http://localhost');
     return incomeEngine.findJobs(Object.fromEntries(url.searchParams),clientKey(req))
