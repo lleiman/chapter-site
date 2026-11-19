@@ -2,6 +2,7 @@
 import { spawn } from 'node:child_process';
 import { organismUiTest } from './organism-ui.mjs';
 import { testIncomeEngine } from './income-engine.mjs';
+import { testInternationalSources } from './international-sources.mjs';
 import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync, readdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -64,6 +65,8 @@ async function main() {
   await organismTests();
   organismUiTest();
   await testIncomeEngine();
+  await testInternationalSources();
+  await internationalRoutesTests();
   await incomeDeskRoutesTest();
   await incomeOpsRoutesTest();
   await allArticleTranslationsTest();
@@ -155,6 +158,28 @@ async function incomeOpsRoutesTest(){
  body:JSON.stringify({deletionToken})});
  assert.equal(removed.status,200,'deletion token remains valid after operator updates');
  console.log('✓ private income operations console and consented brief outcome accounting');
+}
+
+async function internationalRoutesTests() {
+ const source=await get('/api/income/sources');
+ assert.equal(source.status,200);
+ const catalogue=await source.json();
+ assert.ok(catalogue.sources.length>=15,'global policy registry present');
+ assert.ok(catalogue.sources.some(s=>s.region==='id'),'Indonesia present');
+ assert.ok(catalogue.sources.some(s=>s.region==='sg'),'Singapore present');
+ assert.ok(catalogue.sources.some(s=>s.region==='eu'),'EU present');
+ assert.ok(catalogue.sources.some(s=>s.region==='us'&&s.readiness==='live'),'US grant source present');
+ for(const pageUrl of ['/income-desk','/en/income-desk']){
+  const page=await html(pageUrl);
+  assert.ok(page.includes('id="id-source-region"'),pageUrl+' country filters');
+  assert.ok(page.includes('id="id-grant-search"'),pageUrl+' grants search');
+  assert.ok(page.includes('/assets/income-global.js'),pageUrl+' country UI');
+ }
+ const asset=await get('/assets/income-global.js');
+ assert.equal(asset.status,200);
+ const map=await html('/sitemap.xml');
+ assert.ok(map.includes('/en/income-desk'));
+ console.log('✓ international source registry and multilingual grant-search routes');
 }
 
 async function incomeDeskRoutesTest() {
