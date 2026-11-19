@@ -5,7 +5,25 @@
 <form id="ops-login"><label>EDITOR PASSWORD<input name="password" type="password" autocomplete="off" required></label><button type="submit">OPEN PRIVATE QUEUE →</button></form>
 <p id="ops-message" role="status" aria-live="polite"></p></section>
 <section id="ops-content" hidden><div class="ops-top"><span>LIVE INTERNAL REVIEW</span><button type="button" id="ops-refresh">REFRESH ↻</button><button type="button" id="ops-lock">LOCK</button></div>
-<div class="ops-metrics" id="ops-metrics"></div><section><h2>Client briefs <small id="ops-brief-count"></small></h2><div id="ops-briefs" class="ops-list"></div></section>
+<div class="ops-metrics" id="ops-metrics"></div><section class="ops-economic"><h2>Economic Memory <small>SEPARATE FROM CLIENT RECORDS</small></h2>
+<p>Record only structured, non-personal observations. No names, customer identifiers, project titles, contact information or confidential commercial details. Figures are operator-reported and not independently audited. This store does not copy or extend client brief retention.</p>
+<form id="ops-memory-form" class="ops-economic-form">
+ <div class="ops-grid"><label>CATEGORY<select name="category" required><option value="creative">Creative</option><option value="software">Software</option><option value="research">Research</option><option value="procurement">Procurement</option><option value="other">Other</option></select></label>
+ <label>OUTCOME<select name="outcome" required><option value="paid">Paid</option><option value="delivered_unpaid">Delivered / unpaid</option><option value="cancelled">Cancelled</option><option value="disputed">Disputed</option></select></label></div>
+ <div class="ops-grid"><label>CURRENCY<select name="currency"><option>USD</option><option>EUR</option><option>GBP</option><option>IDR</option><option>RUB</option></select></label>
+ <label>MONTH (YYYY-MM)<input name="period" type="month" required></label></div>
+ <div class="ops-grid"><label>RECEIVED PAYMENT<input name="amountReceived" type="number" min="0" max="10000000" step="0.01" value="0"></label>
+ <label>DIRECT COSTS<input name="directCosts" type="number" min="0" max="10000000" step="0.01" value="0"></label></div>
+ <label>DOCUMENTED WORK HOURS<input name="hours" type="number" min="0" max="20000" step="0.25" value="0"></label>
+ <label class="ops-memory-confirm"><input type="checkbox" name="nonPersonalConfirmation" required>
+ I confirm the observation contains no personal data, customer-identifying project information or information I lack the right to retain.</label>
+ <button type="submit">SAVE NON-PERSONAL OBSERVATION →</button>
+ <p id="ops-memory-status" role="status"></p>
+</form>
+<div id="ops-memory-summary" class="ops-memory-summary"></div>
+<div id="ops-memory-list" class="ops-list"></div>
+</section>
+<section><h2>Client briefs <small id="ops-brief-count"></small></h2><div id="ops-briefs" class="ops-list"></div></section>
 <section><h2>Candidate profiles <small id="ops-cv-count"></small></h2><p>CV records are available only with applicant consent and expire automatically after 30 days. Do not forward profiles without separate permission.</p><div id="ops-cvs" class="ops-list"></div></section>
 <p class="ops-foot">No automated offers, contracts or transfers. Accepted projects require independent written agreements. Revenue and cost fields are operator-reported pilot measurements.</p></section>
 <script type="module" src="/assets/income-ops.js"></script></main>
