@@ -37,27 +37,32 @@ export function loadCashAwards(dir){
 export function renderCashAwards(records,lang='en'){
  const en=lang==='en';
  if(!records.length)return '<p class="id-legal">'+(en?
-  'No currently verified cash awards meet the publishing rules. Unpriced or expired opportunities are not shown.':
-  'Нет действующих наград с подтверждённой опубликованной суммой. Безденежные и закрытые конкурсы не показываются.')+'</p>';
+  'No currently verified cash awards meet the rules. Unpriced or expired entries stay hidden.':
+  'Сейчас нет подходящих денежных наград. Конкурсы без сумм и закрытые заявки скрыты.')+'</p>';
+ const monthFmt=new Intl.DateTimeFormat(en?'en-GB':'ru-RU',{month:'short',timeZone:'UTC'});
  return records.map((v,i)=>{
   const summary=en?v.summaryEn:v.summaryRu,requirements=en?v.requirementsEn:v.requirementsRu;
   const amount=new Intl.NumberFormat(en?'en-US':'ru-RU',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v.cashAward);
-  const pool=v.totalCashPool?new Intl.NumberFormat(en?'en-US':'ru-RU',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v.totalCashPool):null;
-  return `<article class="id-top-bounty id-cash-pick">
-   <div class="id-top-bounty-rank">${String(i+1).padStart(2,'0')}</div>
-   <div class="id-top-bounty-main">
-    <div class="id-job-meta"><span>${esc(v.field)} · ${esc(v.issuer)} · ${en?'CASH AWARD':'ДЕНЕЖНЫЙ ПРИЗ'}</span><span>${esc(v.deadlineLabel)}</span></div>
-    <h4>${esc(v.title)}</h4><p>${esc(summary)}</p>
-    <p class="id-top-bounty-warning">${en?'REQUIREMENTS: ':'УСЛОВИЯ: '}${esc(requirements)}</p>
-    <p class="id-top-bounty-warning">${en?'Organiser published an amount; eligibility and eventual payment depend on winning and official rules.':'Организатор опубликовал сумму; допуск и выплата зависят от результатов и правил конкурса.'}</p>
-    <a href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">${en?'OPEN OFFICIAL CONTEST':'ОТКРЫТЬ КОНКУРС'} ↗</a>
-    <a class="id-cash-rules" href="${esc(v.rulesUrl)}" target="_blank" rel="noopener noreferrer">${en?'OFFICIAL RULES':'ОФИЦИАЛЬНЫЕ ПРАВИЛА'} ↗</a>
-   </div>
-   <div class="id-top-bounty-outcome"><small>${en?'PUBLISHED CASH · FIRST PRIZE':'ЗАЯВЛЕНО · ПЕРВОЕ МЕСТО'}</small>
-    <strong>${esc(amount)}</strong>
-    ${pool?`<span class="id-cash-pool">${en?'TOTAL CASH POOL':'ОБЩИЙ ДЕНЕЖНЫЙ ФОНД'}: ${esc(pool)}</span>`:''}
-    <small>${en?'Contest prize, not guaranteed income':'Приз конкурса, не гарантированный доход'}</small>
-   </div>
-   </article>`;
+  const deadline=new Date(v.deadlineDate+'T12:00:00Z');
+  const shortDate=deadline.getUTCDate()+' '+monthFmt.format(deadline).toUpperCase()+' '+deadline.getUTCFullYear();
+  return `<details class="id-award-row">
+    <summary class="id-award-summary">
+     <span class="id-award-index">${String(i+1).padStart(2,'0')}</span>
+     <span class="id-award-identity"><strong>${esc(v.title)}</strong><small>${esc(v.field)} · ${esc(v.issuer)}</small></span>
+     <span class="id-award-date"><small>${en?'DEADLINE':'ДЕДЛАЙН'}</small><strong>${esc(shortDate)}</strong></span>
+     <span class="id-award-money"><small>${en?'1ST CASH PRIZE':'1-Й ДЕНЕЖНЫЙ ПРИЗ'}</small><strong>${esc(amount)}</strong></span>
+     <span class="id-award-chevron" aria-hidden="true"></span>
+    </summary>
+    <div class="id-award-expanded">
+     <p>${esc(summary)}</p>
+     <p class="id-award-requirements"><strong>${en?'REQUIREMENTS':'УСЛОВИЯ'}:</strong> ${esc(requirements)}</p>
+     <div class="id-award-actions">
+      <a href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">${en?'OPEN COMPETITION':'ОТКРЫТЬ КОНКУРС'} ↗</a>
+      <a class="id-award-secondary" href="${esc(v.rulesUrl)}" target="_blank" rel="noopener noreferrer">${en?'OFFICIAL RULES':'ПРАВИЛА ОРГАНИЗАТОРА'} ↗</a>
+     </div>
+     <small class="id-award-disclaimer">${en?'Published cash award, payable only to eligible winners under organiser rules.':
+      'Опубликованный денежный приз, выплата только победителям при соблюдении правил.'}</small>
+    </div>
+   </details>`;
  }).join('');
 }
