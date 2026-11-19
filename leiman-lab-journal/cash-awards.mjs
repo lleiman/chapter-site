@@ -2,7 +2,7 @@ import {readFileSync} from 'node:fs';
 import path from 'node:path';
 
 const ORGANISER_DOMAINS=new Set(['aif.runway.com','higgsfield.ai','www.akool.com','akool.com','redditgameofday2026.devpost.com','cognizant-agenticweb.devpost.com','www.heygen.com','dynamic.heygen.ai']);
-const BLOCKED=/(?:\bcrypto\b|\bweb3\b|\bblockchain\b|\btoken sale\b|\bNFT\b|\bsecurity bounty\b|\bbug bounty\b)/i;
+const BLOCKED=/(?:\bcrypto(?:currency|currencies)?\b|\bweb3\b|\bblockchain\b|\btoken sale\b|\bNFTs?\b|\bDeFi\b|\bdigital assets?\b|\bsecurity bounty\b|\bbug bounty\b)/i;
 const esc=value=>String(value??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
 const exactUrl=value=>{try{const u=new URL(String(value));return u.protocol==='https:'&&ORGANISER_DOMAINS.has(u.hostname)?u.href:null}catch{return null}};
 const validDate=s=>typeof s==='string'&&/^\d{4}-\d\d-\d\d$/.test(s)&&!Number.isNaN(Date.parse(s+'T00:00:00Z'));
