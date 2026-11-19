@@ -5,10 +5,22 @@
  <div class="id-bounty-featured-head"><div>
   <div class="id-section-code">00 / PAID OPPORTUNITIES · OFFICIAL SOURCES</div>
   <h3 id="id-top-bounty-heading">Editor's picks</h3>
-  <p>Five competitions with published cash prizes. Tap a row for requirements and official rules.</p>
-  </div><div class="id-bounty-featured-count" id="id-top-bounty-meta">5 PICKS · CASH ONLY</div></div>
- <div id="id-top-bounty-results" class="id-bounty-featured-list"><!-- CASH_AWARDS_SSR --></div>
- <p class="id-awards-footnote">Amounts are published by organisers. Payment depends on winning and eligibility.</p>
+  <p id="id-featured-description">Two opportunities to start. Switch categories or expand the list.</p>
+  </div><div class="id-bounty-featured-count" id="id-top-bounty-meta">2 OF 5 · PUBLISHED CASH</div></div>
+ <div class="id-featured-switch" role="tablist" aria-label="Opportunity type">
+  <button type="button" id="id-feature-prizes" class="is-active" role="tab" aria-selected="true" aria-controls="id-feature-prizes-panel">Prizes</button>
+  <button type="button" id="id-feature-grants" role="tab" aria-selected="false" aria-controls="id-feature-grants-panel" tabindex="-1">Grants</button>
+ </div>
+ <div id="id-feature-prizes-panel" role="tabpanel" aria-labelledby="id-feature-prizes">
+  <div id="id-top-bounty-results" class="id-bounty-featured-list"><!-- CASH_AWARDS_SSR --></div>
+ </div>
+ <div id="id-feature-grants-panel" role="tabpanel" aria-labelledby="id-feature-grants" hidden>
+  <div id="id-feature-grants-status" role="status" aria-live="polite">Grant records load when this tab is opened.</div>
+  <div id="id-feature-grants-results" class="id-bounty-featured-list"></div>
+  <a class="id-featured-browse-link" href="#bounties">Search grants by topic ↓</a>
+ </div>
+ <button type="button" id="id-feature-see-more" class="id-feature-see-more" aria-expanded="false" aria-controls="id-top-bounty-results">See more (3) <span aria-hidden="true">↓</span></button>
+ <p id="id-featured-footnote" class="id-awards-footnote">Published cash prizes are conditional on winning and eligibility.</p>
  </section>
 <section id="radar" class="id-section"><div class="id-section-code">01 / LIVE OPPORTUNITY RADAR</div><header><h2>Find an actual opportunity.</h2><p>Explore remote jobs with published salary amounts, source attribution, geographic restrictions and relevance explanations. Jobs without stated pay are excluded; employment is not guaranteed.</p></header>
  <form id="id-job-search" class="id-search-form"><label>ROLE / KEYWORD<input name="q" type="search" maxlength="90" placeholder="e.g. product designer (optional)"></label>
