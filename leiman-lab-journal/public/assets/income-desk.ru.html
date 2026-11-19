@@ -16,7 +16,24 @@
  </section>
 <p class="id-legal">Вакансии получены из Himalayas. Отклики направляются через предоставленную ссылку Himalayas. Данные обновляются по расписанию источника; объявления могут закрыться раньше. <a href="https://himalayas.app" target="_blank" rel="noopener noreferrer">Himalayas ↗</a></p>
  <p class="id-legal">Рейтинг показывает приблизительное соответствие, а не вероятность трудоустройства. Прямого подтверждения работодателя нет.</p></section>
- <section class="id-section id-global" id="global-opportunities">
+ <section class="id-section id-v2" id="opportunity-engine"><div class="id-section-code">v0.2 / ЕДИНЫЙ ДВИЖОК ВОЗМОЖНОСТЕЙ</div>
+<header><h2>Один индекс. Разная экономика.</h2><p>Вакансии, гранты и тендеры теперь хранятся в едином индексе с указанием первоисточника. Ищите среди действительно загруженных записей и отдельно проверяйте возможный допуск. Полнота охвата не гарантируется.</p></header>
+<div class="id-v2-summary" id="id-v2-summary">Загружаем индекс возможностей…</div>
+<form id="id-v2-form" class="id-search-form"><label>ПОИСК ПО ИНДЕКСУ<input type="search" name="q" maxlength="100" placeholder="например, design, research"></label>
+<label>ТИП<select name="type"><option value="all">Все типы</option><option value="employment">Работа</option><option value="grant">Грант</option><option value="tender">Тендер</option></select></label>
+<label>СТРАНА<select name="country"><option value="">Все юрисдикции</option><option value="US">США</option><option value="GB">Великобритания</option></select></label>
+<button class="id-action" type="submit">ИСКАТЬ В ИНДЕКСЕ →</button></form>
+<p class="id-legal">Индекс сохраняет на сервере только неперсональные записи из источников. Объявления обновляются, известные истёкшие сроки скрываются. Данные для оценки допуска используются только для текущего запроса и не сохраняются в профиль.</p>
+<div class="id-v2-layout"><div><div id="id-v2-count" class="id-results-head">ИНДЕКС</div><div id="id-v2-results" class="id-v2-results"></div></div>
+<aside class="id-v2-assessment"><div class="id-section-code">ПРОВЕРКА ДОПУСКА / ЧЕЛОВЕЧЕСКИЙ КОНТРОЛЬ</div><h3>Оценка выбранной возможности.</h3><form id="id-v2-assess">
+<input type="hidden" name="id">
+<label>ТИП ЗАЯВИТЕЛЯ<select name="applicantType"><option value="unknown">Не указан</option><option value="individual">Физическое лицо</option><option value="company">Компания</option><option value="research_institution">Научная организация</option><option value="nonprofit">Некоммерческая организация</option></select></label>
+<label>СТРАНА ПРОЖИВАНИЯ (ISO 2)<input name="residenceCountry" placeholder="например, ID" maxlength="2" pattern="[A-Za-z]{2}"></label>
+<label>СТРАНА РЕГИСТРАЦИИ ОРГАНИЗАЦИИ<input name="registrationCountry" placeholder="например, US" maxlength="2" pattern="[A-Za-z]{2}"></label>
+<label>НАВЫКИ / КОМПЕТЕНЦИИ<input name="skills" maxlength="150" placeholder="например, design, research"></label>
+<button type="submit" class="id-action">ПРОВЕРИТЬ ДОПУСК →</button></form>
+<div id="id-v2-assess-result" role="status" aria-live="polite"><p>Выберите запись. Неизвестный статус никогда не считается подтверждением допуска.</p></div></aside></div></section>
+<section class="id-section id-global" id="global-opportunities">
  <div class="id-section-code">02 / МЕЖДУНАРОДНАЯ СЕТЬ ВОЗМОЖНОСТЕЙ</div>
  <header><h2>Страны, гранты и закупки.</h2><p>Изучайте официальные источники разных стран. Наличие объявления, право участвовать и юридические требования — разные вещи. Для каждого источника указано, что доступно и что ещё нужно проверить.</p></header>
  <div class="id-global-tools"><label>СТРАНА / РЕГИОН<select id="id-source-region"><option value="all">Все регионы</option><option value="global">Международные</option><option value="us">США</option><option value="uk">Великобритания</option><option value="eu">Европейский союз</option><option value="ca">Канада</option><option value="au">Австралия</option><option value="sg">Сингапур</option><option value="id">Индонезия</option></select></label>
@@ -52,5 +69,6 @@
  <div id="id-delete-panel" class="id-delete-panel" hidden><p>Заявка принята для закрытого рассмотрения. Сохраните код удаления:</p><code id="id-delete-token"></code><button id="id-delete-brief" type="button">УДАЛИТЬ ЗАЯВКУ</button></div>
  <p class="id-legal">Данные не направляются в нейросети и на внешние биржи. Сохраните код удаления.</p></section>
  <section class="id-outro"><small>LEIMAN LAB / 2026</small><h2>ПЕРВАЯ ОПЛАЧЕННАЯ ЗАДАЧА — КРИТЕРИЙ УСПЕХА.</h2><p>Мы оцениваем проверенные возможности, выполненные проекты, фактически оплаченные счета и итоговую экономику, а не число зарегистрированных агентов.</p><div><a href="/organism">КАРТА ОРГАНИЗМА ↗</a><a href="/articles/ai-income-opportunities">ИССЛЕДОВАНИЕ ↗</a></div></section>
+ <script type="module" src="/assets/income-v2.js"></script>
  <script type="module" src="/assets/income-global.js"></script>
  <script type="module" src="/assets/income-desk.js"></script></main>
