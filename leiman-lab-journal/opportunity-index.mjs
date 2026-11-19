@@ -8,7 +8,7 @@ import {mkdirSync,existsSync,readFileSync,writeFileSync,renameSync} from 'node:f
 import {createHash} from 'node:crypto';
 
 const TYPES=new Set(['employment','grant','tender','bounty','contract','research']);
-const SOURCES=new Set(['Himalayas','Grants.gov','UK Find a Tender']);
+const SOURCES=new Set(['Himalayas','Grants.gov','UK Find a Tender','GitHub Bounty Candidates']);
 const MAX_RECORDS=5500;
 const KEEP_MS=90*86400000;
 const clean=(x,n=300)=>String(x??'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,n);
@@ -19,14 +19,14 @@ export function normalizeOpportunity(raw){
  if(!raw || !TYPES.has(raw.type) || !SOURCES.has(raw.source))return null;
  const sourceUrl=safeUrl(raw.sourceUrl),title=clean(raw.title,240);
  if(!sourceUrl||!title)return null;
- const domains={'Himalayas':'himalayas.app','Grants.gov':'www.grants.gov','UK Find a Tender':'www.find-tender.service.gov.uk'};
+ const domains={'Himalayas':'himalayas.app','Grants.gov':'www.grants.gov','UK Find a Tender':'www.find-tender.service.gov.uk','GitHub Bounty Candidates':'github.com'};
  try{if(new URL(sourceUrl).hostname!==domains[raw.source])return null}catch{return null}
  const identity=raw.source+':'+String(raw.id||sourceUrl);
  const id=createHash('sha256').update(identity).digest('hex').slice(0,24);
- const country=raw.type==='employment'?'GLOBAL':raw.country==='US'?'US':raw.country==='GB'?'GB':null;
+ const country=['employment','bounty'].includes(raw.type)?'GLOBAL':raw.country==='US'?'US':raw.country==='GB'?'GB':null;
  const salary=raw.type==='employment'?raw.salary:null;
  const countries=Array.isArray(raw.locationRestrictions)?raw.locationRestrictions.map(x=>clean(x,3).toUpperCase()).filter(Boolean).slice(0,100):[];
- const status=raw.status==='planned'?'planned':raw.status==='posted'||raw.status==='active'?'source_reported_open':'source_reported';
+ const status=raw.type==='bounty'?'unverified_candidate':raw.status==='planned'?'planned':raw.status==='posted'||raw.status==='active'?'source_reported_open':'source_reported';
  const listedAt=date(raw.publishedAt||raw.postedAt);
  const deadline=date(raw.deadline||raw.expiresAt);
  const excerpt=clean(raw.excerpt,800);
@@ -39,6 +39,10 @@ export function normalizeOpportunity(raw){
   salaryCurrency:clean(salary?.currency||'',5),
   tenderValue:Number.isFinite(raw.value)?raw.value:null,
   tenderCurrency:clean(raw.currency||'',5),
+  bountyRewardAmount:raw.type==='bounty'&&Number.isFinite(raw.rewardAmount)?raw.rewardAmount:null,
+  bountyRewardCurrency:raw.type==='bounty'?clean(raw.rewardCurrency||'',5):'',
+  bountyRewardEvidence:raw.type==='bounty'?clean(raw.rewardEvidence||'not_disclosed',45):'',
+  bountyPaymentVerified:false,
   attribution:raw.source,
   eligibilityStatus:'needs_review',eligibilityEvidence:'No applicant-specific evidence collected',
   updatedAt:new Date().toISOString()};
@@ -67,6 +71,10 @@ export function evaluateEligibility(item,profile={}){
   if(applicantType==='unknown')gaps.push('Applicant legal type not supplied');
   if(!organisation&&applicantType!=='individual')gaps.push('Applicant institution/organisation registration jurisdiction not supplied');
   gaps.push('Detailed grant notice and foreign applicant conditions not independently checked');
+ }else if(item.type==='bounty'){
+  requirements.push('Confirm that the issuer is authorised, the reward is funded, the claim is available, and acceptance criteria are explicit');
+  gaps.push('Payout has not been independently verified');
+  gaps.push('Competing claims, maintainer policy, and geographic restrictions require original-issue review');
  }else if(item.type==='tender'){
   requirements.push('Procurement documents determine bidder establishment, suitability and mandatory certifications');
   if(applicantType==='individual')gaps.push('Tender may require a registered organisation');
