@@ -8,17 +8,9 @@ import { createHash } from 'node:crypto';
 
 const PROVIDER = 'https://himalayas.app';
 const CACHE_TTL = 45 * 60 * 1000;
-const NEGATIVE_TTL = 90 * 1000;
 const MAX_CACHE = 70;
 const cache = new Map();
 const clientRate = new Map();
-const vocabulary = {
-  creative: ['creative','design','video','animation','film','motion','art','brand','content','marketing','visual'],
-  research: ['research','science','psychology','data','ux','behavior','analysis','academic'],
-  engineering: ['engineer','developer','software','code','frontend','backend','python','javascript','devops'],
-  design: ['design','designer','ux','ui','product','brand','motion','graphic'],
-  business: ['business','strategy','growth','marketing','sales','product','finance','operations']
-};
 const CAPABILITIES = [
   {id:'research',label:'Research & Analysis',keywords:['research','survey','interview','study','data','analysis','market','ux'],human:'Research specialist',agent:'Research assistant'},
   {id:'strategy',label:'Strategy & Scope',keywords:['strategy','product','growth','campaign','requirements','planning','market'],human:'Strategist / producer',agent:'Planning assistant'},
