@@ -15,7 +15,8 @@ import { createCommons, CommonsError } from './commons.mjs';
 import { createOpportunityIntake } from './opportunities.mjs';
 import { createIncomeEngine } from './income-engine.mjs';
 import { createGrantSearch } from './grant-search.mjs';
-import { createBountySearch } from './bounty-search.mjs';
+import { loadCashAwards, renderCashAwards } from './cash-awards.mjs';
+import { createFundedGrantRadar } from './funded-grants.mjs';
 import { createUkTenders } from './uk-tenders.mjs';
 import { createOpportunityIndex } from './opportunity-index.mjs';
 import { createEconomicMemory } from './economic-memory.mjs';
@@ -40,7 +41,7 @@ const intake = createOpportunityIntake(DATA_DIR);
 const briefs = createBriefIntake(DATA_DIR);
 const incomeEngine = createIncomeEngine();
 const grantSearch = createGrantSearch();
-const bountySearch = createBountySearch();
+const fundedGrantRadar = createFundedGrantRadar({grantSearch});
 const ukTenders = createUkTenders();
 const opportunityIndex = createOpportunityIndex(DATA_DIR);
 const economicMemory = createEconomicMemory(DATA_DIR);
@@ -58,8 +59,7 @@ async function refreshOpportunityIndex(){
   await Promise.allSettled([
    ...['designer','engineer','research'].map(q=>incomeEngine.findJobs({q},'system-ingest').then(r=>retainSourceResponse(r,'Himalayas'))),
    grantSearch.search({q:'artificial intelligence'},'system-ingest').then(r=>retainSourceResponse(r,'Grants.gov')),
-   ukTenders.search({q:''},'system-ingest').then(r=>retainSourceResponse(r,'UK Find a Tender')),
-   bountySearch.search({q:''},'system-ingest').then(r=>retainSourceResponse(r,'GitHub Bounty Candidates'))
+   ukTenders.search({q:''},'system-ingest').then(r=>retainSourceResponse(r,'UK Find a Tender'))
   ]);
  }catch(err){console.error('Scheduled opportunity ingestion:',err.message)}
 }
@@ -808,16 +808,20 @@ const server = http.createServer((req,res)=>{
       return sendJson(res,out?200:404,out||{error:'Opportunity not indexed'});
     })().catch(()=>sendJson(res,400,{error:'Invalid assessment request'}));
   }
-  if(apiPath==='/api/income/bounties/top' && req.method==='GET'){
-    return bountySearch.top(clientKey(req))
-      .then(out=>sendJson(res,out.status,out.body))
-      .catch(()=>sendJson(res,503,{results:[],error:'Featured bounty selection unavailable'}));
+  if(apiPath==='/api/income/prizes/top' && req.method==='GET'){
+    const results=loadCashAwards(DIR);
+    return sendJson(res,200,{provider:'Organiser-owned official competition pages',results,
+      total:results.length,verification:'organiser_published_monetary_award',
+      disclaimer:'Only cash amounts explicitly published by the organiser are displayed. Prize competition awards are conditional on selection and eligibility; payout is not guaranteed. No crypto, credit-only or unpriced listings.'});
   }
-  if(apiPath==='/api/income/bounties' && req.method==='GET'){
-    const params=new URL(req.url,'http://localhost');
-    return bountySearch.search(Object.fromEntries(params.searchParams),clientKey(req))
-      .then(out=>{retainSourceResponse(out,'GitHub Bounty Candidates');return sendJson(res,out.status,out.body)})
-      .catch(()=>sendJson(res,503,{provider:'GitHub Bounty Candidates',results:[],error:'Bounty source unavailable'}));
+  if(apiPath==='/api/income/prizes/funded-grants' && req.method==='GET'){
+    const url=new URL(req.url,'http://localhost');
+    return fundedGrantRadar.search(Object.fromEntries(url.searchParams),clientKey(req))
+      .then(result=>sendJson(res,result.status,result.body))
+      .catch(()=>sendJson(res,503,{provider:'Grants.gov',results:[],error:'Official funding amount search unavailable'}));
+  }
+  if(['/api/income/bounties','/api/income/bounties/top'].includes(apiPath) && req.method==='GET'){
+    return sendJson(res,410,{results:[],error:'Unverified GitHub issue bounties have been retired. Use /api/income/prizes/top or /api/income/prizes/funded-grants for published cash amounts.'});
   }
   if (apiPath === '/api/income/sources' && req.method === 'GET') {
     return sendJson(res,200,{...incomeSources,sourceStatus:'editorial_directory',
@@ -983,7 +987,7 @@ const server = http.createServer((req,res)=>{
   if(['/income-desk','/income-desk/','/en/income-desk','/en/income-desk/'].includes(pathname)) {
     const lang=pathname.startsWith('/en/')?'en':'ru';
     const pagePath=lang==='en'?'/en/income-desk':'/income-desk';
-    const content=readFileSync(path.join(PUBLIC,'assets','income-desk.'+lang+'.html'),'utf8');
+    const content=readFileSync(path.join(PUBLIC,'assets','income-desk.'+lang+'.html'),'utf8').replace('<!-- CASH_AWARDS_SSR -->',renderCashAwards(loadCashAwards(DIR),lang));
     return write(res,200,page({content,lang,
       title:lang==='en'?'Income Intelligence — Live Jobs & Finance Curator':'Income Intelligence — вакансии и финансовый куратор',
       description:lang==='en'?'Search live remote opportunities, create explainable capability plans, and privately submit a business brief for human review.':'Ищите реальные удалённые вакансии, собирайте план исполнения задач и отправляйте приватные заявки на рассмотрение.',
