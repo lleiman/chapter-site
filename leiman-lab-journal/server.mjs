@@ -736,7 +736,7 @@ const server = http.createServer((req,res)=>{
       .then(out=>sendJson(res,out.status,out.body))
       .catch(()=>sendJson(res,503,{error:'Opportunity provider unavailable',results:[]}));
   }
-  if (apiPath === '/api/income/plan' || apiPath === '/api/income/briefs' || /^\\/api\\/income\\/briefs\\/[a-f0-9]{32}$/.test(apiPath)) {
+  if (apiPath === '/api/income/plan' || apiPath === '/api/income/briefs' || /^\/api\/income\/briefs\/[a-f0-9]{32}$/.test(apiPath)) {
     return (async()=>{
       if(!['POST','DELETE'].includes(req.method))return sendJson(res,405,{error:'Method not allowed'});
       if(!String(req.headers['content-type']||'').startsWith('application/json'))return sendJson(res,415,{error:'JSON required'});
