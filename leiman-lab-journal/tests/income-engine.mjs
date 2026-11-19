@@ -39,11 +39,15 @@ export async function testIncomeEngine(){
  const engine=createIncomeEngine({fetcher:async(url)=>{
    requests++;
    assert.ok(String(url).startsWith('https://himalayas.app/jobs/api/search?'));
-   return {ok:true,json:async()=>({jobs:[sampleJob],totalCount:1,updatedAt:Math.floor(Date.now()/1000)})};
+   return {ok:true,json:async()=>({jobs:[sampleJob,{
+     ...sampleJob,guid:'https://himalayas.app/companies/test-employer/jobs/product-designer-duplicate',
+     applicationLink:'https://himalayas.app/companies/test-employer/jobs/product-designer-duplicate'
+   }],totalCount:2,updatedAt:Math.floor(Date.now()/1000)})};
  }});
  const first=await engine.findJobs({q:'designer',skills:'Figma',country:'US'},'test-a');
  assert.equal(first.status,200);
  assert.equal(first.body.results.length,1);
+ assert.equal(first.body.totalFromProvider,2,'provider total remains separate from deduplicated results');
  assert.equal(first.body.results[0].sourceUrl,sampleJob.guid);
  assert.equal(first.body.results[0].applicationLink,sampleJob.applicationLink);
  const second=await engine.findJobs({q:'designer',skills:'Figma',country:'US'},'test-a');
