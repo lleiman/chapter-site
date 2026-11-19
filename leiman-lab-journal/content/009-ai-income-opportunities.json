@@ -16,9 +16,9 @@
   ],
   "title": "Новая экономика поиска заработка: может ли ИИ находить возможности раньше человека?",
   "cardTitle": "Income Intelligence — экономика возможностей",
-  "summary": "Вакансии, гранты, контракты и конкурсы в одном исследовании. Открытые источники, рейтинг возможностей, CV и модель подписки Pro.",
-  "deck": "Как объединить вакансии, гранты и платные проекты в персональный радар возможностей. Проверил источники и спроектировал прозрачный рейтинг, безопасную работу с CV и модель подписки.",
-  "description": "Может ли ИИ помочь найти заработок? Исследование рынка труда, грантов и вакансий, методика рейтинга Income Intelligence, работа с CV и подписка Pro.",
+  "summary": "Исследование рынка труда и возможностей заработка: вакансии с зарплатой, денежные конкурсы, гранты, требования к участию и гипотезы персонального подбора.",
+  "deck": "Какие источники позволяют находить оплачиваемые возможности за пределами обычных вакансий? Исследование, ограничения оценки и текущий публичный пилот Income Intelligence.",
+  "description": "Исследование Leiman Lab о поиске заработка с помощью ИИ: вакансии, денежные призы, гранты, проверка допуска и ограничения пилота Income Intelligence.",
   "readingMinutes": 15,
   "featured": true,
   "cover": "/assets/income-intelligence-cover.svg",
@@ -29,7 +29,22 @@
     },
     {
       "type": "p",
-      "text": "Я изучил данные о занятости и навыках, официальные каталоги вакансий и грантов, открытые API и исследования алгоритмического найма. На их основе предлагаю Income Intelligence — направление Leiman Lab, которое будет искать и сравнивать способы заработка по профилю человека. Это проектная модель, а не утверждение, что готовый сервис уже предсказывает доход."
+      "text": "Я изучил данные о занятости и навыках, официальные каталоги вакансий и грантов, открытые API и исследования алгоритмического найма. На основе этих данных я разработал исследовательскую концепцию Income Intelligence. Её публичный пилот уже работает, но возможность увеличить чьи-либо заработки пока не доказана."
+    },
+    {
+      "type": "aside",
+      "label": "СТАТУС ПРОДУКТА",
+      "text": "ОБНОВЛЕНИЕ ПРОДУКТА · 19 НОЯБРЯ 2026. После публикации исследования появился публичный пилот Income Intelligence. Сейчас на сайте работают ограниченные ленты вакансий с указанной зарплатой, грантов Grants.gov с опубликованными суммами и британских контрактов с заявленной стоимостью, а также редакционная подборка денежных конкурсных призов из правил организаторов. Список источников шире числа подключённых лент. Это ещё не полноценный ИИ-подбор, проверка юридического допуска или гарантия заработка. CV принимаются только по согласию в закрытую анкету; автоматического анализа резюме, откликов, оплаты и подписки Pro нет."
+    },
+    {
+      "type": "p",
+      "text": "Рабочая версия Income Intelligence доступна отдельно от исследовательской статьи. Денежный приз означает сумму награды победителю, а размер гранта — целевое финансирование допустимого проекта. Ни то ни другое не является гарантированным личным доходом.",
+      "links": [
+        {
+          "label": "ОТКРЫТЬ INCOME INTELLIGENCE",
+          "url": "https://leimanlab.com/income-desk#editors-picks"
+        }
+      ]
     },
     {
       "type": "h2",
@@ -76,7 +91,7 @@
       "type": "list",
       "text": "",
       "items": [
-        "Штатная работа: местные, международные и полностью удалённые вакансии с проверенными условиями найма.",
+        "Штатная работа: местные, международные и полностью удалённые вакансии с объявленной зарплатой, ссылкой на первоисточник и ограничениями по странам. Условия найма и допуск требуют дополнительной проверки.",
         "Контракты и фриланс: оплачиваемые задачи, тендеры, проектные роли и короткие консультации.",
         "Гранты и исследовательское финансирование: деньги на проект с требованиями к заявителю, организации и месту проживания.",
         "Конкурсы, премии и резиденции: выплаты, производственные бюджеты, оплачиваемые программы, иногда только неденежная поддержка.",
@@ -215,7 +230,7 @@
     },
     {
       "type": "h2",
-      "text": "07 / Бесплатный продукт и подписка Pro"
+      "text": "07 / Концепция бесплатной версии и подписки Pro"
     },
     {
       "type": "p",
@@ -225,7 +240,7 @@
       "type": "list",
       "text": "",
       "items": [
-        "Free: профиль, первичный разбор CV, 10 релевантных записей в неделю, история сохранённых возможностей.",
+        "ПРЕДЛОЖЕНИЕ, НЕ ДЕЙСТВУЮЩИЙ ТАРИФ: базовый профиль и анализ CV, 10 релевантных записей в неделю и история сохранённых возможностей.",
         "Pro, ориентир $12–19 в месяц: персональный мониторинг, расширенные источники, оповещения о сроках, сравнение чистого дохода, версии CV и материалов заявки.",
         "Professional, ориентир $39–59 в месяц: несколько профессиональных профилей, портфель грантов и тендеров, совместная работа, аналитика заявок и отчёты.",
         "Платные планы не должны повышать редакционный рейтинг спонсируемых возможностей. Реклама и партнёрские рекомендации маркируются отдельно."
@@ -233,7 +248,7 @@
     },
     {
       "type": "p",
-      "text": "Цены здесь — гипотезы для A/B-тестирования, не исследованные тарифы конкурентов. Проверять нужно конверсию в качественную заявку, долю актуальных предложений, стоимость получения данных, стоимость ИИ-обработки, удержание и реальный финансовый результат спустя 30–90 дней. Подписка без измеримого эффекта быстро превращается в ещё один ежемесячный расход."
+      "text": "Эти тарифы — только предложения для возможного будущего тестирования. Платные планы сейчас не запущены. Оценивать их стоит по пригодным для заявки предложениям, точности сроков, затратам на поиск и реальным финансовым результатам, а не по числу показанных карточек."
     },
     {
       "type": "h2",
@@ -255,11 +270,11 @@
     },
     {
       "type": "h2",
-      "text": "09 / Что строить в Leiman Lab"
+      "text": "09 / От проекта к публичному пилоту Leiman Lab"
     },
     {
       "type": "p",
-      "text": "Я предлагаю открыть отдельный раздел Income Intelligence с публичным каталогом источников и методологией, затем персональный кабинет. Сначала — проверяемые данные и рейтинг, затем AI-помощник для CV и заявок, и только после этого платные подписки. Параллельно можно вести открытый журнал того, какие направления и источники дают реальные результаты."
+      "text": "На 19 ноября 2026 года публичный пилот уже доступен: источники вакансий, денежные конкурсы, ограниченный поиск грантов и тендеров, предварительная оценка совпадения требований и примерный план исполнения проекта. Важные части концепции ещё не реализованы: автоматический анализ CV, полная проверка права на участие, независимая верификация выплаты, рассылка заявок, автономное исполнение и подписки. Следующий этап — проверить реальные результаты и точность данных, а не увеличивать число обещаний."
     },
     {
       "type": "aside",
@@ -268,7 +283,7 @@
     },
     {
       "type": "p",
-      "text": "Состояние исследования: 18 ноября 2026 года. Источники отражают доступные на дату публикации данные и документацию. Условия вакансий, грантов и API меняются; перед подачей заявки нужна повторная проверка первоисточника."
+      "text": "Исследовательские источники: состояние на 18 ноября 2026 года. Статус продукта обновлён 19 ноября 2026 года. Условия вакансий, грантов, конкурсов и доступа к API меняются; перед заявкой следует открыть первоисточник и проверить условия."
     }
   ],
   "sources": [
@@ -333,14 +348,14 @@
       "type": "LEGAL REFERENCE"
     }
   ],
-  "sourceNote": "Источники проверены в ноябре 2026 года. Весовые коэффициенты, ценовые уровни и продуктовая модель — гипотезы Leiman Lab, а не результаты испытаний.",
+  "sourceNote": "Исследования и источники проверены в ноябре 2026 года. Перечисленные веса рейтинга, будущие тарифы и функциональность за пределами действующего пилота являются гипотезами Leiman Lab, а не подтверждёнными коммерческими результатами.",
   "translations": {
     "en": {
       "title": "The New Economics of Finding Work: Can AI Discover Income Opportunities Before We Do?",
       "cardTitle": "Income Intelligence — Mapping Opportunity",
-      "summary": "Jobs, grants, contracts and competitions in one research framework. Primary data sources, transparent ranking, CV privacy and a Pro subscription model.",
-      "deck": "How to turn jobs, grants and paid projects into a personal opportunity radar. A source-based framework for ranking, CV analysis and subscription economics.",
-      "description": "Can AI help you find ways to earn money? Research on jobs, grants, freelance work and a transparent Income Intelligence ranking with CV analysis and Pro subscriptions.",
+      "summary": "Research on paid opportunities across jobs, cash-prize competitions and grants, with eligibility limitations and the current Income Intelligence beta.",
+      "deck": "How to discover monetary opportunities beyond job listings, separate prize amounts from likely earnings, and evaluate the current Income Intelligence pilot.",
+      "description": "Leiman Lab research on income discovery: salaried roles, cash prizes, grants, eligibility, evidence quality and the current Income Intelligence beta.",
       "section": "RESEARCH / ECONOMICS OF WORK",
       "tags": [
         "AI jobs",
@@ -357,7 +372,22 @@
         },
         {
           "type": "p",
-          "text": "I examined labour-market evidence, official job and grant directories, public APIs and research on algorithmic hiring. The result is a proposal for Income Intelligence, a Leiman Lab system that would discover and compare ways to earn money based on an individual profile. It is a product hypothesis, not a claim that a working service can already forecast anyone's income."
+          "text": "I examined labour-market evidence, official job and grant directories, public APIs and research on algorithmic hiring. The result is the Income Intelligence research concept, now accompanied by a public beta. Whether the system actually helps users earn more remains untested."
+        },
+        {
+          "type": "aside",
+          "label": "PRODUCT STATUS",
+          "text": "PRODUCT UPDATE · 19 NOVEMBER 2026. Since this research was published, a public Income Intelligence beta has gone live. It currently offers bounded feeds of remote jobs with disclosed salaries, Grants.gov opportunities with published funding amounts, UK tenders with stated contract values, and an editorial shortlist of cash prizes documented by organisers. The source directory is broader than the set of live integrations. This is not yet a personalised AI career adviser, verified legal-eligibility checker or income guarantee. CVs are accepted only through a consent-based private intake; automated CV analysis, applications, payments and Pro subscriptions are not live."
+        },
+        {
+          "type": "p",
+          "text": "The working Income Intelligence beta is separate from this research article. A cash prize is conditional on winning, while a grant supports an eligible project under restricted terms. Neither is guaranteed personal income.",
+          "links": [
+            {
+              "label": "OPEN INCOME INTELLIGENCE BETA",
+              "url": "https://leimanlab.com/en/income-desk#editors-picks"
+            }
+          ]
         },
         {
           "type": "h2",
@@ -404,7 +434,7 @@
           "type": "list",
           "text": "",
           "items": [
-            "Employment: local, international and remote positions with verified hiring conditions.",
+            "Employment: local, international and remote positions with disclosed pay, links to primary sources and advertised location restrictions. Actual hiring conditions and eligibility still require verification.",
             "Freelance and contracts: paid assignments, tenders, project roles and short advisory engagements.",
             "Grants and research funding: project support subject to eligibility, institutional affiliation and geographic restrictions.",
             "Competitions, awards and residencies: cash awards, production support, funded programmes or purely non-cash benefits.",
@@ -543,7 +573,7 @@
         },
         {
           "type": "h2",
-          "text": "07 / The free product, Pro subscription and economics"
+          "text": "07 / Proposed free service and subscription economics"
         },
         {
           "type": "p",
@@ -553,7 +583,7 @@
           "type": "list",
           "text": "",
           "items": [
-            "Free: individual profile, initial CV review, 10 relevant records per week and a saved-opportunity list.",
+            "PROPOSED, NOT LIVE: an individual profile, an initial CV review, 10 relevant records per week and a saved-opportunity history.",
             "Pro, test price $12–19/month: personal monitoring, broader source coverage, deadline alerts, net-income comparison and tailored application materials.",
             "Professional, test price $39–59/month: multiple professional profiles, grant and tender portfolio, collaboration and application analytics.",
             "Paid placement must never secretly change the editorial score. Sponsored opportunities and referral links require clear disclosure."
@@ -561,7 +591,7 @@
         },
         {
           "type": "p",
-          "text": "These prices are experiments, not measured market-clearing rates. The meaningful metrics are qualified applications, active listing accuracy, data acquisition costs, inference costs, retention and actual economic outcomes after 30–90 days. A subscription that yields no measurable benefit is simply a new monthly expense."
+          "text": "These are proposed prices for possible future experiments, not active subscription plans. They should be evaluated against actionable leads, deadline accuracy, acquisition and inference costs, and real economic outcomes, rather than the number of cards displayed."
         },
         {
           "type": "h2",
@@ -583,11 +613,11 @@
         },
         {
           "type": "h2",
-          "text": "09 / The product Leiman Lab should build"
+          "text": "09 / From research proposal to public beta"
         },
         {
           "type": "p",
-          "text": "I would launch an Income Intelligence section with a public source directory, methodology and clearly dated records, then add a private profile workspace. First comes verified data and explainable ranking; next, AI-assisted CV review and applications; only then, a paid monitoring tier. An open research log should report which sources and strategies produce real outcomes."
+          "text": "As of 19 November 2026, a public beta provides vacancy discovery, selected cash-prize competitions, limited monetary grant and tender searches, preliminary requirement matching and illustrative execution plans. Key parts of the vision remain unbuilt: automatic CV analysis, complete legal eligibility checks, independent payout verification, application submission, autonomous delivery and paid subscriptions. The next test is whether the system helps people obtain real economic results, not simply whether it displays more opportunities."
         },
         {
           "type": "aside",
@@ -596,10 +626,10 @@
         },
         {
           "type": "p",
-          "text": "Research snapshot: 18 November 2026. Labour-market reports and API documentation reflect the information available at publication. Opportunities, deadlines and data access rules may change; always verify the primary source immediately before applying."
+          "text": "Research snapshot: 18 November 2026. Product status updated on 19 November 2026. Job, grant, competition and API terms change; verify the original source immediately before applying."
         }
       ],
-      "sourceNote": "Sources reviewed in November 2026. Ranking weights, subscription prices and product architecture are Leiman Lab hypotheses, not validated performance claims.",
+      "sourceNote": "Sources were reviewed in November 2026. Proposed scoring weights, possible subscription prices and functionality beyond the deployed beta are Leiman Lab hypotheses, not verified commercial results.",
       "readingMinutes": 15,
       "translationPublished": "2026-11-18"
     }
