@@ -1,5 +1,5 @@
 import {createCipheriv,createDecipheriv,createHash,randomBytes,timingSafeEqual} from 'node:crypto';
-import {mkdirSync,existsSync,readFileSync,writeFileSync,readdirSync,unlinkSync,statSync} from 'node:fs';
+import {mkdirSync,existsSync,readFileSync,writeFileSync,readdirSync,unlinkSync,statSync,renameSync,utimesSync} from 'node:fs';
 import path from 'node:path';
 
 /** Private project briefs, never published or submitted to external AI. 30 day TTL. */
@@ -53,6 +53,34 @@ export function createBriefIntake(dataDir){
     return {status:201,body:{ok:true,id,deletionToken:token,expiresAt:row.expiresAt,
       note:'Brief submitted for private review. No service agreement, exclusivity, payment or response time is promised.'}};
   }
+  function update(id,changes={}){
+    if(!/^[a-f0-9]{32}$/.test(id)||!existsSync(recordPath(id)))return {status:404,body:{error:'Brief not found'}};
+    const allowed=['unreviewed','qualified','contacted','proposal','contracted','delivered','paid','declined'];
+    const status=String(changes.status||'');
+    const note=String(changes.note||'').trim().slice(0,600);
+    if(!allowed.includes(status))return {status:400,body:{error:'Invalid status'}};
+    const value=Number(changes.amountReceived||0);
+    const directCosts=Number(changes.directCosts||0);
+    if(!Number.isFinite(value)||!Number.isFinite(directCosts)||value<0||directCosts<0||value>10000000||directCosts>10000000)
+      return {status:400,body:{error:'Invalid financial values'}};
+    if(status!=='paid'&&(value!==0||directCosts!==0))
+      return {status:400,body:{error:'Financial outcome can only be entered for paid projects'}};
+    try{
+      const file=recordPath(id),row=unseal(readFileSync(file,'utf8'));
+      row.status=status;row.note=note;
+      row.amountReceived=status==='paid'?value:0;
+      row.directCosts=status==='paid'?directCosts:0;
+      row.updatedAt=new Date().toISOString();
+      row.outcomeEvidence='operator_reported_not_independently_audited';
+      // Write new ciphertext atomically without extending the original 30-day retention.
+      const temp=file+'.tmp';
+      writeFileSync(temp,seal(row),{mode:0o600});
+      renameSync(temp,file);
+      const original=new Date(row.createdAt);
+      utimesSync(file,original,original);
+      return {status:200,body:{ok:true,id,status,updatedAt:row.updatedAt}};
+    }catch{return {status:500,body:{error:'Unable to save brief update'}}}
+  }
   function remove(id,token){
     if(!/^[a-f0-9]{32}$/.test(id)||!/^[a-f0-9]{48}$/.test(token))return false;
     if(!existsSync(recordPath(id)))return false;
@@ -71,5 +99,5 @@ export function createBriefIntake(dataDir){
   }
   clean();
   const timer=setInterval(clean,3600000);timer.unref?.();
-  return {submit,remove,list};
+  return {submit,remove,list,update};
 }
