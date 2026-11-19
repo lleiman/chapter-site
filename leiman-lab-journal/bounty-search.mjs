@@ -39,6 +39,64 @@ export function normalizeBountyIssue(issue){
   caveat:'The issue is open on GitHub. Reward amount, payer, funding, eligibility, and payout are not independently verified.'
  };
 }
+/**
+ * Editorial shortlisting of source-reported leads. This is NOT verified
+ * profitability, funded escrow, difficulty, or expected payment.
+ * Lower-scope signals in issue text cannot substitute for reading the issue.
+ */
+export function scoreBountyCandidate(item,{now=Date.now()}={}){
+ const title=str(item.title,180).toLowerCase();
+ const excerpt=str(item.excerpt,600).toLowerCase();
+ const description=title+' '+excerpt;
+ const amount=Number(item.rewardAmount);
+ const priced=Number.isFinite(amount)&&amount>0;
+ let score=0;
+ const reasons=[];
+ if(priced){
+  score+=amount>=100&&amount<=2000?21:amount<100?10:amount<=5000?14:7;
+  reasons.push('stated_reward');
+ }else reasons.push('reward_not_disclosed');
+ const focus=[
+  {test:/\\b(?:documentation|readme|docs|typo|copywriting|spelling|examples?)\\b/i,key:'documentation_scope',points:22},
+  {test:/\\b(?:ui|frontend|css|styling|layout|visual|landing page|website|responsive)\\b/i,key:'visual_scope',points:17},
+  {test:/\\b(?:small|simple|minor|single|one[- ]page|one[- ]file|quick fix)\\b/i,key:'narrow_scope_hint',points:9},
+  {test:/\\b(?:test|tests|unit test|lint|build|fix a bug|bugfix)\\b/i,key:'concrete_test_scope',points:8},
+  {test:/\\b(?:agent|automation|workflow|integration)\\b/i,key:'automation_scope',points:8}
+ ];
+ let matched=0;
+ for(const f of focus)if(f.test.test(description)){
+  score+=f.points;reasons.push(f.key);matched++;
+ }
+ if(!matched)score+=2;
+ if(/\\b(?:acceptance criteria|deliverables|requirements|steps to reproduce|definition of done|expected behavior)\\b/i.test(description)){
+  score+=9;reasons.push('criteria_mentioned');
+ }
+ if(/\\b(?:in progress|already claimed|assigned|claimed by|closed for submissions|do not apply)\\b/i.test(description)){
+  score-=25;reasons.push('possible_claim_conflict');
+ }
+ if(/\\b(?:exploit|critical vulnerability|audit entire|complete rewrite|entire framework|production infrastructure|kernel|cryptography|zk[- ]?proof|zero knowledge)\\b/i.test(description)){
+  score-=20;reasons.push('specialist_or_complex_scope');
+ }
+ if(/\\b(?:guaranteed|instant money|no work|easy profit|free cash)\\b/i.test(description)){
+  score-=18;reasons.push('promotional_claim_warning');
+ }
+ if((item.claimCount||0)>=20){score-=7;reasons.push('many_issue_comments')}
+ const updated=Date.parse(item.updatedAt||'');
+ if(Number.isFinite(updated)){
+  const ageDays=Math.max(0,(now-updated)/86400000);
+  if(ageDays<=7)score+=13;
+  else if(ageDays<=30)score+=7;
+  else if(ageDays>120){score-=15;reasons.push('older_update')}
+ }
+ // Risk deduction: every issue lacks independently verified payer/funds.
+ score-=15;
+ // Bounded and reproducible, not a success chance or skill assessment.
+ return {score:Math.max(0,Math.min(100,Math.round(score))),
+  reasons,method:'editorial_heuristic_v1',paymentVerified:false,
+  effortVerified:false,
+  notice:'Priority for manual inspection only. Payout, difficulty, eligibility and claim availability remain unverified.'};
+}
+
 export function createBountySearch({fetcher=globalThis.fetch}={}){
  async function search({q='',page=1}={},client='anonymous'){
   const now=Date.now(),hashed=createHash('sha256').update(String(client)).digest('hex');
@@ -78,5 +136,36 @@ export function createBountySearch({fetcher=globalThis.fetch}={}){
    totalCandidates:Number(payload.total_count||0),retrievedAt:new Date().toISOString(),
    disclaimer:'These are open, bounty-labelled GitHub issues. They are leads only. Financial reward, claim availability, publisher identity and payment are not verified. Never begin work or supply credentials without reviewing the original issue and its rules.'}};
  }
- return {search};
+ async function top(client='anonymous'){
+  // Independent of user filters. Collect several recent pages rather than
+  // selecting five from whatever keyword the visitor happened to type.
+  const pages=await Promise.allSettled([1,2,3].map(page=>
+    search({q:'',page},client+'|curated-top')
+  ));
+  const leads=[],seen=new Set(),statuses=[];
+  for(const page of pages){
+   if(page.status!=='fulfilled')continue;
+   const result=page.value;
+   if(result.status!==200)continue;
+   statuses.push(result.body.sourceStatus);
+   for(const item of result.body.results){
+    if(seen.has(item.sourceUrl))continue;
+    seen.add(item.sourceUrl);
+    leads.push({...item,editorial:scoreBountyCandidate(item)});
+   }
+  }
+  if(!statuses.length)return {status:503,body:{
+   results:[],candidatePool:0,provider:'GitHub Bounty Candidates',
+   error:'No recent bounty candidates could be retrieved. No featured items have been invented.'
+  }};
+  leads.sort((a,b)=>b.editorial.score-a.editorial.score||
+    Number(Boolean(b.rewardAmount))-Number(Boolean(a.rewardAmount))||
+    String(b.updatedAt).localeCompare(String(a.updatedAt)));
+  return {status:200,body:{results:leads.slice(0,5),
+   candidatePool:leads.length,provider:'GitHub Bounty Candidates',
+   sourceStatus:statuses.includes('stale')?'partially_stale':statuses.every(x=>x==='cached')?'cached':'fresh',
+   independentOfUserFilters:true,editorialMethod:'editorial_heuristic_v1',
+   disclaimer:'Automatically shortlisted for manual review across up to 90 recent GitHub issue candidates. This is NOT a verified recommendation, guaranteed payment, predicted difficulty or a probability of winning. Original project and reward terms must be checked.'}};
+ }
+ return {search,top};
 }
