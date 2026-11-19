@@ -48,7 +48,7 @@ if(financeRoot){
  function grantsHTML(x,i){
   const value=x.fundingCeiling??x.fundingFloor;
   const title=esc(x.title),issuer=esc(x.issuer||'Grants.gov');
-  const deadline=esc(x.deadline|| (en?'See official notice':'Уточнить в объявлении'));
+  const deadline=esc(x.deadline&&x.deadline<'2090-01-01'?x.deadline:(en?'Verify notice':'Уточнить срок'));
   const count=new Intl.NumberFormat(en?'en-US':'ru-RU',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(value);
   const label=x.fundingCeiling!=null?(en?'AWARD CEILING':'МАКСИМУМ ГРАНТА'):(en?'AWARD FLOOR':'МИНИМУМ ГРАНТА');
   return '<details class="id-award-row"><summary class="id-award-summary">'+
@@ -141,7 +141,7 @@ if(financeRoot){
  const form=$('id-funded-grant-form'),status=$('id-funded-grant-status'),results=$('id-funded-grant-results');
  const amount=v=>v==null?labels.noAmount:new Intl.NumberFormat(en?'en-US':'ru-RU',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v);
  const render=x=>`<article class="id-grant-card id-funded-card">
-  <div class="id-job-meta"><span>${labels.status}</span><span>${esc(x.deadline||'')}</span></div>
+  <div class="id-job-meta"><span>${labels.status}</span><span>${esc(x.deadline&&x.deadline<'2090-01-01'?x.deadline:(en?'VERIFY DEADLINE':'УТОЧНИТЬ СРОК'))}</span></div>
   <h4>${esc(x.title)}</h4>
   <p class="id-funded-agency">${esc(x.issuer)}</p>
   ${x.summary?'<p class="id-funded-applicants">'+esc(x.summary.slice(0,330))+'</p>':''}
