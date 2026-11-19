@@ -61,3 +61,5 @@
 .id-v2-verdict{font:700 11px ui-monospace,monospace;color:var(--accent);padding:10px;border:1px solid var(--accent)}
 @media(max-width:1080px){.id-v2-layout{grid-template-columns:1fr}.id-v2-assessment{position:static}}
 @media(max-width:730px){.id-v2 .id-search-form{grid-template-columns:1fr}.id-v2-assessment{padding:15px}.id-v2-card{padding:16px}}
+
+.id-v2-card-footer{flex-wrap:wrap}.id-v2-source-age{font:9px/1.5 ui-monospace,Consolas,monospace;color:#777970;max-width:275px}
