@@ -27,6 +27,7 @@ export function grantWithPublishedMoney(base,payload){
   cashAmount:c,cashCurrency:'USD',cashEvidence:'official_grant_synopsis',
   amountBasis:ceiling?'published_award_ceiling':'published_award_floor',
   fundingFloor:floor,fundingCeiling:ceiling,deadline:base.deadline,
+  summary:String(syn.synopsisDesc||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,550),
   postedAt:base.postedAt,applicantTypes:applicants,requiresReview:true,
   paymentGuaranteed:false,eligibility:'Unverified. Funding supports the named project/applicant under specific federal rules, not general income.',
   notice:'The funding ceiling is a maximum available award under programme rules, not a prize, personal payment, or expected earnings.'};
@@ -72,10 +73,21 @@ export function createFundedGrantRadar({grantSearch,fetcher=globalThis.fetch}){
     if(r.status==='rejected')issues.push('details_unavailable');
    }
   }
+  const terms=query.toLowerCase().match(/[a-z]{3,}/g)||[];
+  const rank=grant=>{
+   const title=grant.title.toLowerCase(),summary=(grant.summary||'').toLowerCase();
+   const matches=terms.reduce((n,t)=>n+(title.includes(t)?40:summary.includes(t)?12:0),0);
+   const amount=grant.fundingCeiling||grant.fundingFloor||0;
+   const scale=amount<=250000?12:amount<=2000000?8:amount<=10000000?2:-10;
+   const types=grant.applicantTypes.map(x=>x.toLowerCase()).join(' ');
+   const applicant=/(individual|nonprofit|small business|arts organisation)/.test(types)?7:0;
+   return matches+scale+applicant;
+  };
+  results.sort((a,b)=>rank(b)-rank(a)||a.cashAmount-b.cashAmount);
   const body={provider:'Grants.gov',sourceStatus:source.body.sourceStatus==='stale'?'stale':'fresh',
     queriedAt:new Date().toISOString(),query:{q:query,page:currentPage},
     searchedListings:inputs.length,skippedNoMoney:inputs.length-results.length,
-    results:results.sort((a,b)=>(b.fundingCeiling||b.fundingFloor||0)-(a.fundingCeiling||a.fundingFloor||0)),
+    results,ranking:'keyword_relevance_and_small_project_scale_heuristic',
     detailsPartiallyUnavailable:issues.length>0,
     disclaimer:'Monetary federal grant notices only. Amount represents a published award ceiling/floor, not guaranteed money, salary or a competition prize. Each notice has institution, jurisdiction, registration and programme-specific eligibility.'};
   if(!issues.length){cache.set(key,{body,at:Date.now()});if(cache.size>35)cache.delete(cache.keys().next().value)}
