@@ -19,9 +19,9 @@ if(node){
  const indexForm=$('id-v2-form'),assessForm=$('id-v2-assess'),container=$('id-v2-results');
  let rows=[];
  const rowsText=items=>items.map(x=>`<article class="id-v2-card">
- <div class="id-v2-card-top"><span>${escape(x.type.toUpperCase())} · ${escape(x.source)}</span><span>${escape(x.deadline||labels.notProvided)}</span></div>
+ <div class="id-v2-card-top"><span>${escape(x.type.toUpperCase())} · ${escape(x.source)} · ${escape(x.status.toUpperCase())}</span><span>${escape(x.deadline||labels.notProvided)}</span></div>
  <h3>${escape(x.title)}</h3><p>${escape(x.issuer)} · ${escape(x.excerpt)}</p>
- <div class="id-v2-card-footer"><a href="${escape(x.sourceUrl)}" target="_blank" rel="noopener noreferrer">${labels.source}</a>
+ <div class="id-v2-card-footer"><span class="id-v2-source-age">${escape(x.sourceFreshnessHours)}h · ${escape(labels.limited)}</span><a href="${escape(x.sourceUrl)}" target="_blank" rel="noopener noreferrer">${labels.source}</a>
  <button type="button" data-assess-id="${escape(x.id)}">${labels.assess}</button></div></article>`).join('');
  async function load(){
   const query=new URLSearchParams(new FormData(indexForm));
