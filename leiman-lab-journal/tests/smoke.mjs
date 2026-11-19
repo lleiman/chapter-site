@@ -171,6 +171,16 @@ async function bountyRoutesTest(){
   const page=await (await get(locale)).text();
   assert.ok(page.includes('id="id-bounty-form"'),locale+' paid task search');
   assert.ok(page.includes('id="id-top-bounty-results"'),locale+' featured list before filters');
+  assert.ok(page.includes('id="editors-picks"'),locale+' featured section has canonical homepage anchor');
+  assert.ok(page.indexOf('id="editors-picks"')<page.indexOf('id="radar"'),
+    locale+' first discovery surface must precede jobs and their search form');
+  assert.ok(page.indexOf('id="editors-picks"')<page.indexOf('id="bounties"'),
+    locale+' featured picks must precede general bounty discovery');
+  const jobSearch=page.match(/<form id="id-job-search"[\s\S]*?<\/form>/)?.[0]||'';
+  assert.ok(jobSearch.includes('name="q"'),locale+' job search remains available');
+  assert.ok(!/name="q"[^>]*\srequired/.test(jobSearch),locale+' keyword must not be required on first visit');
+  assert.ok(!/name="q"[^>]*value="designer"/.test(jobSearch),locale+' initial browse does not depend on a hidden preset keyword');
+
   assert.ok(page.indexOf('id="id-top-bounty-results"')<page.indexOf('id="id-bounty-form"'),
    locale+' featured items must precede user search and controls');
   assert.ok(page.includes('id="id-bounty-directories"'),locale+' verified directory links');
