@@ -8,7 +8,7 @@
     "start": "node server.mjs",
     "dev": "node --watch server.mjs",
     "test": "node tests/smoke.mjs",
-    "check": "node --check server.mjs && node --check commons.mjs && node --check public/assets/commons.js && node --check public/assets/opportunities.js && node --check public/assets/organism.js && node --check tests/organism-ui.mjs && node --check tests/smoke.mjs"
+    "check": "node --check server.mjs && node --check income-engine.mjs && node --check brief-intake.mjs && node --check public/assets/income-desk.js && node --check tests/income-engine.mjs && node --check commons.mjs && node --check public/assets/commons.js && node --check public/assets/opportunities.js && node --check public/assets/organism.js && node --check tests/organism-ui.mjs && node --check tests/smoke.mjs"
   },
   "engines": {
     "node": ">=20.9.0"
