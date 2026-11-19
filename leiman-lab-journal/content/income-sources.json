@@ -61,14 +61,14 @@
         "GB"
       ],
       "kind": "tenders",
-      "access": "official_api",
+      "access": "live",
       "url": "https://www.find-tender.service.gov.uk/Search",
       "search": "https://www.find-tender.service.gov.uk/Search",
       "policy": "https://www.gov.uk/government/publications/open-contracting",
-      "en": "UK procurement notices via official OCDS API. Verify live procedure, procurement stage, bidder eligibility, deadlines and buyer requirements.",
-      "ru": "Государственные закупки Великобритании, официальный OCDS API. Проверяйте стадию, требования к участнику, срок и заказчика.",
+      "en": "Recent UK public tender-stage notices are available through our bounded live feed. The directory also supports deeper searches. Each tender still requires a notice-by-notice eligibility check.",
+      "ru": "Недавние тендерные уведомления Великобритании доступны в живой выборке. Для глубокого поиска есть официальный каталог. Условия участия проверяются отдельно.",
       "eligibility": "per_notice",
-      "readiness": "directory"
+      "readiness": "live"
     },
     {
       "id": "ukcontracts",
