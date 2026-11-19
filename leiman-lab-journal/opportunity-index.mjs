@@ -152,5 +152,11 @@ export function createOpportunityIndex(dataDir){
   return {total:values.length,byType:Object.fromEntries([...TYPES].map(t=>[t,values.filter(v=>v.type===t).length])),
    bySource:Object.fromEntries([...SOURCES].map(t=>[t,values.filter(v=>v.source===t).length]))};
  }
- return {ingest,search,stats};
+ function assess(id,profile={}){
+  if(!/^[a-f0-9]{24}$/.test(String(id))||!entries[id])return null;
+  const item=entries[id];
+  return {opportunity:item,eligibility:evaluateEligibility(item,profile),
+    capabilityFit:compareCapabilities(item,profile),warning:'Automated triage only; legal and programme-specific conditions require human source review.'};
+ }
+ return {ingest,search,stats,assess};
 }
