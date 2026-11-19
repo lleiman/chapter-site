@@ -39,6 +39,7 @@ if(financeRoot){
   <div class="id-job-meta"><span>${labels.status}</span><span>${esc(x.deadline||'')}</span></div>
   <h4>${esc(x.title)}</h4>
   <p class="id-funded-agency">${esc(x.issuer)}</p>
+  ${x.summary?'<p class="id-funded-applicants">'+esc(x.summary.slice(0,330))+'</p>':''}
   <div class="id-grant-detail">
    <div><small>${labels.ceiling}</small><strong>${esc(amount(x.fundingCeiling))}</strong></div>
    <div><small>${labels.floor}</small><strong>${esc(amount(x.fundingFloor))}</strong></div>
