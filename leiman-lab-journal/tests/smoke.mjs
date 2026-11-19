@@ -173,6 +173,7 @@ async function internationalRoutesTests() {
   const page=await html(pageUrl);
   assert.ok(page.includes('id="id-source-region"'),pageUrl+' country filters');
   assert.ok(page.includes('id="id-grant-search"'),pageUrl+' grants search');
+  assert.ok(page.includes('id="id-uk-search"'),pageUrl+' UK tender search');
   assert.ok(page.includes('/assets/income-global.js'),pageUrl+' country UI');
  }
  const asset=await get('/assets/income-global.js');
