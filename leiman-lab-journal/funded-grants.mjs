@@ -6,6 +6,7 @@
 const DETAIL_URL='https://api.grants.gov/v1/api/fetchOpportunity';
 const MAX_DETAILS=14,CACHE_MS=45*60*1000;
 const BLOCKED=/(?:\bcrypto(?:currency|currencies)?\b|\bweb3\b|\bblockchain\b|\btoken sale\b|\bNFTs?\b|\bDeFi\b|\bdigital assets?\b|\bsecurity bounty\b|\bbug bounty\b)/i;
+const NON_CASH=/(?:\bindemnity\b|\bindemnification\b|\binsurance coverage\b|\bloan guarantee\b|\bguaranteed loan\b|\bnoncash\b|\bnon[- ]cash\b|\bin[- ]kind only\b)/i;
 const cache=new Map(),rate=new Map();
 const money=s=>{
  if(typeof s==='number')return Number.isFinite(s)&&s>0?s:null;
@@ -17,7 +18,8 @@ export function grantWithPublishedMoney(base,payload){
  const syn=payload?.data?.synopsis;
  if(!syn||!base||base.source!=='Grants.gov'||base.status!=='posted')return null;
  if(String(payload.data?.id)!==String(base.id).replace(/^us-grant-/,''))return null;
- if(BLOCKED.test(base.title+' '+String(syn.synopsisDesc||'').slice(0,1600)))return null;
+ const eligibilityText=base.title+' '+String(syn.synopsisDesc||'').slice(0,1600);
+ if(BLOCKED.test(eligibilityText)||NON_CASH.test(eligibilityText))return null;
  const ceiling=money(syn.awardCeiling),floor=money(syn.awardFloor);
  if(!ceiling&&!floor)return null;
  const c=ceiling||floor;
