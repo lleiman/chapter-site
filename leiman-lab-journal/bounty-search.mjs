@@ -98,6 +98,7 @@ export function scoreBountyCandidate(item,{now=Date.now()}={}){
 }
 
 export function createBountySearch({fetcher=globalThis.fetch}={}){
+ let featuredCache=null;
  async function search({q='',page=1}={},client='anonymous'){
   const now=Date.now(),hashed=createHash('sha256').update(String(client)).digest('hex');
   const prevRate=clientCounts.get(hashed)||{at:now,n:0};
@@ -137,6 +138,8 @@ export function createBountySearch({fetcher=globalThis.fetch}={}){
    disclaimer:'These are open, bounty-labelled GitHub issues. They are leads only. Financial reward, claim availability, publisher identity and payment are not verified. Never begin work or supply credentials without reviewing the original issue and its rules.'}};
  }
  async function top(client='anonymous'){
+  if(featuredCache && Date.now()-featuredCache.at<20*60*1000)
+    return {status:200,body:{...featuredCache.body,sourceStatus:'cached'}};
   // Independent of user filters. Collect several recent pages rather than
   // selecting five from whatever keyword the visitor happened to type.
   const pages=await Promise.allSettled([1,2,3].map(page=>
@@ -161,11 +164,13 @@ export function createBountySearch({fetcher=globalThis.fetch}={}){
   leads.sort((a,b)=>b.editorial.score-a.editorial.score||
     Number(Boolean(b.rewardAmount))-Number(Boolean(a.rewardAmount))||
     String(b.updatedAt).localeCompare(String(a.updatedAt)));
-  return {status:200,body:{results:leads.slice(0,5),
+  const output={status:200,body:{results:leads.slice(0,5),
    candidatePool:leads.length,provider:'GitHub Bounty Candidates',
    sourceStatus:statuses.includes('stale')?'partially_stale':statuses.every(x=>x==='cached')?'cached':'fresh',
    independentOfUserFilters:true,editorialMethod:'editorial_heuristic_v1',
    disclaimer:'Automatically shortlisted for manual review across up to 90 recent GitHub issue candidates. This is NOT a verified recommendation, guaranteed payment, predicted difficulty or a probability of winning. Original project and reward terms must be checked.'}};
+  featuredCache={at:Date.now(),body:output.body};
+  return output;
  }
  return {search,top};
 }
