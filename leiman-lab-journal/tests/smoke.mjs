@@ -4,7 +4,7 @@ import { organismUiTest } from './organism-ui.mjs';
 import { testIncomeEngine } from './income-engine.mjs';
 import { testInternationalSources } from './international-sources.mjs';
 import { testOpportunityV2 } from './opportunity-v2.mjs';
-import { testBountySearch } from './bounty-search.mjs';
+import { testCashPrizeDiscovery } from './bounty-search.mjs';
 import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync, readdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -69,8 +69,8 @@ async function main() {
   await testIncomeEngine();
   await testInternationalSources();
   testOpportunityV2();
-  await testBountySearch();
-  await bountyRoutesTest();
+  await testCashPrizeDiscovery();
+  await cashPrizeRoutesTest();
   await opportunityV2RoutesTest();
   await internationalRoutesTests();
   await incomeDeskRoutesTest();
@@ -166,42 +166,42 @@ async function incomeOpsRoutesTest(){
  console.log('✓ private income operations console and consented brief outcome accounting');
 }
 
-async function bountyRoutesTest(){
+async function cashPrizeRoutesTest(){
+ const endpoint=await get('/api/income/prizes/top');
+ assert.equal(endpoint.status,200,'cash prize shortlist should load');
+ const data=await endpoint.json();
+ assert.equal(data.results.length,5);
+ assert.ok(data.results.every(r=>r.cashAward>0&&r.cashCurrency==='USD'),'all displayed prizes have stated money');
+ assert.ok(data.results.every(r=>r.cashEvidence.startsWith('official_')&&!r.paymentGuaranteed));
+ assert.ok(data.results.some(r=>r.id==='heygen-video-contest-2026'));
+ assert.ok(data.results.every(r=>!/(crypto|web3|akool|hackerone|github)/i.test(r.title)));
  for(const locale of ['/en/income-desk','/income-desk']){
   const page=await (await get(locale)).text();
-  assert.ok(page.includes('id="id-bounty-form"'),locale+' paid task search');
-  assert.ok(page.includes('id="id-top-bounty-results"'),locale+' featured list before filters');
-  assert.ok(page.includes('id="editors-picks"'),locale+' featured section has canonical homepage anchor');
-  assert.ok(page.indexOf('id="editors-picks"')<page.indexOf('id="radar"'),
-    locale+' first discovery surface must precede jobs and their search form');
-  assert.ok(page.indexOf('id="editors-picks"')<page.indexOf('id="bounties"'),
-    locale+' featured picks must precede general bounty discovery');
-  const jobSearch=page.match(/<form id="id-job-search"[\s\S]*?<\/form>/)?.[0]||'';
-  assert.ok(jobSearch.includes('name="q"'),locale+' job search remains available');
-  assert.ok(!/name="q"[^>]*\srequired/.test(jobSearch),locale+' keyword must not be required on first visit');
-  assert.ok(!/name="q"[^>]*value="designer"/.test(jobSearch),locale+' initial browse does not depend on a hidden preset keyword');
-
-  assert.ok(page.indexOf('id="id-top-bounty-results"')<page.indexOf('id="id-bounty-form"'),
-   locale+' featured items must precede user search and controls');
-  assert.ok(page.includes('id="id-bounty-directories"'),locale+' verified directory links');
-  assert.ok(page.includes('option value="bounty"'),locale+' unified index type filter');
-  assert.ok(page.includes('/assets/income-bounties.js'),locale+' interactive bounty client');
+  assert.ok(page.includes('id="editors-picks"'),'featured list exists');
+  assert.ok(page.indexOf('id="editors-picks"')<page.indexOf('id="radar"'),'awards render first');
+  assert.ok(page.includes('id="id-top-bounty-results"'),'cash award area present');
+  assert.ok(page.includes('HeyGen')&&page.includes('Higgsfield')&&page.includes('Runway'),'server renders real organiser prizes on first paint');
+  assert.ok(page.includes('id="id-funded-grant-form"'),'official monetary grant search');
+  assert.ok(page.includes('/assets/income-bounties.js'),'money grant browser logic');
+  assert.ok(!page.includes('id="id-bounty-form"'),'old Github bounty widget must be removed');
+  assert.ok(!page.includes('id="id-grant-search"'),'unpriced grant results must not be shown');
+  assert.ok(!page.includes('id="id-bounty-directories"'),'unpriced bounty directories removed');
+  assert.ok(!page.includes('option value="bounty"'),'retired issue bounties excluded from index filter');
+  assert.ok(!page.includes('security_bounties'),'crypto/security rewards excluded');
+  const input=page.match(/<form id="id-job-search"[\s\S]*?<\/form>/)?.[0]||'';
+  assert.ok(!/name="q"[^>]*\srequired/.test(input),'jobs keyword stays optional');
  }
- assert.equal((await get('/assets/income-bounties.js')).status,200);
- const providers=await (await get('/api/income/sources')).json();
- assert.ok(providers.sources.some(s=>s.id==='githubbounties'&&s.readiness==='live'));
- assert.ok(providers.sources.some(s=>s.id==='devpost'&&s.readiness==='directory'));
- assert.ok(providers.sources.some(s=>s.id==='opire'));
- assert.ok(providers.sources.some(s=>s.id==='hackerone'));
+ const sources=(await (await get('/api/income/sources')).json()).sources;
+ assert.ok(sources.some(s=>s.id==='heygen2026'));
+ assert.ok(!sources.some(s=>['githubbounties','opire','algora','immunefi','hackerone','akool2026'].includes(s.id)));
+ for(const old of ['/api/income/bounties','/api/income/bounties/top']){
+  const response=await get(old);assert.equal(response.status,410,'legacy unverified bounties retired');
+  assert.deepEqual((await response.json()).results,[]);
+ }
  const index=await (await get('/api/income/index?type=bounty')).json();
- assert.ok(Array.isArray(index.records));
- const unavailable=await get('/api/income/bounties?q=docs');
- assert.ok([200,503,429].includes(unavailable.status),'external GitHub API errors must be reported, not hidden');
- const reply=await unavailable.json();
- assert.ok(Array.isArray(reply.results));
- if(unavailable.status===200)
-  assert.ok(reply.results.every(x=>x.rewardFunded===false&&x.paymentGuarantee==='none'),'no verified payout claims');
- console.log('✓ dedicated bilingual bounty radar, source rules, unverified payouts and live candidate endpoint');
+ assert.equal(index.count,0,'retired issue source must not appear in unified index');
+ assert.equal((await get('/assets/income-bounties.js')).status,200);
+ console.log('✓ monetised organiser prize picks SSR, only official monetary grants, no crypto or unverified bounty source');
 }
 
 async function opportunityV2RoutesTest(){
@@ -259,7 +259,7 @@ async function internationalRoutesTests() {
  for(const pageUrl of ['/income-desk','/en/income-desk']){
   const page=await html(pageUrl);
   assert.ok(page.includes('id="id-source-region"'),pageUrl+' country filters');
-  assert.ok(page.includes('id="id-grant-search"'),pageUrl+' grants search');
+  assert.ok(page.includes('id="id-funded-grant-form"'),pageUrl+' monetary-only grant search');
   assert.ok(page.includes('id="id-uk-search"'),pageUrl+' UK tender search');
   assert.ok(page.includes('/assets/income-global.js'),pageUrl+' country UI');
  }
