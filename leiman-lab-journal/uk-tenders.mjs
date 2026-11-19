@@ -12,7 +12,7 @@ export function normalizeTender(release){
  if(!release||typeof release!=='object'||!release.tender)return null;
  const t=release.tender;
  if(!Array.isArray(release.tag)||!release.tag.includes('tender'))return null;
- if(!['active','planned'].includes(t.status))return null;
+ if(t.status!=='active')return null;
  const deadline=String(t.tenderPeriod?.endDate||'').slice(0,10);
  if(deadline&&/^\d{4}-\d{2}-\d{2}$/.test(deadline)&&deadline<new Date().toISOString().slice(0,10))return null;
  const notice=String(release.id||'');
@@ -66,7 +66,7 @@ export function createUkTenders({fetcher=globalThis.fetch}={}){
     else return {status:503,body:{provider:'UK Find a Tender',results:[],error:'Official tender feed unavailable; no records have been invented.'}};
    }finally{clearTimeout(timer)}
   }
-  const normalized=(data.releases||[]).map(normalizeTender).filter(Boolean);
+  const normalized=(data.releases||[]).map(normalizeTender).filter(v=>v&&v.value!=null&&v.value>0&&v.currency==='GBP');
   const filtered=normalized.filter(r=>!keyword||[r.title,r.issuer,r.excerpt,...r.sectors].join(' ').toLowerCase().includes(keyword));
   const seen=new Set(),results=[];
   for(const entry of filtered){if(seen.has(entry.id))continue;seen.add(entry.id);results.push(entry);if(results.length>=30)break}
