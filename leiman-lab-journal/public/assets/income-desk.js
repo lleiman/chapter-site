@@ -77,7 +77,7 @@ if(desk){
  });
  drawTracker();
  function renderJob(item){
-  const loc=item.worldwide?tr.global:item.locationRestrictions.join(', ');
+  const loc=item.worldwide?tr.global:(item.locationUnclear?(en?'UNCONFIRMED · VERIFY':'НЕИЗВЕСТНО · ПРОВЕРЬТЕ'):item.locationRestrictions.join(', '));
   const salary=item.salary?.min!=null?
     money(item.salary.min,item.salary.currency)+(item.salary.max?' – '+money(item.salary.max,item.salary.currency):'')+' / '+esc(item.salary.period):
     tr.notPay;
