@@ -39,10 +39,9 @@ export function normalizeOpportunity(raw){
   salaryCurrency:clean(salary?.currency||'',5),
   tenderValue:Number.isFinite(raw.value)?raw.value:null,
   tenderCurrency:clean(raw.currency||'',5),
-  bountyRewardAmount:raw.type==='bounty'&&Number.isFinite(raw.rewardAmount)?raw.rewardAmount:null,
-  bountyRewardCurrency:raw.type==='bounty'?clean(raw.rewardCurrency||'',5):'',
-  bountyRewardEvidence:raw.type==='bounty'?clean(raw.rewardEvidence||'not_disclosed',45):'',
-  bountyPaymentVerified:false,
+  grantFundingCeiling:Number.isFinite(raw.fundingCeiling)?raw.fundingCeiling:null,
+  grantFundingFloor:Number.isFinite(raw.fundingFloor)?raw.fundingFloor:null,
+  grantCashEvidence:raw.cashEvidence==='official_grant_synopsis'?raw.cashEvidence:null,
   attribution:raw.source,
   eligibilityStatus:'needs_review',eligibilityEvidence:'No applicant-specific evidence collected',
   updatedAt:new Date().toISOString()};
@@ -96,6 +95,16 @@ export function compareCapabilities(item,profile={}){
   interpretation:'Keyword evidence only; missing terms do not prove lack of qualifications.'};
 }
 
+// The public opportunity workspace defaults to explicit monetary evidence.
+// Unpriced records can remain in source cache but cannot be recommended here.
+const hasPublishedMoney=v=>{
+ if(v.type==='employment')return Number(v.salaryMin)>0||Number(v.salaryMax)>0;
+ if(v.type==='grant')return v.grantCashEvidence==='official_grant_synopsis' &&
+    (Number(v.grantFundingCeiling)>0||Number(v.grantFundingFloor)>0);
+ if(v.type==='tender')return Number(v.tenderValue)>0;
+ return false;
+};
+
 export function createOpportunityIndex(dataDir){
  const dir=path.join(dataDir,'income-intelligence');
  mkdirSync(dir,{recursive:true,mode:0o700});
@@ -140,6 +149,7 @@ export function createOpportunityIndex(dataDir){
   const profile={applicantType:query.applicantType,residenceCountry:query.residenceCountry,
     registrationCountry:query.registrationCountry,skills:query.skills};
   const matches=Object.values(entries).filter(v=>
+    hasPublishedMoney(v)&&
     (!type||type==='all'||v.type===type)&&
     (!source||source==='all'||v.source===source)&&
     (!countries||(v.type==='employment'
@@ -160,8 +170,10 @@ export function createOpportunityIndex(dataDir){
     disclaimer:'Indexed provider-reported records. Records not re-seen for 14 days are hidden by default; no applicant is considered legally eligible without source review. Not an exhaustive market index.'};
  }
  function stats(){
-  const values=Object.values(entries);
-  return {total:values.length,byType:Object.fromEntries([...TYPES].map(t=>[t,values.filter(v=>v.type===t).length])),
+  const values=Object.values(entries).filter(hasPublishedMoney);
+  return {total:values.length,storedRecords:Object.keys(entries).length,
+   moneyPolicy:'published_positive_amount_required',
+   byType:Object.fromEntries([...TYPES].map(t=>[t,values.filter(v=>v.type===t).length])),
    bySource:Object.fromEntries([...SOURCES].map(t=>[t,values.filter(v=>v.source===t).length]))};
  }
  function assess(id,profile={}){
