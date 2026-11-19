@@ -13,6 +13,8 @@ import path from 'node:path';
 import { createEngagement, EngagementError } from './engagement.mjs';
 import { createCommons, CommonsError } from './commons.mjs';
 import { createOpportunityIntake } from './opportunities.mjs';
+import { createIncomeEngine } from './income-engine.mjs';
+import { createBriefIntake } from './brief-intake.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(ROOT, 'public');
@@ -30,6 +32,8 @@ const ogPngCache = new Map();
 const engagement = createEngagement(DATA_DIR);
 const commons = createCommons(DATA_DIR);
 const intake = createOpportunityIntake(DATA_DIR);
+const briefs = createBriefIntake(DATA_DIR);
+const incomeEngine = createIncomeEngine();
 const plural = (n, [one, few, many]) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many; };
 const fmt = n => n.toLocaleString('ru-RU');
 // Person key for de-duplication and rate limits: first X-Forwarded-For hop (Railway edge) + User-Agent. Only hashes are stored.
@@ -646,6 +650,7 @@ async function adminApi(req, res, pathname) {
   if (!passwordOk(req)) { await new Promise(r => setTimeout(r, 800)); return sendJson(res, 401, { error: 'Неверный пароль' }); }
   if (pathname === '/api/admin/login' && req.method === 'POST') return sendJson(res, 200, { ok: true });
   if (pathname === '/api/admin/opportunities/submissions' && req.method === 'GET') return sendJson(res, 200, { retentionDays: 30, submissions: intake.list() });
+  if (pathname === '/api/admin/income/briefs' && req.method === 'GET') return sendJson(res, 200, { retentionDays: 30, briefs: briefs.list() });
 
   if (pathname === '/api/admin/site') {
     if (req.method === 'POST') {
@@ -725,6 +730,36 @@ async function publicApi(req, res, pathname) {
 
 const server = http.createServer((req,res)=>{
   const apiPath = (req.url || '').split('?')[0];
+  if (apiPath === '/api/income/jobs' && req.method === 'GET') {
+    const url=new URL(req.url,'http://localhost');
+    return incomeEngine.findJobs(Object.fromEntries(url.searchParams),clientKey(req))
+      .then(out=>sendJson(res,out.status,out.body))
+      .catch(()=>sendJson(res,503,{error:'Opportunity provider unavailable',results:[]}));
+  }
+  if (apiPath === '/api/income/plan' || apiPath === '/api/income/briefs' || /^\\/api\\/income\\/briefs\\/[a-f0-9]{32}$/.test(apiPath)) {
+    return (async()=>{
+      if(!['POST','DELETE'].includes(req.method))return sendJson(res,405,{error:'Method not allowed'});
+      if(!String(req.headers['content-type']||'').startsWith('application/json'))return sendJson(res,415,{error:'JSON required'});
+      if(req.headers['sec-fetch-site']==='cross-site')return sendJson(res,403,{error:'Cross-site request blocked'});
+      const reqOrigin=req.headers.origin;
+      if(reqOrigin){
+        let host;try{host=new URL(reqOrigin).host}catch{return sendJson(res,403,{error:'Invalid Origin'})}
+        if(host!==requestHost(req))return sendJson(res,403,{error:'Origin mismatch'});
+      }
+      const body=await readBody(req,18000);
+      if(apiPath==='/api/income/plan'&&req.method==='POST'){
+        const out=incomeEngine.plan(body);return sendJson(res,out.status,out.body);
+      }
+      if(apiPath==='/api/income/briefs'&&req.method==='POST'){
+        const out=briefs.submit(body,clientKey(req));return sendJson(res,out.status,out.body);
+      }
+      if(req.method==='DELETE'&&apiPath.startsWith('/api/income/briefs/')){
+        const deleted=briefs.remove(apiPath.split('/').at(-1),String(body.deletionToken||''));
+        return sendJson(res,deleted?200:403,{ok:deleted,deleted});
+      }
+      return sendJson(res,405,{error:'Method not allowed'});
+    })().catch(e=>{console.error('Income workflow:',e.message);return sendJson(res,500,{error:'Unable to process request'})});
+  }
   if(apiPath === '/api/opportunities/cv' || /^\/api\/opportunities\/cv\/[a-f0-9]{32}$/.test(apiPath)) {
     return (async () => {
       if(!['POST','DELETE'].includes(req.method)) return sendJson(res,405,{error:'Method not allowed'});
