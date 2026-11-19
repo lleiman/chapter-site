@@ -15,6 +15,7 @@ import { createCommons, CommonsError } from './commons.mjs';
 import { createOpportunityIntake } from './opportunities.mjs';
 import { createIncomeEngine } from './income-engine.mjs';
 import { createGrantSearch } from './grant-search.mjs';
+import { createBountySearch } from './bounty-search.mjs';
 import { createUkTenders } from './uk-tenders.mjs';
 import { createOpportunityIndex } from './opportunity-index.mjs';
 import { createEconomicMemory } from './economic-memory.mjs';
@@ -39,6 +40,7 @@ const intake = createOpportunityIntake(DATA_DIR);
 const briefs = createBriefIntake(DATA_DIR);
 const incomeEngine = createIncomeEngine();
 const grantSearch = createGrantSearch();
+const bountySearch = createBountySearch();
 const ukTenders = createUkTenders();
 const opportunityIndex = createOpportunityIndex(DATA_DIR);
 const economicMemory = createEconomicMemory(DATA_DIR);
@@ -56,7 +58,8 @@ async function refreshOpportunityIndex(){
   await Promise.allSettled([
    ...['designer','engineer','research'].map(q=>incomeEngine.findJobs({q},'system-ingest').then(r=>retainSourceResponse(r,'Himalayas'))),
    grantSearch.search({q:'artificial intelligence'},'system-ingest').then(r=>retainSourceResponse(r,'Grants.gov')),
-   ukTenders.search({q:''},'system-ingest').then(r=>retainSourceResponse(r,'UK Find a Tender'))
+   ukTenders.search({q:''},'system-ingest').then(r=>retainSourceResponse(r,'UK Find a Tender')),
+   bountySearch.search({q:''},'system-ingest').then(r=>retainSourceResponse(r,'GitHub Bounty Candidates'))
   ]);
  }catch(err){console.error('Scheduled opportunity ingestion:',err.message)}
 }
@@ -804,6 +807,12 @@ const server = http.createServer((req,res)=>{
       const out=opportunityIndex.assess(id,profile);
       return sendJson(res,out?200:404,out||{error:'Opportunity not indexed'});
     })().catch(()=>sendJson(res,400,{error:'Invalid assessment request'}));
+  }
+  if(apiPath==='/api/income/bounties' && req.method==='GET'){
+    const params=new URL(req.url,'http://localhost');
+    return bountySearch.search(Object.fromEntries(params.searchParams),clientKey(req))
+      .then(out=>{retainSourceResponse(out,'GitHub Bounty Candidates');return sendJson(res,out.status,out.body)})
+      .catch(()=>sendJson(res,503,{provider:'GitHub Bounty Candidates',results:[],error:'Bounty source unavailable'}));
   }
   if (apiPath === '/api/income/sources' && req.method === 'GET') {
     return sendJson(res,200,{...incomeSources,sourceStatus:'editorial_directory',
