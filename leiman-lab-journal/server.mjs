@@ -58,7 +58,7 @@ async function refreshOpportunityIndex(){
  try{
   await Promise.allSettled([
    ...['designer','engineer','research'].map(q=>incomeEngine.findJobs({q},'system-ingest').then(r=>retainSourceResponse(r,'Himalayas'))),
-   grantSearch.search({q:'artificial intelligence'},'system-ingest').then(r=>retainSourceResponse(r,'Grants.gov')),
+   ...['arts','research'].map(q=>fundedGrantRadar.search({q},'system-ingest').then(r=>retainSourceResponse(r,'Grants.gov'))),
    ukTenders.search({q:''},'system-ingest').then(r=>retainSourceResponse(r,'UK Find a Tender'))
   ]);
  }catch(err){console.error('Scheduled opportunity ingestion:',err.message)}
@@ -817,7 +817,7 @@ const server = http.createServer((req,res)=>{
   if(apiPath==='/api/income/prizes/funded-grants' && req.method==='GET'){
     const url=new URL(req.url,'http://localhost');
     return fundedGrantRadar.search(Object.fromEntries(url.searchParams),clientKey(req))
-      .then(result=>sendJson(res,result.status,result.body))
+      .then(result=>{retainSourceResponse(result,'Grants.gov');return sendJson(res,result.status,result.body)})
       .catch(()=>sendJson(res,503,{provider:'Grants.gov',results:[],error:'Official funding amount search unavailable'}));
   }
   if(['/api/income/bounties','/api/income/bounties/top'].includes(apiPath) && req.method==='GET'){
@@ -836,7 +836,7 @@ const server = http.createServer((req,res)=>{
   if (apiPath === '/api/income/grants' && req.method === 'GET') {
     const url=new URL(req.url,'http://localhost');
     return grantSearch.search(Object.fromEntries(url.searchParams),clientKey(req))
-     .then(out=>{retainSourceResponse(out,'Grants.gov');return sendJson(res,out.status,out.body)})
+     .then(out=>sendJson(res,out.status,out.body))
      .catch(()=>sendJson(res,503,{provider:'Grants.gov',results:[],error:'Official grants search unavailable'}));
   }
   if (apiPath === '/api/income/jobs' && req.method === 'GET') {
