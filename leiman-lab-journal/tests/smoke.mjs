@@ -4,6 +4,7 @@ import { organismUiTest } from './organism-ui.mjs';
 import { testIncomeEngine } from './income-engine.mjs';
 import { testInternationalSources } from './international-sources.mjs';
 import { testOpportunityV2 } from './opportunity-v2.mjs';
+import { testBountySearch } from './bounty-search.mjs';
 import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync, readdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -68,6 +69,8 @@ async function main() {
   await testIncomeEngine();
   await testInternationalSources();
   testOpportunityV2();
+  await testBountySearch();
+  await bountyRoutesTest();
   await opportunityV2RoutesTest();
   await internationalRoutesTests();
   await incomeDeskRoutesTest();
@@ -161,6 +164,31 @@ async function incomeOpsRoutesTest(){
  body:JSON.stringify({deletionToken})});
  assert.equal(removed.status,200,'deletion token remains valid after operator updates');
  console.log('✓ private income operations console and consented brief outcome accounting');
+}
+
+async function bountyRoutesTest(){
+ for(const locale of ['/en/income-desk','/income-desk']){
+  const page=await (await get(locale)).text();
+  assert.ok(page.includes('id="id-bounty-form"'),locale+' paid task search');
+  assert.ok(page.includes('id="id-bounty-directories"'),locale+' verified directory links');
+  assert.ok(page.includes('option value="bounty"'),locale+' unified index type filter');
+  assert.ok(page.includes('/assets/income-bounties.js'),locale+' interactive bounty client');
+ }
+ assert.equal((await get('/assets/income-bounties.js')).status,200);
+ const providers=await (await get('/api/income/sources')).json();
+ assert.ok(providers.sources.some(s=>s.id==='githubbounties'&&s.readiness==='live'));
+ assert.ok(providers.sources.some(s=>s.id==='devpost'&&s.readiness==='directory'));
+ assert.ok(providers.sources.some(s=>s.id==='opire'));
+ assert.ok(providers.sources.some(s=>s.id==='hackerone'));
+ const index=await (await get('/api/income/index?type=bounty')).json();
+ assert.ok(Array.isArray(index.records));
+ const unavailable=await get('/api/income/bounties?q=docs');
+ assert.ok([200,503,429].includes(unavailable.status),'external GitHub API errors must be reported, not hidden');
+ const reply=await unavailable.json();
+ assert.ok(Array.isArray(reply.results));
+ if(unavailable.status===200)
+  assert.ok(reply.results.every(x=>x.rewardFunded===false&&x.paymentGuarantee==='none'),'no verified payout claims');
+ console.log('✓ dedicated bilingual bounty radar, source rules, unverified payouts and live candidate endpoint');
 }
 
 async function opportunityV2RoutesTest(){
