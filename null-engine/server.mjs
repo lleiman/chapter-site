@@ -1,5 +1,6 @@
 import http from 'node:http';
-import {readFileSync} from 'node:fs';
+import {readFileSync,writeFileSync,mkdirSync,renameSync,existsSync} from 'node:fs';
+import {randomBytes,createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import pathModule from 'node:path';
 const PORT=Number(process.env.PORT||3000);
@@ -70,15 +71,71 @@ function page(){
 const json=(res,obj)=>{res.writeHead(200,{'Content-Type':'application/json; charset=utf-8','Access-Control-Allow-Origin':'*'});res.end(JSON.stringify(obj,null,2))};
 
 const HERE=pathModule.dirname(fileURLToPath(import.meta.url));
-function episodePage(){
-const main=Array.from({length:12},(_,i)=>{const n=String(i+1).padStart(2,'0');return '<figure class="frame"><img src="/panels/NULL_'+n+'.jpg" loading="'+(i<2?'eager':'lazy')+'" alt="NULL, эпизод 001, кадр '+n+'"></figure>'}).join('');
-const alt=Array.from({length:6},(_,i)=>{const n=String(i+13).padStart(2,'0');return '<figure class="frame"><img src="/panels/NULL_'+n+'.jpg" loading="lazy" alt="NULL, альтернативный монтаж, кадр '+n+'"></figure>'}).join('');
-return '<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#080b0d"><meta name="description" content="NULL, Нулевая запись. Веб-комикс Leiman Lab, первый эпизод и альтернативный монтаж."><title>NULL / 001 — Нулевая запись</title><style>*{box-sizing:border-box}html{scroll-behavior:smooth}body{background:#090c0e;color:#ecf0ed;margin:0;font:16px/1.5 Inter,Arial,sans-serif}a{color:inherit;text-decoration:none}nav{height:60px;border-bottom:1px solid #273338;display:flex;justify-content:space-between;align-items:center;padding:0 max(18px,calc((100% - 1100px)/2))}nav strong{letter-spacing:.27em}nav span{font:11px monospace;color:#a6bcb5}.wrap{max-width:1040px;margin:auto;padding:0 12px}.intro{padding:45px 6px 28px}.eyebrow{color:#9bbdb8;letter-spacing:.23em;font:12px monospace}.intro h1{font-size:clamp(74px,17vw,180px);letter-spacing:-.105em;line-height:.9;margin:20px 0}.lead{font-size:clamp(18px,2.6vw,25px);max-width:690px}.note{font-size:13px;color:#90a7a2;max-width:800px;padding-bottom:20px}.frame{display:flex;justify-content:center;margin:0 0 12px;overflow:hidden}.frame img{display:block;max-width:100%;width:auto;height:auto;object-fit:contain;image-rendering:auto}.strip{max-width:1040px;margin:0 auto}.divider{margin:90px auto 30px;max-width:850px;border-top:1px solid #4f6262;padding:24px 18px}.divider h2{font-size:clamp(28px,5vw,52px);letter-spacing:-.04em;margin:0 0 9px}.divider p{color:#91a7a2}.footer{margin:80px auto;padding:30px 20px 80px;text-align:center;font:12px monospace;color:#829c9c}.toplink{display:inline-block;border:1px solid #5a7875;padding:10px 15px}.badge{display:inline-block;border:1px solid #526764;padding:4px 8px;font:11px monospace;margin-right:9px;color:#b0c4c0}@media(max-width:650px){.frame{margin-bottom:7px}.intro{padding-top:29px}nav{padding:0 14px}}</style></head><body><nav><a href="/"><strong>NULL / ENGINE</strong></a><span>LEIMAN LAB · WEB COMIC</span></nav><main class="wrap"><header class="intro"><div class="eyebrow">SEASON 01 / PILOT / 2029</div><h1>NULL.</h1><p class="lead">Эпизод 001. Нулевая запись.</p><p class="note"><span class="badge">12 КАДРОВ</span>Основная последовательность первой иллюстрированной версии. Кадры показаны целиком без искусственной подгонки под единый размер.</p></header><section id="main" class="strip">'+main+'</section><div class="divider" id="alternative"><h2>Альтернативный монтаж</h2><p>Ещё 6 кадров из второй генерации. Это другая интерпретация начала той же истории, а не сюжетное продолжение. Сохранены отдельно, чтобы не дублировать события в основной главе.</p></div><section class="strip">'+alt+'</section><footer class="footer"><a class="toplink" href="#main">↑ НАЧАЛО</a><p>NULL / EPISODE 001 · 18 ORIGINAL PANELS · LEIMAN LAB</p></footer></main></body></html>';
+
+const VOTE_PATH='/data/null-votes-001.json';
+const DEFAULT_VERSION='alternative';
+const VOTE_OPTIONS={alternative:'Версия B · Манга',original:'Версия A · Кинематографический комикс'};
+let voteStore={voters:{},total:0,counts:{alternative:0,original:0},updated:null};
+try{
+ if(existsSync(VOTE_PATH)){const loaded=JSON.parse(readFileSync(VOTE_PATH,'utf8'));if(loaded&&typeof loaded.voters==='object'){voteStore=loaded;}}
+}catch(error){console.error('NULL vote load',error.message)}
+function voteCounts(){const c={alternative:0,original:0};for(const v of Object.values(voteStore.voters||{})){if(v in c)c[v]++}return c}
+function voteState(token){
+ const counts=voteCounts(),total=counts.alternative+counts.original;
+ const winner=counts.alternative>=counts.original?'alternative':'original';
+ const voterKey=token?createHash('sha256').update(token).digest('hex'):null;
+ return {poll:'episode-001-version',options:VOTE_OPTIONS,counts,total,winner,
+  tie:counts.alternative===counts.original,defaultOnTie:DEFAULT_VERSION,
+  myVote:voterKey?(voteStore.voters[voterKey]||null):null,updated:voteStore.updated||null};
+}
+function saveVotes(){mkdirSync('/data',{recursive:true});const temp=VOTE_PATH+'.tmp';writeFileSync(temp,JSON.stringify(voteStore),'utf8');renameSync(temp,VOTE_PATH)}
+function readCookie(req){const m=(req.headers.cookie||'').match(/(?:^|;\s*)null_voter=([a-f0-9]{48})(?:;|$)/);return m?m[1]:null}
+const rateLimit=new Map();
+async function acceptVote(req,res){
+ let input='';for await(const part of req){input+=part;if(input.length>2048){res.writeHead(413);return res.end('too large')}}
+ let value;try{value=JSON.parse(input).version}catch{res.writeHead(400);return res.end('invalid JSON')}
+ if(!(value in VOTE_OPTIONS)){res.writeHead(400);return res.end('invalid version')}
+ const host=req.headers.host||'',origin=req.headers.origin||'';
+ if(origin&&new URL(origin).host!==host){res.writeHead(403);return res.end('cross origin blocked')}
+ const ip=String(req.headers['x-forwarded-for']||req.socket.remoteAddress||'unknown').split(',')[0].trim();
+ const key=createHash('sha256').update(ip).digest('hex');
+ const now=Date.now();const recent=rateLimit.get(key)||[];
+ const fresh=recent.filter(t=>now-t<60000);
+ if(fresh.length>=12){res.writeHead(429,{'Retry-After':'60'});return res.end('rate limited')}
+ fresh.push(now);rateLimit.set(key,fresh);
+ if(rateLimit.size>10000)rateLimit.clear();
+ let token=readCookie(req);const newToken=!token;if(!token)token=randomBytes(24).toString('hex');
+ const voterKey=createHash('sha256').update(token).digest('hex');
+ voteStore.voters[voterKey]=value;voteStore.updated=new Date().toISOString();
+ try{saveVotes()}catch(e){console.error('NULL vote save',e.message);res.writeHead(503);return res.end('vote storage unavailable')}
+ res.writeHead(200,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',
+  ...(newToken?{'Set-Cookie':'null_voter='+token+'; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=31536000'}:{})});
+ res.end(JSON.stringify(voteState(token)));
+}
+function episodePage(token){
+ const poll=voteState(token);
+ const cards=(first,count)=>Array.from({length:count},(_,i)=>{const n=String(i+first).padStart(2,'0');return '<figure class="frame"><img src="/panels/NULL_'+n+'.jpg" loading="'+(i<2?'eager':'lazy')+'" alt="NULL, эпизод 001, кадр '+n+'"></figure>'}).join('');
+ const main=poll.winner==='alternative'?cards(13,6):cards(1,12);
+ const other=poll.winner==='alternative'?cards(1,12):cards(13,6);
+ const lead=poll.winner==='alternative'?'Версия B · Манга (6 кадров)':'Версия A · Кинематографический комикс (12 кадров)';
+ const alt=poll.winner==='alternative'?'Версия A · Кинематографический комикс':'Версия B · Манга';
+ const percentage=v=>poll.total?Math.round(poll.counts[v]/poll.total*100):0;
+ const votes=(Object.keys(VOTE_OPTIONS)).map(v=>'<button class="vote-button'+(poll.myVote===v?' chosen':'')+'" data-vote="'+v+'"><span>'+VOTE_OPTIONS[v]+'</span><strong>'+percentage(v)+'% · '+poll.counts[v]+'</strong><i style="width:'+percentage(v)+'%"></i></button>').join('');
+ return `<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080b0d"><title>NULL / 001 — Нулевая запись · Голосование</title>
+ <style>*{box-sizing:border-box}html{scroll-behavior:smooth}body{background:#090c0e;color:#ecf0ed;margin:0;font:16px/1.5 Arial,sans-serif}a{color:inherit;text-decoration:none}nav{min-height:60px;border-bottom:1px solid #273338;display:flex;justify-content:space-between;align-items:center;padding:10px max(18px,calc((100% - 1100px)/2));gap:10px}nav strong{letter-spacing:.22em}nav span{font:11px monospace;color:#a6bcb5}.wrap{max-width:1040px;margin:auto;padding:0 12px}.intro{padding:45px 6px 28px}.eyebrow{color:#9bbdb8;letter-spacing:.23em;font:12px monospace}.intro h1{font-size:clamp(74px,17vw,180px);letter-spacing:-.105em;line-height:.9;margin:20px 0}.lead{font-size:clamp(18px,2.6vw,25px);max-width:690px}.note{font-size:13px;color:#90a7a2;max-width:800px;padding-bottom:20px}.frame{display:flex;justify-content:center;margin:0 0 12px;overflow:hidden}.frame img{display:block;max-width:100%;width:auto;height:auto;object-fit:contain}.strip{max-width:1040px;margin:0 auto}.divider{margin:75px auto 30px;max-width:850px;border-top:1px solid #4f6262;padding:24px 18px}.divider h2{font-size:clamp(28px,5vw,52px);letter-spacing:-.04em;margin:0 0 9px}.divider p{color:#91a7a2}.footer{margin:80px auto;padding:30px 20px 80px;text-align:center;font:12px monospace;color:#829c9c}.toplink{display:inline-block;border:1px solid #5a7875;padding:10px 15px}.badge{display:inline-block;border:1px solid #526764;padding:4px 8px;font:11px monospace;margin-right:9px;color:#b0c4c0}.poll{max-width:850px;margin:0 auto 35px;padding:25px;background:#131a1c;border:1px solid #3c5352}.poll h2{font-size:clamp(23px,3.7vw,36px);margin:0 0 6px}.poll .sub{color:#acbebb;font-size:14px}.vote-button{position:relative;overflow:hidden;width:100%;text-align:left;margin:10px 0;padding:17px 18px;background:#1b2929;border:1px solid #58706e;color:#edf3ee;display:flex;justify-content:space-between;gap:12px;cursor:pointer;font-size:15px}.vote-button span,.vote-button strong{position:relative;z-index:2}.vote-button i{position:absolute;left:0;top:0;bottom:0;background:#23584d;opacity:.75;transition:width .25s}.vote-button.chosen{border:2px solid #c4f7e1}.vote-button:focus-visible{outline:3px solid #dcf}.poll-status{font:13px monospace;color:#96afa9}.display-state{font:13px monospace;color:#b3e0c9}.smallprint{font-size:12px;color:#899f9a}@media(max-width:650px){.frame{margin-bottom:7px}.intro{padding-top:29px}nav{padding:0 14px}.vote-button{flex-direction:column}}</style>
+ </head><body><nav><a href="/"><strong>NULL / ENGINE</strong></a><span>LEIMAN LAB · READER-DRIVEN FICTION</span></nav><main class="wrap"><header class="intro"><div class="eyebrow">SEASON 01 / PILOT / 2029</div><h1>NULL.</h1><p class="lead">Эпизод 001. Нулевая запись.</p><p class="note"><span class="badge">ЧИТАТЕЛЬСКИЙ МОНТАЖ</span>Читатели выбирают визуальную версию главы. Победившая версия автоматически становится основной для всех посетителей.</p></header>
+ <section class="poll" id="poll"><h2>Какую версию оставить каноном?</h2><p class="sub">Голос определяет порядок отображения первой главы. Изменить голос можно в любой момент, до закрытия голосования. При равенстве выбирается версия B.</p><div id="vote-options">${votes}</div><p class="poll-status" id="poll-status">Всего голосов: ${poll.total}. ${poll.myVote?'Ваш выбор учтён.':'Вы ещё не голосовали.'}</p><p class="display-state">СЕЙЧАС ПОКАЗЫВАЕТСЯ: ${lead}</p><p class="smallprint">Учёт голосов привязан к браузеру. Это экспериментальное голосование без авторизации: защита от накрутки ограниченная. Два монтажа являются альтернативами одной истории.</p></section>
+ <div class="divider" style="margin-top:22px" id="main"><h2>Основной монтаж</h2><p>${lead}. Определяется текущим результатом голосования.</p></div><section class="strip">${main}</section>
+ <div class="divider" id="alternative"><h2>Другой монтаж</h2><p>${alt}. Сохраняется доступным для сравнения; это не сюжетное продолжение.</p></div><section class="strip">${other}</section><footer class="footer"><a class="toplink" href="#poll">↑ ГОЛОСОВАТЬ</a><p>NULL · EPISODE 001 · 18 PANELS · LEIMAN LAB</p></footer></main>
+ <script>document.querySelectorAll('[data-vote]').forEach(button=>button.addEventListener('click',async()=>{const status=document.getElementById('poll-status');status.textContent='Сохраняю ваш выбор…';document.querySelectorAll('[data-vote]').forEach(b=>b.disabled=true);try{const response=await fetch('/api/vote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({version:button.dataset.vote})});if(!response.ok)throw Error('HTTP '+response.status);const result=await response.json();status.textContent='Голос учтён. Обновляю основной монтаж…';location.reload()}catch(e){status.textContent='Не удалось сохранить голос: '+e.message;document.querySelectorAll('[data-vote]').forEach(b=>b.disabled=false)}}));</script>
+ </body></html>`;
 }
 
 http.createServer(async(req,res)=>{
  const path=new URL(req.url,'http://localhost').pathname;
- if(path==='/episode/1'||path==='/episode/001'){res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'public, max-age=60'});return res.end(episodePage())}
+ if(path==='/episode/1'||path==='/episode/001'){res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'private, no-store'});return res.end(episodePage(readCookie(req)))}
+ if(path==='/api/vote'&&req.method==='GET')return json(res,voteState(readCookie(req)));
+ if(path==='/api/vote'&&req.method==='POST')return acceptVote(req,res);
  if(/^\/panels\/NULL_\d{2}\.jpg$/.test(path)){try{const body=readFileSync(pathModule.join(HERE,'public',path));res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'public,max-age=86400','Content-Length':body.length});return res.end(body)}catch(e){res.writeHead(404);return res.end('Missing panel')}}
  if(path==='/health')return json(res,{ok:true,version:'0.1',feedUpdated:snapshot.time});
  if(path==='/api/world')return json(res,story);
