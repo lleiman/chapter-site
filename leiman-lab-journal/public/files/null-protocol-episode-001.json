@@ -1,0 +1,193 @@
+{
+  "series": "NULL / Протокол отсутствия",
+  "genre": "near-future procedural techno-noir",
+  "timeline": "2026–2032 (fiction starts 2029)",
+  "city": "Seiko Bay, fictional port jurisdiction within Tokyo Bay",
+  "rules": [
+    "A digital signature establishes that an authorized delegate acted, not necessarily that the human consented to this particular action.",
+    "No mind uploading, magic AGI or supernatural explanation.",
+    "Each technological consequence requires a documented real-world precursor and an explicit speculative link.",
+    "No literal visual or narrative borrowing from Ghost in the Shell; mood influence only.",
+    "Human characters retain memory and consequences of their actions across installments."
+  ],
+  "characters": [
+    {
+      "name": "Курода Рэй",
+      "age": 38,
+      "occupation": "архивный следователь",
+      "look": "very short black hair, sharp cheekbones, narrow charcoal coat, severe eyes",
+      "conflict": "trusts records while suspecting record legitimacy"
+    },
+    {
+      "name": "Мидзуно Аки",
+      "age": 31,
+      "occupation": "инженер происхождения цифровых действий",
+      "look": "asymmetric blunt bob, silver cuff, tired observant gaze, minimal clothing",
+      "conflict": "cannot revoke delegated authority"
+    },
+    {
+      "name": "Савада Ицуки",
+      "age": 49,
+      "occupation": "бывший архитектор муниципальных алгоритмов",
+      "look": "grey hair at temples, wire glasses, workwear",
+      "conflict": "buried test protocol, unrevealed in episode 1"
+    }
+  ],
+  "episode": {
+    "number": 1,
+    "title": "Нулевая запись",
+    "date": "2029-03-14",
+    "panels": [
+      {
+        "n": 1,
+        "shot": "WIDE / dawn aerial",
+        "visual": "Industrial Seiko Bay, 2029, container cranes, wet concrete, harbour district in blackout; rain at early morning.",
+        "caption": "СЭЙКО, ТОКИЙСКИЙ ЗАЛИВ. 14 МАРТА 2029. 04:18.",
+        "dialogue": [],
+        "sound": "ЩЁЛК",
+        "plot": "Электричество исчезает на 47 секунд."
+      },
+      {
+        "n": 2,
+        "shot": "MACRO / analog printout",
+        "visual": "Paper strip exits obsolete emergency dot matrix printer; ink reads DEATH RECORD: MIZUNO AKI / VERIFIED 04:18:07.",
+        "caption": "ОБЪЕКТ: МИДЗУНО АКИ. СОСТОЯНИЕ: СМЕРТЬ.",
+        "dialogue": [
+          {
+            "speaker": "Диспетчер",
+            "text": "Выглядит как ошибка импорта."
+          },
+          {
+            "speaker": "Курода",
+            "text": "Почему она заверена?"
+          }
+        ],
+        "plot": "Цифровое свидетельство с действительной подписью."
+      },
+      {
+        "n": 3,
+        "shot": "MEDIUM / woman apartment",
+        "visual": "Mizuno Aki, short uneven black bob, silver ear cuff, exhausted eyes, oversized charcoal shirt; standing barefoot beside window, morning sea light and dead screen.",
+        "caption": "04:21 / ЖИЛОЙ БЛОК 17",
+        "dialogue": [
+          {
+            "speaker": "Система",
+            "text": "Ваша гражданская непрерывность прекращена."
+          },
+          {
+            "speaker": "Аки",
+            "text": "Я здесь."
+          }
+        ],
+        "plot": "Живой человек объявлен отсутствующим."
+      },
+      {
+        "n": 4,
+        "shot": "SPLIT / surveillance paradox",
+        "visual": "Analog CCTV video archive frames show empty corridor with one perfect human shadow and access log entry MIZUNO AKI; small inset close-up of investigator Kuroda Rei, 38, severe cropped dark hair, angular jacket.",
+        "caption": "ПРОХОД РАЗРЕШЁН. ЧЕЛОВЕК НЕ ОБНАРУЖЕН.",
+        "dialogue": [
+          {
+            "speaker": "Диспетчер",
+            "text": "Подпись её. Камера никого не видит."
+          },
+          {
+            "speaker": "Курода",
+            "text": "Тогда что вошло?"
+          }
+        ],
+        "plot": "Физического присутствия нет."
+      },
+      {
+        "n": 5,
+        "shot": "CLOSE / hands & old map",
+        "visual": "Kuroda studies handwritten disaster map marked 1923 and a municipal route 9-1-1; torn 20th century paper under transparent holo print, fingernails ink stained.",
+        "caption": "АРХИВ 1923 / МАРШРУТ 9-1-1",
+        "dialogue": [
+          {
+            "speaker": "Курода",
+            "text": "Этот маршрут закрыли сто лет назад."
+          }
+        ],
+        "plot": "Исторический шифр связывает преступление с архивом."
+      },
+      {
+        "n": 6,
+        "shot": "WIDE / quay subterranean",
+        "visual": "Flooded subterranean harbor infrastructure, anonymous female silhouette behind distorted metal mesh, reflections show a face but body hidden; red thin status light.",
+        "caption": "ПОДПОРТОВЫЙ УЗЕЛ / ДОСТУП ОТКРЫТ",
+        "dialogue": [
+          {
+            "speaker": "Терминал",
+            "text": "Делегирование принято."
+          }
+        ],
+        "plot": "Кто-то принимает право действия чужим именем."
+      },
+      {
+        "n": 7,
+        "shot": "MEDIUM / Kuroda train",
+        "visual": "Kuroda on nearly empty elevated railway car, severe rain trails on glass, city reflected over her face, phone encrypted signal glow.",
+        "caption": "ИСТОЧНИК: НЕ ОПРЕДЕЛЁН",
+        "dialogue": [
+          {
+            "speaker": "Неизвестный",
+            "text": "Не ищите того, кто вошёл."
+          },
+          {
+            "speaker": "Неизвестный",
+            "text": "Найдите того, кто дал разрешение."
+          }
+        ],
+        "plot": "Мотив меняется: расследуется согласие."
+      },
+      {
+        "n": 8,
+        "shot": "FULL BLEED / cliffhanger",
+        "visual": "Panoramic waterfront skyline as every public screen and cargo-crane display illuminates simultaneously at end of blackout, tiny human observer foreground, glass and seawater.",
+        "caption": "СОГЛАСИЕ НЕ ТРЕБУЕТ ПРИСУТСТВИЯ.",
+        "dialogue": [],
+        "plot": "Финал. Открытая угроза городу."
+      }
+    ]
+  },
+  "realWorldSignals": [
+    {
+      "date": "2026-11-16",
+      "headline": "US rule curbing remote use of advanced AI compute",
+      "url": "https://www.reuters.com/legal/litigation/us-issues-rule-protect-advanced-ai-chips-being-accessed-remotely-2026-11-16/",
+      "storyUse": "geolocated legal provenance of inference"
+    },
+    {
+      "date": "2026-11-06",
+      "headline": "Japan cybersecurity emergency package",
+      "url": "https://apnews.com/article/8ba038fde849e7ea9c49126ecd770972",
+      "storyUse": "specialized cyber-investigation unit"
+    },
+    {
+      "date": "2026-11-17",
+      "headline": "US Senate letter on AI-enabled cyber threats",
+      "url": "https://www.commerce.senate.gov/wp-content/uploads/2026/11/AI-and-cybersecurity-letter-to-SIF.pdf",
+      "storyUse": "financial-sector trust in agent transactions"
+    }
+  ],
+  "continuity": {
+    "unresolved": [
+      "who issued delegated authority for Aki?",
+      "meaning of 1923/9-1-1",
+      "who sent anonymous message?",
+      "why synchronized screens?"
+    ]
+  },
+  "production": {
+    "state": "editorial+script+cover published; illustrated pages not yet committed",
+    "autopublish": false,
+    "requiredReview": [
+      "source verification",
+      "continuity",
+      "visual consistency",
+      "text legibility",
+      "defamation/false attribution"
+    ]
+  }
+}
