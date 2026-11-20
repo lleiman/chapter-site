@@ -2,7 +2,6 @@ import http from 'node:http';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import pathModule from 'node:path';
-import {readFileSync} from 'node:fs';
 const PORT=Number(process.env.PORT||3000);
 const sources=[
  {name:'arXiv / AI',url:'https://rss.arxiv.org/rss/cs.AI',kind:'research'},
@@ -80,7 +79,7 @@ return '<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="v
 http.createServer(async(req,res)=>{
  const path=new URL(req.url,'http://localhost').pathname;
  if(path==='/episode/1'||path==='/episode/001'){res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'public, max-age=60'});return res.end(episodePage())}
- if(/^\/panels\/NULL_\\d{2}\\.jpg$/.test(path)){try{const body=readFileSync(pathModule.join(HERE,'public',path));res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'public,max-age=86400','Content-Length':body.length});return res.end(body)}catch(e){res.writeHead(404);return res.end('Missing panel')}}
+ if(/^\/panels\/NULL_\d{2}\.jpg$/.test(path)){try{const body=readFileSync(pathModule.join(HERE,'public',path));res.writeHead(200,{'Content-Type':'image/jpeg','Cache-Control':'public,max-age=86400','Content-Length':body.length});return res.end(body)}catch(e){res.writeHead(404);return res.end('Missing panel')}}
  if(path==='/health')return json(res,{ok:true,version:'0.1',feedUpdated:snapshot.time});
  if(path==='/api/world')return json(res,story);
  if(path==='/api/news')return json(res,snapshot);
