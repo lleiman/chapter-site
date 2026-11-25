@@ -1057,7 +1057,7 @@ const server = http.createServer((req,res)=>{
     const content=readFileSync(path.join(PUBLIC,'assets','predictions.html'),'utf8');
     const originUrl=origin+'/predictions';
     return write(res,200,page({content,title:'Что в жизни можно предсказать — Prediction OS · Leiman Lab',
-      description:'Исследование Льва Леймана: миллион биографий, 88 гипотез о жизни, смерти и успехе. Пройдите предсказатель и посмотрите, что подтвердилось на новых людях.',
+      description:'Исследование Льва Леймана: почти 12 миллионов биографий, 88 гипотез о жизни, смерти и успехе. Пройдите предсказатель и посмотрите, что подтвердилось на новых людях.',
       canonical:originUrl,cover:origin+'/assets/predictions-1200x630.png',extraStylesheet:'/assets/predictions.css',bodyData:' data-page="predictions"',
       schema:{'@context':'https://schema.org','@graph':[
         {'@type':'WebPage',name:'Prediction OS',url:originUrl,dateModified:'2026-11-25',inLanguage:'ru-RU'},
