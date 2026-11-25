@@ -937,7 +937,7 @@ const server = http.createServer((req,res)=>{
       {path:'/about'},
       {path:'/ai-index',lastmod:articleBySlug.get('ai-index-2026')?.updated||'2026-11-04'},
       {path:'/ai-film-awards',lastmod:'2026-11-10'},
-      {path:'/predictions',lastmod:'2026-11-18'},
+      {path:'/predictions',lastmod:'2026-11-25'},
       {path:'/income-desk',lastmod:'2026-11-19',alts:[{lang:'ru',path:'/income-desk'},{lang:'en',path:'/en/income-desk'}]},
       {path:'/en/income-desk',lastmod:'2026-11-19',alts:[{lang:'ru',path:'/income-desk'},{lang:'en',path:'/en/income-desk'}]},
       {path:'/organism',lastmod:'2026-11-18',alts:[{lang:'ru',path:'/organism'},{lang:'en',path:'/en/organism'}]},
@@ -1057,10 +1057,10 @@ const server = http.createServer((req,res)=>{
     const content=readFileSync(path.join(PUBLIC,'assets','predictions.html'),'utf8');
     const originUrl=origin+'/predictions';
     return write(res,200,page({content,title:'Что в жизни можно предсказать — Prediction OS · Leiman Lab',
-      description:'Исследование Льва Леймана: 900 тысяч биографий, 88 гипотез о жизни, смерти и успехе. Пройдите предсказатель и посмотрите, что подтвердилось на новых людях.',
+      description:'Исследование Льва Леймана: миллион биографий, 88 гипотез о жизни, смерти и успехе. Пройдите предсказатель и посмотрите, что подтвердилось на новых людях.',
       canonical:originUrl,cover:origin+'/assets/predictions-1200x630.png',extraStylesheet:'/assets/predictions.css',bodyData:' data-page="predictions"',
       schema:{'@context':'https://schema.org','@graph':[
-        {'@type':'WebPage',name:'Prediction OS',url:originUrl,dateModified:'2026-11-18',inLanguage:'ru-RU'},
+        {'@type':'WebPage',name:'Prediction OS',url:originUrl,dateModified:'2026-11-25',inLanguage:'ru-RU'},
         {'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Журнал',item:origin+'/'},{'@type':'ListItem',position:2,name:'Prediction OS',item:originUrl}]}
       ]}}));
   }
