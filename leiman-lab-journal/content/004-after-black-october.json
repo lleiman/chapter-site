@@ -242,6 +242,16 @@
     {
       "type": "p",
       "text": "Leiman Lab · Редакционная версия 30 октября 2026 года. Исследования, источники и рекомендации имеют указанные в тексте ограничения. Первоначальный материал «Чёрный октябрь» сохранён отдельно в тёмной редакции."
+    },
+    {
+      "type": "p",
+      "text": "Продолжение исследования Leiman Lab: экономика кибератак и временной разрыв защиты.",
+      "links": [
+        {
+          "label": "Временной разрыв безопасности",
+          "url": "/articles/security-gap-ai-2026"
+        }
+      ]
     }
   ],
   "sources": [
@@ -527,6 +537,16 @@
         {
           "type": "p",
           "text": "Leiman Lab · Editorial version, 30 October 2026. Research, sources and practical guidance have the limits stated throughout. The original Black October investigation remains available as a separate publication."
+        },
+        {
+          "type": "p",
+          "text": "Continue the Leiman Lab investigation into the economics of cyberattacks and the security time gap.",
+          "links": [
+            {
+              "label": "The Security Time Gap",
+              "url": "/en/articles/security-gap-ai-2026"
+            }
+          ]
         }
       ],
       "sources": [
@@ -574,5 +594,6 @@
       "sourceNote": "Historical editorial snapshot: 30 October 2026. This article distinguishes company statements from independently verified findings and does not suggest that the separate incidents were a single coordinated AI attack.",
       "translationPublished": "2026-11-18"
     }
-  }
+  },
+  "story": "Security Intelligence"
 }

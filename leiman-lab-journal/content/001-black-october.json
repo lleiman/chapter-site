@@ -127,6 +127,16 @@
     {
       "type": "p",
       "text": "Запрет в промпте не отнимает у программы разрешения. Если агенту доступны рабочие ключи и терминал, одной инструкции об осторожности мало. Поэтому нужны минимальные права, изоляция, журнал действий и подтверждение опасных операций человеком."
+    },
+    {
+      "type": "p",
+      "text": "Продолжение исследования Leiman Lab: экономика кибератак и временной разрыв защиты.",
+      "links": [
+        {
+          "label": "Временной разрыв безопасности",
+          "url": "/articles/security-gap-ai-2026"
+        }
+      ]
     }
   ],
   "sourcesLabel": "Первичные источники / 21–22 Oct 2026",
@@ -282,6 +292,16 @@
         {
           "type": "p",
           "text": "A prohibition written in a prompt does not revoke a program's permissions. If an agent can access live credentials and a shell, instructions to be careful cannot provide a meaningful security boundary. Least-privilege access, isolation, audit logs and human approval for dangerous operations are necessary."
+        },
+        {
+          "type": "p",
+          "text": "Continue the Leiman Lab investigation into the economics of cyberattacks and the security time gap.",
+          "links": [
+            {
+              "label": "The Security Time Gap",
+              "url": "/en/articles/security-gap-ai-2026"
+            }
+          ]
         }
       ],
       "sourcesLabel": "SOURCES",
@@ -312,5 +332,6 @@
       ],
       "translationPublished": "2026-11-18"
     }
-  }
+  },
+  "story": "Security Intelligence"
 }

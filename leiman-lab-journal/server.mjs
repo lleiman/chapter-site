@@ -431,7 +431,7 @@ function paperResearchView(a, origin) {
     ['#incident-response','После взлома'], ['#sources','Источники']
   ];
   const navigation = sections.map(pair=>'<a href="'+pair[0]+'">'+escaped(pair[1])+'</a>').join('');
-  const footerLink = '<div class="report-related">Эта статья продолжает <a href="/articles/black-october">«Чёрный октябрь»</a>. Оригинальная публикация остаётся в прежнем тёмном оформлении.</div>';
+  const footerLink = '<div class="report-related">Эта статья продолжает <a href="/articles/black-october">«Чёрный октябрь»</a>. Оригинальная публикация остаётся в прежнем тёмном оформлении. Продолжение исследования: <a href="/articles/security-gap-ai-2026">«Временной разрыв безопасности»</a>.</div>';
   const content = '<main>'+draftBanner+
     '<div class="report-paper"><aside class="report-index" aria-label="Навигация по исследованию">'+
     '<div class="report-index-inner"><div class="report-brand">LEIMAN LAB<span style="color:#c72b34">.</span></div>'+
@@ -464,7 +464,7 @@ function paperResearchView(a, origin) {
     '<script type="module" src="'+asset('/assets/engage.js')+'"></script>'+
     '<script>document.getElementById("copy-link")?.addEventListener("click",async e=>{try{await navigator.clipboard.writeText(e.currentTarget.dataset.url);e.currentTarget.textContent="ССЫЛКА СКОПИРОВАНА ✓"}catch{e.currentTarget.textContent="КОПИРОВАНИЕ НЕДОСТУПНО"}})</script>'+
     footerLink+'</div></div></main>';
-  return page({content,title:a.title+' — Leiman Lab',description:a.description||a.summary,
+  return page({content,alternates:hasEnglish(a)?[{lang:"ru",href:pageUrl},{lang:"en",href:origin+"/en/articles/"+a.slug}]:[],title:a.title+' — Leiman Lab',description:a.description||a.summary,
     canonical:pageUrl,cover:origin+socialCover(a),
     type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,
     extraStylesheet:'/assets/paper-report.css',
@@ -519,7 +519,7 @@ function articleView(a, origin, lang = 'ru') {
   if (english) body = translateArticleChrome(body);
   const description = a.description || a.summary;
   const alternates = hasEnglish(a) ? [{lang:'ru',href:origin+'/articles/'+a.slug},{lang:'en',href:origin+'/en/articles/'+a.slug}] : [];
-  return page({lang,alternates,content:body,title:`${a.seoTitle || a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${socialCover(a)}`,type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,extraStylesheet:['period-poluraspada-novogo','ai-film-competitions-2026'].includes(a.slug)?'/assets/period-poluraspada-light.css':['ai-index-2026','attention-economy-ai-2026'].includes(a.slug)?'/assets/ai-index-article.css':'',bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@graph':[makeSocialSchema(a,origin,lang),{'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:english?'Journal':'Журнал',item:origin+(english?'/en/':'/')},{'@type':'ListItem',position:2,name:a.title,item:pageUrl}]}]}});
+  return page({lang,alternates,content:body,title:`${a.seoTitle || a.title} — Leiman Lab`,description,canonical:pageUrl,cover:`${origin}${socialCover(a)}`,type:'article',date:a.date,modified:a.updated,noindex:!!a.draft,extraStylesheet:['period-poluraspada-novogo','ai-film-competitions-2026','security-gap-ai-2026'].includes(a.slug)?'/assets/period-poluraspada-light.css':['ai-index-2026','attention-economy-ai-2026'].includes(a.slug)?'/assets/ai-index-article.css':'',bodyData:` data-page="article" data-slug="${escaped(a.slug)}" data-version="${versionOf(a)}"`,schema:{'@context':'https://schema.org','@graph':[makeSocialSchema(a,origin,lang),{'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:english?'Journal':'Журнал',item:origin+(english?'/en/':'/')},{'@type':'ListItem',position:2,name:a.title,item:pageUrl}]}]}});
 }
 
 function translateArticleChrome(html) {

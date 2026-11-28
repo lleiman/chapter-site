@@ -1,0 +1,383 @@
+{
+  "slug": "security-gap-ai-2026",
+  "issue": "013",
+  "date": "2026-11-28",
+  "dateLabel": "28 NOV 2026",
+  "section": "RESEARCH / SECURITY INTELLIGENCE",
+  "rubric": "ai",
+  "tags": [
+    "ИИ",
+    "Информационная безопасность",
+    "Инфраструктура",
+    "Уязвимости"
+  ],
+  "title": "Временной разрыв безопасности: экономика кибератак в эпоху ИИ",
+  "cardTitle": "Временной разрыв безопасности",
+  "summary": "Исследования Google и Verizon, ноябрьские инциденты и практический протокол защиты инфраструктуры.",
+  "deck": "Автоматизация поиска уязвимостей меняет экономику атак. Как измерять окно риска и сокращать время защиты.",
+  "description": "Кибербезопасность в эпоху ИИ: данные Google и Verizon о поиске и эксплуатации уязвимостей, окно риска и практический протокол защиты бизнеса.",
+  "seoTitle": "Кибербезопасность в эпоху ИИ: временной разрыв и защита бизнеса",
+  "readingMinutes": 6,
+  "featured": true,
+  "cover": "/assets/security-gap-ai-2026.svg",
+  "story": "Security Intelligence",
+  "paragraphs": [
+    {
+      "type": "lead",
+      "text": "В ноябре Google описала первые наблюдавшиеся её специалистами случаи, когда злоумышленники автоматизировали поиск и эксплуатацию уязвимостей с помощью языковых моделей без непосредственного участия человека в этих операциях. В отчёте Verizon за 2026 год одновременно вырос медианный срок полного устранения исследованных известных эксплуатируемых уязвимостей: с 32 до 43 дней.",
+      "links": [
+        {
+          "label": "Google, 16 ноября",
+          "url": "https://cloud.google.com/blog/topics/threat-intelligence/agentic-threat-activity-crosses-a-significant-threshold"
+        },
+        {
+          "label": "Verizon DBIR 2026",
+          "url": "https://www.verizon.com/business/resources/reports/dbir/"
+        }
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Я продолжаю октябрьское исследование цифровых доступов. Теперь меня интересует скорость, с которой организация способна ограничить ущерб, если поиск ошибок и подготовка атак становятся дешевле и быстрее.",
+      "links": [
+        {
+          "label": "Чёрный октябрь",
+          "url": "/articles/black-october"
+        },
+        {
+          "label": "После чёрного октября",
+          "url": "/articles/after-black-october"
+        }
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "01 / Что произошло в ноябре"
+    },
+    {
+      "type": "p",
+      "text": "19 ноября VMware раскрыла критическую уязвимость vCenter; Google описала её эксплуатацию ещё в сентябре. 27 ноября Reuters со ссылкой на осведомлённые источники сообщило о проникновении в военное облако Cloud One. Масштаб ущерба публично не установлен.",
+      "links": [
+        {
+          "label": "Google / VMware",
+          "url": "https://cloud.google.com/blog/topics/threat-intelligence/armory-castle-exploits-vsphere"
+        },
+        {
+          "label": "Reuters / Cloud One",
+          "url": "https://www.reuters.com/world/hackers-breach-us-air-force-flagship-cloud-one-computing-platform-2026-11-27/"
+        }
+      ]
+    },
+    {
+      "type": "p",
+      "text": "SAP подтвердила инцидент после сообщений о подозрительной активности в среде разработки GitHub. Компания не сообщала о доказанном несанкционированном доступе к клиентским бизнес-данным. 25 ноября 1Password раскрыла компрометацию внутренних систем и части клиентских метаданных; по её заявлению, содержимое защищённых хранилищ не пострадало.",
+      "links": [
+        {
+          "label": "SAP, комментарий компании",
+          "url": "https://www.bleepingcomputer.com/news/security/sap-confirms-security-incident-after-suspicious-github-activity/"
+        },
+        {
+          "label": "1Password, заявление",
+          "url": "https://1password.com/blog/update-on-nov-2026-security-incident"
+        }
+      ]
+    },
+    {
+      "type": "p",
+      "text": "У этих событий разные даты возникновения и раскрытия. Публичных доказательств, что каждую из четырёх атак провёл ИИ, нет. Сводить их к единому нападению было бы ошибкой."
+    },
+    {
+      "type": "h2",
+      "text": "02 / Что меняется количественно"
+    },
+    {
+      "type": "p",
+      "text": "В анализе GTIG от 30 сентября 2026 года число раскрытых уязвимостей выросло с 5 045 в январе до 10 740 в августе. Число уязвимостей, эксплуатацию которых наблюдали исследователи, составляло в среднем 10,5 в месяц в 2025 году и 18 в январе–августе 2026-го. Google предупреждает: изменение процедур регистрации CVE также влияет на статистику.",
+      "links": [
+        {
+          "label": "Исследование GTIG",
+          "url": "https://cloud.google.com/blog/topics/threat-intelligence/vulnerability-discovery-and-exploitation-trends-in-the-ai-era"
+        }
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Verizon измеряет другую сторону процесса: в выборке уязвимостей из каталога CISA KEV медианное время полного устранения увеличилось с 32 до 43 дней относительно предыдущего отчёта. Это не универсальный срок исправления всех уязвимостей. Нельзя вычитать его из статистики Google и получать измеренное время атаки."
+    },
+    {
+      "type": "h2",
+      "text": "03 / Временной разрыв безопасности"
+    },
+    {
+      "type": "p",
+      "text": "Предлагаю обозначить этим термином период, когда конкретная система уже уязвима для реальной эксплуатации, а эффективная мера защиты ещё не действует. Если обозначить начало доступности эксплуатации через tₐ, а момент эффективной защиты через tₚ, длительность окна составляет max(0, tₚ − tₐ). На практике начало атаки часто неизвестно, поэтому измерение требует осторожности."
+    },
+    {
+      "type": "p",
+      "text": "Даже после обнаружения ошибки нужно установить затронутые компоненты, проверить исправление, согласовать развёртывание и убедиться, что защита работает. Для атакующего многие аналогичные интеллектуальные задачи уже поддаются автоматизации. Защитники тоже могут использовать ИИ, поэтому увеличение разрыва остаётся гипотезой, а не неизбежным исходом."
+    },
+    {
+      "type": "h2",
+      "text": "04 / Экономика доступа"
+    },
+    {
+      "type": "p",
+      "text": "Если автоматизация снижает предельную стоимость анализа очередной системы, потенциально выгодных целей становится больше. Это касается и небольших студий, интернет-магазинов и независимых разработчиков, у которых есть платёжные интеграции, клиентские данные и ключи облачных сервисов. Статистики, позволяющей оценить точную стоимость взлома до и после внедрения ИИ, пока недостаточно."
+    },
+    {
+      "type": "p",
+      "text": "В собственных проектах я использую ИИ для разработки и исследования. Чем больше операций мы делегируем агентам, тем важнее разделять их полномочия. Агенту, редактирующему текст, не требуется доступ к платежам или клиентским базам. Ограничения должны обеспечиваться самой инфраструктурой. Отсюда мой прогноз: криптография, формальная проверка и модели риска будут всё чаще появляться в публичных дискуссиях об ИИ."
+    },
+    {
+      "type": "h2",
+      "text": "05 / Практический протокол"
+    },
+    {
+      "type": "list",
+      "text": "",
+      "items": [
+        "Сегодня: составить карту критических доступов, отозвать лишние разрешения, включить устойчивую к фишингу аутентификацию, проверить резервные копии.",
+        "За неделю: разделить тестовые и рабочие ключи, ограничить права агентов, установить лимиты расходов, включить уведомления об аномалиях.",
+        "За месяц: наладить контроль зависимостей и сроки исправлений с учётом экспозиции, проверить восстановление, ввести независимое подтверждение опасных действий и провести учебный инцидент."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Для каждой системы полезно записывать время обнаружения проблемы, время изоляции, время отзыва доступа и время восстановления. Это измеримые параметры собственной готовности. Более подробный протокол личной и командной защиты опубликован в предыдущей работе.",
+      "links": [
+        {
+          "label": "Практический гайд",
+          "url": "/articles/after-black-october"
+        }
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "06 / Security Intelligence: что наблюдать дальше"
+    },
+    {
+      "type": "p",
+      "text": "Предлагаю отслеживать три независимые серии данных: раскрытие уязвимостей, подтверждённую эксплуатацию и скорость устранения в конкретных организациях. Для каждого инцидента отдельно фиксировать дату раскрытия, уровень доказательств и известную роль ИИ. Это программа наблюдений, не действующий автоматический радар. Проверяемый вопрос: увеличивается ли реальное окно уязвимости после внедрения агентных инструментов, или защитники успевают его сокращать?"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Google GTIG — Vulnerability Discovery and Exploitation Trends in the AI Era, 30 Sep 2026",
+      "url": "https://cloud.google.com/blog/topics/threat-intelligence/vulnerability-discovery-and-exploitation-trends-in-the-ai-era"
+    },
+    {
+      "title": "Google GTIG / Mandiant — Agentic Threat Activity Crosses a Significant Threshold, 16 Nov 2026",
+      "url": "https://cloud.google.com/blog/topics/threat-intelligence/agentic-threat-activity-crosses-a-significant-threshold"
+    },
+    {
+      "title": "Verizon — 2026 Data Breach Investigations Report, results and analysis, p. 17",
+      "url": "https://www.verizon.com/business/resources/reports/dbir/"
+    },
+    {
+      "title": "Google GTIG — ARMORY CASTLE Exploits vSphere",
+      "url": "https://cloud.google.com/blog/topics/threat-intelligence/armory-castle-exploits-vsphere"
+    },
+    {
+      "title": "Reuters — Reported Cloud One breach, 27 Nov 2026",
+      "url": "https://www.reuters.com/world/hackers-breach-us-air-force-flagship-cloud-one-computing-platform-2026-11-27/"
+    },
+    {
+      "title": "BleepingComputer — SAP security incident, 27 Nov 2026",
+      "url": "https://www.bleepingcomputer.com/news/security/sap-confirms-security-incident-after-suspicious-github-activity/"
+    },
+    {
+      "title": "1Password — Update on backend security incident, 25 Nov 2026",
+      "url": "https://1password.com/blog/update-on-nov-2026-security-incident"
+    }
+  ],
+  "sourceNote": "Срез на 28 ноября 2026 года. Цифры относятся к разным выборкам и периодам. Участие ИИ в отдельных ноябрьских инцидентах не установлено. Схема на обложке концептуальная, не график измерений.",
+  "translations": {
+    "en": {
+      "title": "The Security Time Gap: The Economics of Cyberattacks in the AI Era",
+      "cardTitle": "The Security Time Gap",
+      "summary": "Evidence from Google and Verizon, November incidents and a practical infrastructure defence protocol.",
+      "deck": "Automation changes the economics of vulnerability discovery. How organisations can measure exposure and shorten response times.",
+      "description": "AI cybersecurity research: Google and Verizon evidence, vulnerability exploitation, exposure windows and practical business security measures.",
+      "seoTitle": "AI Cybersecurity: The Security Time Gap and Business Defence",
+      "section": "RESEARCH / SECURITY INTELLIGENCE",
+      "tags": [
+        "Cybersecurity",
+        "AI agents",
+        "AI security",
+        "Vulnerability management"
+      ],
+      "paragraphs": [
+        {
+          "type": "lead",
+          "text": "In November, Google's threat researchers reported their first observed cases of adversaries using language-model workflows to automate vulnerability discovery and exploitation without direct human participation in those operations. Meanwhile, Verizon's 2026 report records an increase in median full remediation time for the studied known exploited vulnerabilities, from 32 to 43 days.",
+          "links": [
+            {
+              "label": "Google, 16 November",
+              "url": "https://cloud.google.com/blog/topics/threat-intelligence/agentic-threat-activity-crosses-a-significant-threshold"
+            },
+            {
+              "label": "Verizon DBIR 2026",
+              "url": "https://www.verizon.com/business/resources/reports/dbir/"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "This is the third instalment of my research into digital access. I want to examine how quickly an organisation can contain damage as the intellectual work involved in finding flaws and preparing attacks becomes easier to automate.",
+          "links": [
+            {
+              "label": "Black October",
+              "url": "/en/articles/black-october"
+            },
+            {
+              "label": "After Black October",
+              "url": "/en/articles/after-black-october"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "01 / What happened in November"
+        },
+        {
+          "type": "p",
+          "text": "On 19 November, VMware disclosed a critical vCenter vulnerability; Google documented exploitation dating back to September. On 27 November, Reuters reported a breach of the US Air Force's Cloud One platform, citing people familiar with the matter. The extent of the damage is not publicly established.",
+          "links": [
+            {
+              "label": "Google / VMware",
+              "url": "https://cloud.google.com/blog/topics/threat-intelligence/armory-castle-exploits-vsphere"
+            },
+            {
+              "label": "Reuters / Cloud One",
+              "url": "https://www.reuters.com/world/hackers-breach-us-air-force-flagship-cloud-one-computing-platform-2026-11-27/"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "SAP confirmed a security incident following reports of suspicious activity in its GitHub development environment. It reported no evidence of unauthorised access to customer business data. On 25 November, 1Password disclosed a compromise of backend systems and some customer metadata. The company says vault contents were unaffected.",
+          "links": [
+            {
+              "label": "SAP statement to BleepingComputer",
+              "url": "https://www.bleepingcomputer.com/news/security/sap-confirms-security-incident-after-suspicious-github-activity/"
+            },
+            {
+              "label": "1Password statement",
+              "url": "https://1password.com/blog/update-on-nov-2026-security-incident"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "The incidents have different occurrence and disclosure dates. No public evidence establishes that AI carried out all four attacks or that they were connected."
+        },
+        {
+          "type": "h2",
+          "text": "02 / What the numbers actually show"
+        },
+        {
+          "type": "p",
+          "text": "GTIG's 30 September analysis counted 5,045 vulnerability disclosures in January 2026 and 10,740 in August. It observed an average of 10.5 exploited vulnerabilities per month in 2025 and 18 from January through August 2026. Google cautions that changes in CVE assignment practices can inflate disclosure totals.",
+          "links": [
+            {
+              "label": "GTIG analysis",
+              "url": "https://cloud.google.com/blog/topics/threat-intelligence/vulnerability-discovery-and-exploitation-trends-in-the-ai-era"
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Verizon measures a different process. Within its sample of vulnerabilities from the CISA Known Exploited Vulnerabilities catalogue, median time to full remediation rose from 32 to 43 days compared with the previous report. This is not a universal patching time, and subtracting Google's counts from Verizon's time measurements would produce no meaningful estimate of attack speed."
+        },
+        {
+          "type": "h2",
+          "text": "03 / The security time gap"
+        },
+        {
+          "type": "p",
+          "text": "I propose the term security time gap for the interval during which a particular system is susceptible to actual exploitation and an effective protective measure is not yet in place. Let tₐ denote the onset of exploitability and tₚ the moment effective protection takes effect. The exposure window is max(0, tₚ − tₐ). In practice, the first moment is often unknown."
+        },
+        {
+          "type": "p",
+          "text": "Even after a flaw is discovered, organisations must identify affected components, test fixes, approve deployment and verify that protection works. AI can automate parts of the intellectual work involved on both sides. A widening gap is therefore a hypothesis, not an inevitable result of better models."
+        },
+        {
+          "type": "h2",
+          "text": "04 / The economics of access"
+        },
+        {
+          "type": "p",
+          "text": "If automation reduces the marginal cost of analysing another system, more targets may become economically attractive. Small studios, retailers and independent developers often hold customer information, payment integrations and cloud credentials. We do not yet have adequate evidence to quantify the cost of a typical attack before and after AI adoption."
+        },
+        {
+          "type": "p",
+          "text": "I use AI for development and research in my own projects. The more operations we delegate to agents, the more carefully their permissions must be designed. An agent editing an article has no business accessing payments or customer records. Technical controls must enforce those limits. My expectation is that cryptography, formal verification and risk modelling will become increasingly important in public discussions of AI."
+        },
+        {
+          "type": "h2",
+          "text": "05 / A practical response protocol"
+        },
+        {
+          "type": "list",
+          "text": "",
+          "items": [
+            "Today: map critical access, revoke unnecessary permissions, enable phishing-resistant authentication and check backups.",
+            "Within a week: separate production from test credentials, scope agent permissions, set spending limits and enable anomaly alerts.",
+            "Within a month: review dependencies, set risk-based remediation deadlines, test restoration, require independent approval for high-impact operations and run an incident exercise."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "For each system, record the time to detect, contain, revoke access and restore service. These are measurable indicators of organisational readiness. The preceding investigation gives more detail on protecting personal and team credentials.",
+          "links": [
+            {
+              "label": "Practical security guide",
+              "url": "/en/articles/after-black-october"
+            }
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "06 / Security Intelligence: a research agenda"
+        },
+        {
+          "type": "p",
+          "text": "Track vulnerability disclosures, confirmed exploitation and remediation times as separate data series. For each incident, record the disclosure date, evidence quality and any established AI involvement. This is a proposed research programme, not a live automated radar. The testable question is whether agent adoption widens actual exposure windows or helps defenders close them faster."
+        }
+      ],
+      "sources": [
+        {
+          "title": "Google GTIG — Vulnerability Discovery and Exploitation Trends in the AI Era, 30 Sep 2026",
+          "url": "https://cloud.google.com/blog/topics/threat-intelligence/vulnerability-discovery-and-exploitation-trends-in-the-ai-era"
+        },
+        {
+          "title": "Google GTIG / Mandiant — Agentic Threat Activity Crosses a Significant Threshold, 16 Nov 2026",
+          "url": "https://cloud.google.com/blog/topics/threat-intelligence/agentic-threat-activity-crosses-a-significant-threshold"
+        },
+        {
+          "title": "Verizon — 2026 Data Breach Investigations Report, results and analysis, p. 17",
+          "url": "https://www.verizon.com/business/resources/reports/dbir/"
+        },
+        {
+          "title": "Google GTIG — ARMORY CASTLE Exploits vSphere",
+          "url": "https://cloud.google.com/blog/topics/threat-intelligence/armory-castle-exploits-vsphere"
+        },
+        {
+          "title": "Reuters — Reported Cloud One breach, 27 Nov 2026",
+          "url": "https://www.reuters.com/world/hackers-breach-us-air-force-flagship-cloud-one-computing-platform-2026-11-27/"
+        },
+        {
+          "title": "BleepingComputer — SAP security incident, 27 Nov 2026",
+          "url": "https://www.bleepingcomputer.com/news/security/sap-confirms-security-incident-after-suspicious-github-activity/"
+        },
+        {
+          "title": "1Password — Update on backend security incident, 25 Nov 2026",
+          "url": "https://1password.com/blog/update-on-nov-2026-security-incident"
+        }
+      ],
+      "sourceNote": "Evidence snapshot: 28 November 2026. The studies use different samples and periods. AI involvement in the individual November incidents has not been established. The cover is a conceptual illustration, not measured data.",
+      "readingMinutes": 6,
+      "translationPublished": "2026-11-28"
+    }
+  }
+}
