@@ -161,9 +161,10 @@ const canonicalOrigin = req => {
 };
 const socialCover = a => {
   if (!/\.svg$/i.test(a.cover || '')) return asset(a.cover);
-  const src = a.slug === 'ai-index-2026' ? '/assets/ai-index-dark-og.svg' : a.cover;
+  const localised = a.lang === 'en' && !!a.translations?.en?.cover;
+  const src = !localised && a.slug === 'ai-index-2026' ? '/assets/ai-index-dark-og.svg' : a.cover;
   const version = asset(src).split('?v=')[1] || '1';
-  return `/og/${a.slug}.png?v=${version}`;
+  return `/og/${localised ? 'en/' : ''}${a.slug}.png?v=${version}`;
 };
 const makeSocialSchema = (a, origin, lang = 'ru') => ({
   '@context': 'https://schema.org',
@@ -1069,10 +1070,12 @@ const server = http.createServer((req,res)=>{
      return write(res,200,page({content,title:'AI Index: какую нейросеть для чего использовать — Leiman Lab',description:'Независимый путеводитель по моделям ИИ: 20 систем, 14 сценариев, сравнение, калькулятор затрат, первоисточники и протокол испытаний. 4 ноября 2026.',canonical:origin+'/ai-index',cover:origin+socialCover(articleBySlug.get('ai-index-2026')),extraStylesheet:'/assets/ai-index.css',bodyData:' data-page="ai-index"',schema:{'@context':'https://schema.org','@type':'TechArticle',headline:'Какую нейросеть для чего использовать',datePublished:'2026-11-04',dateModified:'2026-11-04',author:{'@type':'Person',name:'Лев Лейман'},publisher:{'@type':'Organization',name:'Leiman Lab'},inLanguage:'ru'}}));
    }
   // Generate proper PNG Open Graph previews for articles with SVG editorial covers.
-  const rasterOg=pathname.match(/^\/og\/([a-z0-9-]+)\.png$/);
-  if(rasterOg&&articleBySlug.has(rasterOg[1])&&/\.svg$/i.test(articleBySlug.get(rasterOg[1]).cover||'')){
-    const a=articleBySlug.get(rasterOg[1]);
-    const src=a.slug==='ai-index-2026'?'/assets/ai-index-dark-og.svg':a.cover;
+  const rasterOg=pathname.match(/^\/og\/(?:(en)\/)?([a-z0-9-]+)\.png$/);
+  const ogArticle=rasterOg ? articleBySlug.get(rasterOg[2]) : null;
+  const ogLocalized=!!(rasterOg?.[1] && ogArticle?.translations?.en?.cover && hasEnglish(ogArticle));
+  const ogSource=ogArticle ? (ogLocalized ? ogArticle.translations.en.cover : ogArticle.slug==='ai-index-2026'?'/assets/ai-index-dark-og.svg':ogArticle.cover) : '';
+  if(ogArticle&&(!rasterOg[1]||ogLocalized)&&/\.svg$/i.test(ogSource||'')){
+    const src=ogSource;
     if(!ogPngCache.has(src))ogPngCache.set(src,sharp(readFileSync(path.join(PUBLIC,src))).resize(1200,630).png({compressionLevel:9}).toBuffer());
     ogPngCache.get(src).then(data=>write(res,200,req.method==='HEAD'?'':data,'image/png',{'Content-Length':data.length,'Cache-Control':'public,max-age=86400'}))
       .catch(err=>{console.error('OG preview:',err);write(res,500,'Preview unavailable','text/plain');});

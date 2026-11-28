@@ -377,7 +377,8 @@
       ],
       "sourceNote": "Evidence snapshot: 28 November 2026. The studies use different samples and periods. AI involvement in the individual November incidents has not been established. The cover is a conceptual illustration, not measured data.",
       "readingMinutes": 6,
-      "translationPublished": "2026-11-28"
+      "translationPublished": "2026-11-28",
+      "cover": "/assets/security-gap-ai-2026-en.svg"
     }
   }
 }
